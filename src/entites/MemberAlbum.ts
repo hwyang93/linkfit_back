@@ -16,6 +16,6 @@ export class MemberAlbum {
   memberSeq: string;
 
   @OneToOne(() => CommonFile)
-  @JoinColumn({ name: 'COMMON_FILE_SEQ' })
+  @JoinColumn([{ name: 'COMMON_FILE_SEQ' }])
   image: CommonFile;
 }

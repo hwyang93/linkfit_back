@@ -1,18 +1,12 @@
-import {
-  CreateDateColumn,
-  DeleteDateColumn,
-  Entity,
-  UpdateDateColumn,
-} from 'typeorm';
+import { CreateDateColumn, DeleteDateColumn, UpdateDateColumn } from 'typeorm';
 
-@Entity()
 export class BaseEntity {
-  @CreateDateColumn({ type: 'datetime', name: 'create_at' })
+  @CreateDateColumn({ type: 'datetime', name: 'CREATE_AT' })
   createAt: number;
 
-  @UpdateDateColumn({ type: 'datetime', name: 'update_at' })
+  @UpdateDateColumn({ type: 'datetime', name: 'UPDATE_AT' })
   updateAt: number;
 
-  @DeleteDateColumn({ type: 'datetime', name: 'delete_at' })
+  @DeleteDateColumn({ type: 'datetime', name: 'DELETE_AT' })
   deleteAt: number;
 }

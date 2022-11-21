@@ -1,9 +1,15 @@
-import {Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn} from 'typeorm';
-import { CommonFile } from './CommonFile';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Member } from './Member';
+import { BaseEntity } from './BaseEntity';
 
 @Entity({ name: 'COMPANY' })
-export class Company {
+export class Company extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'SEQ' })
   seq: number;
 
@@ -32,6 +38,6 @@ export class Company {
   intro: string;
 
   @OneToOne(() => Member, (Member) => Member.company)
-  @JoinColumn({ name: 'MEMBER_SEQ' })
+  @JoinColumn([{ name: 'MEMBER_SEQ' }])
   member: Member;
 }

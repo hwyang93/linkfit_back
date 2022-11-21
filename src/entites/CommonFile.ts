@@ -6,7 +6,7 @@ export class CommonFile extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'SEQ' })
   seq: number;
 
-  @Column({ type: 'int',  name: 'MEMBER_SEQ' })
+  @Column({ type: 'int', name: 'MEMBER_SEQ' })
   memberSeq: string;
 
   @Column({ type: 'varchar', length: 10, name: 'UPLOAD_DIR' })

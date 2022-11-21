@@ -13,7 +13,7 @@ export class MemberLicence extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'SEQ' })
   seq: number;
 
-  @Column({ type: 'int',  name: 'MEMBER_SEQ' })
+  @Column({ type: 'int', name: 'MEMBER_SEQ' })
   memberSeq: string;
 
   @Column({ type: 'varchar', length: 20, name: 'FIELD' })
@@ -29,6 +29,6 @@ export class MemberLicence extends BaseEntity {
   status: string;
 
   @OneToOne(() => CommonFile)
-  @JoinColumn({ name: 'LICENCE_FILE_SEQ' })
+  @JoinColumn([{ name: 'LICENCE_FILE_SEQ' }])
   licenceFile: CommonFile;
 }

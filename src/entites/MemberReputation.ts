@@ -6,7 +6,6 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { CommonFile } from './CommonFile';
 import { Member } from './Member';
 
 @Entity({ name: 'MEMBER_REPUTATION' })
@@ -21,10 +20,10 @@ export class MemberReputation extends BaseEntity {
   comment: number;
 
   @OneToOne(() => Member)
-  @JoinColumn({ name: 'EVALUATION_MEMBER_SEQ' })
+  @JoinColumn([{ name: 'EVALUATION_MEMBER_SEQ' }])
   evaluationMember: Member;
 
   @OneToOne(() => Member)
-  @JoinColumn({ name: 'TARGET_MEMBER_SEQ' })
+  @JoinColumn([{ name: 'TARGET_MEMBER_SEQ' }])
   targetMember: Member;
 }

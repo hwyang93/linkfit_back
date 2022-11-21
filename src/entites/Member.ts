@@ -1,7 +1,15 @@
-import {Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn} from 'typeorm';
+import {
+  Column,
+  Entity,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  JoinColumn,
+  OneToMany,
+} from 'typeorm';
 import { BaseEntity } from './BaseEntity';
 import { CommonFile } from './CommonFile';
 import { Company } from './Company';
+import { MemberLink } from './MemberLink';
 
 @Entity({ name: 'MEMBER' })
 export class Member extends BaseEntity {
@@ -65,9 +73,12 @@ export class Member extends BaseEntity {
   status: string;
 
   @OneToOne(() => CommonFile)
-  @JoinColumn({ name: 'PROFILE_FILE_SEQ' })
+  @JoinColumn([{ name: 'PROFILE_FILE_SEQ' }])
   profileImage: CommonFile;
 
   @OneToOne(() => Company, (Company) => Company.member)
   company: Company;
+
+  @OneToMany(() => MemberLink, (MemberLink) => MemberLink.member)
+  links: MemberLink[];
 }
