@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { CreateRecruitDto } from './dto/create-recruit.dto';
-import { UpdateRecruitDto } from './dto/update-recruit.dto';
+import {Injectable} from '@nestjs/common';
+import {CreateRecruitDto} from './dto/create-recruit.dto';
+import {UpdateRecruitDto} from './dto/update-recruit.dto';
 import {Recruit} from "../entites/Recruit";
 import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
@@ -15,14 +15,16 @@ export class RecruitService {
     return 'This action adds a new recruit';
   }
 
-  async getRecruits() {
-    const result = await this.recruitRepository.find();
-    console.log(result)
-    return `This action returns all recruit`;
+  async getRecruitList() {
+    return await this.recruitRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} recruit`;
+  async getRecruit(id: number) {
+    console.log(id);
+    return await this.recruitRepository.createQueryBuilder('recruit')
+        .where('recruit.seq = :seq', {seq: id})
+        .innerJoinAndSelect('recruit.dates', 'dates')
+        .getOne();
   }
 
   update(id: number, updateRecruitDto: UpdateRecruitDto) {

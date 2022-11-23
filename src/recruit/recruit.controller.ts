@@ -2,7 +2,9 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { RecruitService } from './recruit.service';
 import { CreateRecruitDto } from './dto/create-recruit.dto';
 import { UpdateRecruitDto } from './dto/update-recruit.dto';
+import {ApiOperation, ApiTags} from "@nestjs/swagger";
 
+@ApiTags('recruit')
 @Controller('recruit')
 export class RecruitController {
   constructor(private readonly recruitService: RecruitService) {}
@@ -12,14 +14,16 @@ export class RecruitController {
     return this.recruitService.create(createRecruitDto);
   }
 
+  @ApiOperation({ summary: '구인 공고 목록 조회' })
   @Get()
-  async findAll() {
-    return this.recruitService.getRecruits();
+  async getRecruitList() {
+    return this.recruitService.getRecruitList();
   }
 
+  @ApiOperation({ summary: '구인 공고 상세 조회' })
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.recruitService.findOne(+id);
+  async getRecruit(@Param('id') id: string) {
+    return this.recruitService.getRecruit(+id);
   }
 
   @Patch(':id')

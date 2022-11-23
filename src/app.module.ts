@@ -17,6 +17,12 @@ import {RecruitDate} from './entites/RecruitDate';
 import { RecruitModule } from './recruit/recruit.module';
 import {MemberLink} from "./entites/MemberLink";
 import {Resume} from "./entites/Resume";
+import {Cs} from "./entites/Cs";
+import {Education} from "./entites/Education";
+import {Inquiry} from "./entites/Inquiry";
+import {InquiryAnswer} from "./entites/InquiryAnswer";
+import {SeekDate} from "./entites/SeekDate";
+import {Seek} from "./entites/Seek";
 
 @Module({
   imports: [TypeOrmModule.forRoot({
@@ -26,8 +32,26 @@ import {Resume} from "./entites/Resume";
     username: 'linkfit',
     password: 'linkfit',
     database: 'linkfit',
-    entities: [Member, MemberLink,CommonFile, Company,MemberAlbum, MemberBlock, MemberLicence, MemberReputation, Career, Community,
-      CommunityComment, Recruit, RecruitDate, Resume],
+    entities: [Member,
+      CommonFile,
+      Company,
+      MemberAlbum,
+      MemberBlock,
+      MemberLicence,
+      MemberReputation,
+      MemberLink,
+      Career,
+      Community,
+      CommunityComment,
+      Cs,
+      Education,
+      Inquiry,
+      InquiryAnswer,
+      Recruit,
+      RecruitDate,
+      Resume,
+      Seek,
+      SeekDate,],
     charset: 'utf8mb4',
     synchronize: false,
     logging: true,
