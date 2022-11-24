@@ -9,9 +9,24 @@ import {
 } from 'typeorm';
 import { Member } from './Member';
 import { RecruitDate } from './RecruitDate';
+import { CreateRecruitDto } from "../recruit/dto/create-recruit.dto";
 
 @Entity('RECRUIT')
 export class Recruit extends BaseEntity {
+  constructor(dto:CreateRecruitDto) {
+    super();
+    this.companyName = dto?.companyName;
+    this.address = dto?.address;
+    this.district = dto?.district;
+    this.phone = dto?.phone;
+    this.recruitType = dto?.recruitType;
+    this.career = dto?.career;
+    this.education = dto?.education;
+    this.payType = dto?.payType;
+    this.pay = dto?.pay;
+    this.classType = dto?.classType;
+    this.content = dto?.content;
+  }
   @PrimaryGeneratedColumn({ type: 'int', name: 'SEQ' })
   seq: number;
 
