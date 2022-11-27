@@ -1,15 +1,17 @@
-import {Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
 import { RecruitService } from './recruit.service';
 import { CreateRecruitDto } from './dto/create-recruit.dto';
 import { UpdateRecruitDto } from './dto/update-recruit.dto';
-import {ApiOperation, ApiTags} from "@nestjs/swagger";
-import {SearchRecruitDto} from "./dto/search-recruit.dto";
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { SearchRecruitDto } from './dto/search-recruit.dto';
+import { CreateRecruitApplyDto } from './dto/create-recruit-apply.dto';
 
 @ApiTags('recruit')
 @Controller('recruit')
 export class RecruitController {
   constructor(private readonly recruitService: RecruitService) {}
 
+  @ApiOperation({ summary: '구인 공고 등록' })
   @Post()
   createRecruit(@Body() createRecruitDto: CreateRecruitDto) {
     console.log(createRecruitDto);
@@ -18,7 +20,7 @@ export class RecruitController {
 
   @ApiOperation({ summary: '구인 공고 목록 조회' })
   @Get()
-  async getRecruitList(@Param() searchParam:SearchRecruitDto) {
+  async getRecruitList(@Param() searchParam: SearchRecruitDto) {
     return this.recruitService.getRecruitList(searchParam);
   }
 
@@ -28,13 +30,28 @@ export class RecruitController {
     return this.recruitService.getRecruit(seq);
   }
 
+  @ApiOperation({ summary: '구인 공고 수정' })
   @Patch(':seq')
   update(@Param('seq') id: string, @Body() updateRecruitDto: UpdateRecruitDto) {
     return this.recruitService.update(+id, updateRecruitDto);
   }
 
+  @ApiOperation({ summary: '구인 공고 삭제' })
   @Delete(':seq')
   deleteRecruit(@Param('seq', ParseIntPipe) seq: number) {
     return this.recruitService.deleteRecruit(seq);
+  }
+
+  @ApiOperation({ summary: '구인 공고 지원' })
+  @Post('apply')
+  recruitApply(@Body() createRecruitApplyDto: CreateRecruitApplyDto) {
+    console.log(createRecruitApplyDto);
+    return this.recruitService.recruitApply(createRecruitApplyDto);
+  }
+
+  @ApiOperation({ summary: '구인 공고 지원 취소' })
+  @Delete('apply/:seq')
+  deleteRecruitApply(@Param('seq', ParseIntPipe) seq: number) {
+    return this.recruitService.deleteRecruitApply(seq);
   }
 }
