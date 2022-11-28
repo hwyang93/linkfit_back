@@ -8,6 +8,7 @@ import { SearchRecruitDto } from './dto/search-recruit.dto';
 import { RecruitDate } from '../entites/RecruitDate';
 import { CreateRecruitApplyDto } from './dto/create-recruit-apply.dto';
 import { RecruitApply } from '../entites/RecruitApply';
+import { UpdateRecruitApplyDto } from './dto/update-recruit-apply.dto';
 
 @Injectable()
 export class RecruitService {
@@ -115,5 +116,17 @@ export class RecruitService {
     // 자신이 작성한 게시글인지 확인 로직 추가해야함
 
     return this.recruitApplyRepository.delete(seq);
+  }
+
+  getRecruitApplyList(recruitSeq: number) {
+    return this.recruitApplyRepository
+      .createQueryBuilder('recruitApply')
+      .where('recruitApply.recruitSeq = :recruitSeq', { recruitSeq: recruitSeq })
+      .innerJoinAndSelect('recruitApply.recruitDate', 'recruitDate')
+      .getMany();
+  }
+
+  async updateRecruitApply(seq: number, updateRecruitApplyDto: UpdateRecruitApplyDto) {
+    return this.recruitApplyRepository.createQueryBuilder('recruitApply').update(RecruitApply).set({ status: updateRecruitApplyDto.status }).where('recruitApply.seq = :seq', { seq: seq });
   }
 }

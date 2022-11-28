@@ -35,6 +35,6 @@ export class CreateRecruitDto {
   @ApiProperty({ description: '내용' })
   content: string;
 
-  @ApiProperty({ description: '구직일시' })
+  @ApiProperty({ description: '구직일시', type: () => Array(RecruitDate) })
   dates: RecruitDate[];
 }

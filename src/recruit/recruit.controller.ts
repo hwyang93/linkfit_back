@@ -5,6 +5,7 @@ import { UpdateRecruitDto } from './dto/update-recruit.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SearchRecruitDto } from './dto/search-recruit.dto';
 import { CreateRecruitApplyDto } from './dto/create-recruit-apply.dto';
+import { UpdateRecruitApplyDto } from './dto/update-recruit-apply.dto';
 
 @ApiTags('recruit')
 @Controller('recruit')
@@ -53,5 +54,17 @@ export class RecruitController {
   @Delete('apply/:seq')
   deleteRecruitApply(@Param('seq', ParseIntPipe) seq: number) {
     return this.recruitService.deleteRecruitApply(seq);
+  }
+
+  @ApiOperation({ summary: '구인 공고 지원 목록 조회' })
+  @Get(':seq/apply')
+  getRecruitApplyList(@Param('seq', ParseIntPipe) seq: number) {
+    return this.recruitService.getRecruitApplyList(seq);
+  }
+
+  @ApiOperation({ summary: '구인 공고 지원 상태 변경' })
+  @Patch(':seq/apply')
+  updateRecruitApply(@Param('seq', ParseIntPipe) seq: number, @Body() updateRecruitApplyDto: UpdateRecruitApplyDto) {
+    return this.recruitService.updateRecruitApply(seq, updateRecruitApplyDto);
   }
 }
