@@ -58,16 +58,16 @@ export class RecruitService {
   async getRecruitList(searchParam: SearchRecruitDto) {
     let qb = this.recruitRepository.createQueryBuilder('recruit').leftJoin('recruit.dates', 'dates').where('1=1');
 
-    if (searchParam.field) {
-      qb.andWhere('recruit.field = :field', { filed: searchParam.field });
+    if (searchParam.fields) {
+      qb.andWhere('recruit.field IN (:...fields)', { fields: searchParam.fields });
     }
 
-    if (searchParam.recruitType) {
-      qb.andWhere('recruit.recruitType = :recruitType', { recruitType: searchParam.recruitType });
+    if (searchParam.recruitTypes) {
+      qb.andWhere('recruit.recruitType IN (:...recruitTypes)', { recruitTypes: searchParam.recruitTypes });
     }
 
-    if (searchParam.time) {
-      qb.andWhere('recruit.time = :time', { time: searchParam.time });
+    if (searchParam.times) {
+      qb.andWhere('recruit.time IN (:...times)', { times: searchParam.times });
     }
 
     return qb.getMany();

@@ -1,17 +1,26 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  OneToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Member } from './Member';
 import { BaseEntity } from './BaseEntity';
+import { CreateCompanyDto } from '../member/dto/create-company.dto';
 
 @Entity({ name: 'COMPANY' })
 export class Company extends BaseEntity {
+  constructor(createCompanyDto: CreateCompanyDto) {
+    super();
+    this.companyName = createCompanyDto?.companyName;
+    this.businessNumber = createCompanyDto?.businessNumber;
+    this.field = createCompanyDto?.field;
+    this.address = createCompanyDto?.address;
+    this.addressDetail = createCompanyDto?.addressDetail;
+    this.phone = createCompanyDto?.phone;
+    this.owner = createCompanyDto?.owner;
+  }
+
   @PrimaryGeneratedColumn({ type: 'int', name: 'SEQ' })
   seq: number;
+
+  @Column({ type: 'int', name: 'MEMBER_SEQ' })
+  memberSeq: number;
 
   @Column({ type: 'varchar', length: 60, name: 'COMPANY_NAME' })
   companyName: string;
@@ -32,12 +41,12 @@ export class Company extends BaseEntity {
   phone: string;
 
   @Column({ type: 'varchar', length: 60, name: 'OWNER' })
-  OWNER: string;
+  owner: string;
 
   @Column({ type: 'text', name: 'INTRO', nullable: true })
   intro: string;
 
-  @OneToOne(() => Member, (Member) => Member.company)
+  @OneToOne(() => Member, Member => Member.company)
   @JoinColumn([{ name: 'MEMBER_SEQ' }])
   member: Member;
 }

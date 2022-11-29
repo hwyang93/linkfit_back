@@ -23,6 +23,7 @@ import {Inquiry} from "./entites/Inquiry";
 import {InquiryAnswer} from "./entites/InquiryAnswer";
 import {SeekDate} from "./entites/SeekDate";
 import {Seek} from "./entites/Seek";
+import { MemberModule } from './member/member.module';
 
 @Module({
   imports: [TypeOrmModule.forRoot({
@@ -56,7 +57,7 @@ import {Seek} from "./entites/Seek";
     synchronize: false,
     logging: true,
     keepConnectionAlive: true
-  }), RecruitModule, ],
+  }), RecruitModule, MemberModule, ],
   controllers: [AppController],
   providers: [AppService],
 })
