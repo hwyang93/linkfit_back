@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
 import { MemberService } from './member.service';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
@@ -15,14 +15,15 @@ export class MemberController {
     return this.memberService.join(createMemberDto);
   }
 
-  @Get()
-  findAll() {
-    return this.memberService.findAll();
+  @ApiOperation({ summary: '이메일 확인' })
+  @Get('check/:email')
+  getMemberInfoByEmail(@Param('email') email: string) {
+    return this.memberService.getMemberInfoByEmail(email);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.memberService.findOne(+id);
+  @Get(':seq')
+  findOne(@Param('seq', ParseIntPipe) seq: number) {
+    return this.memberService.findOne(seq);
   }
 
   @Patch(':id')

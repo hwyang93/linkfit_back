@@ -36,8 +36,9 @@ export class MemberService {
     return { seq: savedMember.seq };
   }
 
-  findAll() {
-    return `This action returns all member`;
+  async getMemberInfoByEmail(email: string) {
+    const member = await this.memberRepository.createQueryBuilder('member').where('member.email = :email', { email: email }).getOne();
+    return { seq: member?.seq };
   }
 
   findOne(id: number) {
