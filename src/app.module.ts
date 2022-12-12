@@ -24,17 +24,19 @@ import { InquiryAnswer } from './entites/InquiryAnswer';
 import { SeekDate } from './entites/SeekDate';
 import { Seek } from './entites/Seek';
 import { MemberModule } from './member/member.module';
-import { AuthModule } from './auth/user.module';
+import { AuthModule } from './auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true }),
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: '192.168.0.25',
-      port: 3306,
-      username: 'linkfit',
-      password: 'linkfit',
-      database: 'linkfit',
+      host: process.env.DATABASE_HOST,
+      port: +process.env.DATABASE_PORT,
+      username: process.env.DATABASE_USER,
+      password: process.env.DATABASE_PASSWORD,
+      database: process.env.DATABASE_SCHEMA,
       entities: [
         Member,
         CommonFile,
