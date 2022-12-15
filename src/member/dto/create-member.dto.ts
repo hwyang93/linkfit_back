@@ -1,6 +1,7 @@
 import { Column } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { CreateCompanyDto } from './create-company.dto';
+import { Member } from '../../entites/Member';
 
 export class CreateMemberDto {
   @ApiProperty({ description: '이메일' })
@@ -35,4 +36,19 @@ export class CreateMemberDto {
 
   @ApiProperty({ description: '업체정보' })
   company: CreateCompanyDto;
+
+  toEntity() {
+    const entity = new Member();
+    entity.email = this?.email;
+    entity.name = this?.name;
+    entity.birth = this?.birth;
+    entity.gender = this?.gender;
+    entity.phone = this?.phone;
+    entity.type = this?.type;
+    entity.nickname = this?.nickname;
+    entity.address = this?.address;
+    entity.addressDetail = this?.addressDetail;
+
+    return entity;
+  }
 }

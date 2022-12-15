@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateRecruitDto } from './dto/create-recruit.dto';
 import { UpdateRecruitDto } from './dto/update-recruit.dto';
 import { Recruit } from '../entites/Recruit';
@@ -9,6 +9,7 @@ import { RecruitDate } from '../entites/RecruitDate';
 import { CreateRecruitApplyDto } from './dto/create-recruit-apply.dto';
 import { RecruitApply } from '../entites/RecruitApply';
 import { UpdateRecruitApplyDto } from './dto/update-recruit-apply.dto';
+import { Member } from '../entites/Member';
 
 @Injectable()
 export class RecruitService {
@@ -19,9 +20,15 @@ export class RecruitService {
     private datasource: DataSource
   ) {}
 
-  async create(createRecruitDto: CreateRecruitDto) {
-    const recruit = new Recruit(createRecruitDto);
+  async createRecruit(createRecruitDto: CreateRecruitDto, member: Member) {
+    if (!member) {
+      throw new UnauthorizedException('로그인 후 이용해주세요.');
+    }
+
+    const recruit = createRecruitDto.toEntity();
     const recruitDates = [];
+
+    recruit.writerSeq = member.seq;
 
     recruit.status = 'ing';
 
@@ -31,23 +38,26 @@ export class RecruitService {
     let savedRecruit;
 
     try {
-      savedRecruit = await this.recruitRepository.save(recruit);
+      savedRecruit = await queryRunner.manager.getRepository(Recruit).save(recruit);
 
       if (createRecruitDto.dates.length > 0) {
         createRecruitDto.dates.forEach(item => {
-          const data = new RecruitDate(item);
-          data.recruitSeq = savedRecruit.seq;
-          recruitDates.push(data);
+          const recruitDateEntity = new RecruitDate();
+          recruitDateEntity.recruitSeq = savedRecruit.seq;
+          recruitDateEntity.day = item.day;
+          recruitDateEntity.time = item.time;
+          recruitDates.push(recruitDateEntity);
         });
       }
       for (const item of recruitDates) {
-        await this.recruitDateRepository.save(item);
+        await queryRunner.manager.getRepository(RecruitDate).save(item);
       }
 
       await queryRunner.commitTransaction();
     } catch (e) {
       console.log(e);
       await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException('서버에서 에러가 발생했습니다.');
     } finally {
       await queryRunner.release();
     }
@@ -55,8 +65,8 @@ export class RecruitService {
     return { seq: savedRecruit.seq };
   }
 
-  async getRecruitList(searchParam: SearchRecruitDto) {
-    let qb = this.recruitRepository.createQueryBuilder('recruit').leftJoin('recruit.dates', 'dates').where('1=1');
+  async getRecruitList(searchParam: SearchRecruitDto, member: Member) {
+    const qb = this.recruitRepository.createQueryBuilder('recruit').leftJoin('recruit.dates', 'dates').where('1=1');
 
     if (searchParam.fields) {
       qb.andWhere('recruit.field IN (:...fields)', { fields: searchParam.fields });
@@ -70,6 +80,10 @@ export class RecruitService {
       qb.andWhere('recruit.time IN (:...times)', { times: searchParam.times });
     }
 
+    if (searchParam.isWriter) {
+      qb.andWhere('recruit.writerSeq = :writerSeq', { writerSeq: member.seq });
+    }
+
     return qb.getMany();
   }
 
@@ -77,17 +91,27 @@ export class RecruitService {
     return await this.recruitRepository.createQueryBuilder('recruit').where('recruit.seq = :seq', { seq: seq }).leftJoinAndSelect('recruit.dates', 'dates').getOne();
   }
 
-  update(id: number, updateRecruitDto: UpdateRecruitDto) {
+  update(id: number, updateRecruitDto: UpdateRecruitDto, member: Member) {
     return `This action updates a #${id} recruit`;
   }
 
-  deleteRecruit(seq: number) {
-    // 자신이 작성한 게시글인지 확인 로직 추가해야함
+  async deleteRecruit(seq: number, member: Member) {
+    const recruit = await this.getRecruit(seq);
 
+    if (!recruit) {
+      throw new NotFoundException('게시글이 존재하지 않습니다.');
+    }
+
+    if (recruit.writerSeq !== member.seq) {
+      throw new UnauthorizedException('작성자가 아닙니다.');
+    }
     return this.recruitRepository.delete(seq);
   }
 
-  async recruitApply(createRecruitApplyDto: CreateRecruitApplyDto) {
+  async recruitApply(createRecruitApplyDto: CreateRecruitApplyDto, member: Member) {
+    if (!member) {
+      throw new UnauthorizedException('로그인 후 이용해주세요.');
+    }
     const queryRunner = this.datasource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -95,30 +119,37 @@ export class RecruitService {
     try {
       for (const recruitDateSeq of createRecruitApplyDto.recruitDateSeq) {
         const apply = new RecruitApply();
-        apply.memberSeq = 1;
+        apply.memberSeq = member.seq;
         apply.recruitSeq = createRecruitApplyDto.recruitSeq;
         apply.recruitDateSeq = recruitDateSeq;
         apply.status = 'apply';
 
-        await this.recruitApplyRepository.save(apply);
+        await queryRunner.manager.getRepository(RecruitApply).save(apply);
       }
 
       await queryRunner.commitTransaction();
     } catch (e) {
       console.log(e);
       await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException('서버에서 에러가 발생했습니다.');
     } finally {
       await queryRunner.release();
     }
   }
 
-  async deleteRecruitApply(seq: number) {
+  async deleteRecruitApply(seq: number, member: Member) {
     // 자신이 작성한 게시글인지 확인 로직 추가해야함
+    if (!member) {
+      throw new UnauthorizedException('로그인 후 이용해주세요.');
+    }
 
     return this.recruitApplyRepository.delete(seq);
   }
 
-  getRecruitApplyList(recruitSeq: number) {
+  getRecruitApplyList(recruitSeq: number, member: Member) {
+    if (!member) {
+      throw new UnauthorizedException('로그인 후 이용해주세요.');
+    }
     return this.recruitApplyRepository
       .createQueryBuilder('recruitApply')
       .where('recruitApply.recruitSeq = :recruitSeq', { recruitSeq: recruitSeq })
@@ -126,7 +157,11 @@ export class RecruitService {
       .getMany();
   }
 
-  async updateRecruitApply(seq: number, updateRecruitApplyDto: UpdateRecruitApplyDto) {
+  async updateRecruitApply(seq: number, updateRecruitApplyDto: UpdateRecruitApplyDto, member: Member) {
+    if (!member) {
+      throw new UnauthorizedException('로그인 후 이용해주세요.');
+    }
+
     return this.recruitApplyRepository.createQueryBuilder('recruitApply').update(RecruitApply).set({ status: updateRecruitApplyDto.status }).where('recruitApply.seq = :seq', { seq: seq });
   }
 }

@@ -1,7 +1,7 @@
 import { BaseEntity } from './BaseEntity';
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { CommonFile } from './CommonFile';
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { RecruitDate } from './RecruitDate';
+import { Recruit } from './Recruit';
 
 @Entity('RECRUIT_APPLY')
 export class RecruitApply extends BaseEntity {
@@ -17,8 +17,12 @@ export class RecruitApply extends BaseEntity {
   @Column({ type: 'int', name: 'RECRUIT_DATE_SEQ' })
   recruitDateSeq: number;
 
-  @Column({ type: 'varchar', length: 10, name: 'MEMBER_SEQ' })
+  @Column({ type: 'varchar', length: 10, name: 'STATUS' })
   status: string;
+
+  @ManyToOne(() => Recruit)
+  @JoinColumn([{ name: 'RECRUIT_SEQ' }])
+  recruit: Recruit;
 
   @OneToOne(() => RecruitDate)
   @JoinColumn([{ name: 'RECRUIT_DATE_SEQ' }])

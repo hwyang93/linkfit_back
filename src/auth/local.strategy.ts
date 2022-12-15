@@ -6,15 +6,15 @@ import { AuthService } from './auth.service';
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
   constructor(private authService: AuthService) {
-    super();
+    super({
+      usernameField: 'email'
+    });
   }
 
-  async validate(username: string, password: string): Promise<any> {
-    console.log('local strategy');
-    console.log(`${username} , ${password}`);
-    const user = await this.authService.validateUser(username, password);
+  async validate(email: string, password: string): Promise<any> {
+    const user = await this.authService.validateUser(email, password);
     if (!user) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('일치하는 정보가 없습니다.');
     }
     return user;
   }

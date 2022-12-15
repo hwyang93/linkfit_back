@@ -7,6 +7,8 @@ import { Member } from '../entites/Member';
 import { RecruitDate } from '../entites/RecruitDate';
 import { Company } from '../entites/Company';
 
+const bcrypt = require('bcrypt');
+
 @Injectable()
 export class MemberService {
   constructor(@InjectRepository(Member) private memberRepository: Repository<Member>, @InjectRepository(Company) private companyRepository: Repository<Company>, private datasource: DataSource) {}
@@ -15,25 +17,44 @@ export class MemberService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
-    const member = new Member(createMemberDto);
+    const member = createMemberDto.toEntity();
+    member.password = await bcrypt.hash(createMemberDto.password, 12);
 
     let savedMember;
 
     try {
       savedMember = await this.memberRepository.save(member);
 
-      const company = new Company(createMemberDto.company);
-      company.memberSeq = savedMember.seq;
+      if (member.type === 'company') {
+        const company = new Company(createMemberDto.company);
+        company.memberSeq = savedMember.seq;
 
-      await this.companyRepository.save(company);
+        await this.companyRepository.save(company);
+      }
+
       await queryRunner.commitTransaction();
     } catch (e) {
-      console.log(e);
       await queryRunner.rollbackTransaction();
     } finally {
       await queryRunner.release();
     }
     return { seq: savedMember.seq };
+  }
+
+  async getMemberInfo(member: Member) {
+    const result = await this.memberRepository.findOne({
+      where: { seq: member.seq }
+    });
+    delete result.password;
+    return result;
+  }
+
+  async getMemberInfoBySeq(seq: number) {
+    const result = await this.memberRepository.findOne({
+      where: { seq: seq }
+    });
+    delete result.password;
+    return result;
   }
 
   async getMemberInfoByEmail(email: string) {

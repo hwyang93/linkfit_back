@@ -1,32 +1,10 @@
 import { BaseEntity } from './BaseEntity';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Member } from './Member';
 import { RecruitDate } from './RecruitDate';
-import { CreateRecruitDto } from "../recruit/dto/create-recruit.dto";
 
 @Entity('RECRUIT')
 export class Recruit extends BaseEntity {
-  constructor(dto:CreateRecruitDto) {
-    super();
-    this.companyName = dto?.companyName;
-    this.address = dto?.address;
-    this.district = dto?.district;
-    this.phone = dto?.phone;
-    this.recruitType = dto?.recruitType;
-    this.career = dto?.career;
-    this.education = dto?.education;
-    this.payType = dto?.payType;
-    this.pay = dto?.pay;
-    this.classType = dto?.classType;
-    this.content = dto?.content;
-  }
   @PrimaryGeneratedColumn({ type: 'int', name: 'SEQ' })
   seq: number;
 
@@ -66,10 +44,13 @@ export class Recruit extends BaseEntity {
   @Column({ type: 'varchar', length: 10, name: 'STATUS' })
   status: string;
 
+  @Column({ type: 'int', name: 'WRITER_SEQ' })
+  writerSeq: number;
+
   @ManyToOne(() => Member)
   @JoinColumn([{ name: 'WRITER_SEQ' }])
   writer: Member;
 
-  @OneToMany(() => RecruitDate, (RecruitDate) => RecruitDate.recruit)
+  @OneToMany(() => RecruitDate, RecruitDate => RecruitDate.recruit)
   dates: RecruitDate[];
 }

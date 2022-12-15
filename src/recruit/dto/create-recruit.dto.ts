@@ -1,6 +1,6 @@
-import { RecruitDate } from '../../entites/RecruitDate';
 import { ApiProperty } from '@nestjs/swagger';
 import { CreateRecruitDateDto } from './create-recruit-date.dto';
+import { Recruit } from '../../entites/Recruit';
 
 export class CreateRecruitDto {
   @ApiProperty({ description: '업체명' })
@@ -38,4 +38,21 @@ export class CreateRecruitDto {
 
   @ApiProperty({ description: '구직일시', type: () => Array(CreateRecruitDateDto) })
   dates: CreateRecruitDateDto[];
+
+  toEntity() {
+    const entity = new Recruit();
+    entity.companyName = this?.companyName;
+    entity.address = this?.address;
+    entity.district = this?.district;
+    entity.phone = this?.phone;
+    entity.recruitType = this?.recruitType;
+    entity.career = this?.career;
+    entity.education = this?.education;
+    entity.payType = this?.payType;
+    entity.pay = this?.pay;
+    entity.classType = this?.classType;
+    entity.content = this?.content;
+
+    return entity;
+  }
 }

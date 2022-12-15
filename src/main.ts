@@ -1,25 +1,34 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { HttpExceptionFilter } from '../httpException.filter';
+import { HttpExceptionFilter } from '../http-exception.filter';
 import { ValidationPipe } from '@nestjs/common';
 import { StandardResponseInterceptor } from './common/interceptor/standard-response.interceptor';
-import passport from 'passport';
 
 declare const module: any;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const port = process.env.PORT || 3000;
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true
+    })
+  );
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new StandardResponseInterceptor());
-  const config = new DocumentBuilder().setTitle('linkfit API').setDescription('linkfit API 문서입니다.').setVersion('1.0').build();
+  const config = new DocumentBuilder()
+    .setTitle('linkfit API')
+    .setDescription('linkfit API 문서입니다.')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .addTag('recruit', '구인 관련')
+    .addTag('member', '회원 관련')
+    .addTag('auth', '회원 인증 관련')
+    .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
 
-  // app.use(passport.initialize());
-  // app.use(passport.session());
   await app.listen(port);
 
   console.log(`listening on port ${port}`);

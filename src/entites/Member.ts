@@ -7,19 +7,19 @@ import { CreateMemberDto } from '../member/dto/create-member.dto';
 
 @Entity({ name: 'MEMBER' })
 export class Member extends BaseEntity {
-  constructor(createMemberDto: CreateMemberDto) {
-    super();
-    this.email = createMemberDto?.email;
-    this.password = createMemberDto?.password;
-    this.name = createMemberDto?.name;
-    this.birth = createMemberDto?.birth;
-    this.gender = createMemberDto?.gender;
-    this.phone = createMemberDto?.phone;
-    this.type = createMemberDto?.type;
-    this.nickname = createMemberDto?.nickname;
-    this.address = createMemberDto?.address;
-    this.addressDetail = createMemberDto?.addressDetail;
-  }
+  // constructor(createMemberDto: CreateMemberDto) {
+  //   super();
+  //   this.email = createMemberDto?.email;
+  //   this.password = createMemberDto?.password;
+  //   this.name = createMemberDto?.name;
+  //   this.birth = createMemberDto?.birth;
+  //   this.gender = createMemberDto?.gender;
+  //   this.phone = createMemberDto?.phone;
+  //   this.type = createMemberDto?.type;
+  //   this.nickname = createMemberDto?.nickname;
+  //   this.address = createMemberDto?.address;
+  //   this.addressDetail = createMemberDto?.addressDetail;
+  // }
 
   @PrimaryGeneratedColumn({ type: 'int', name: 'SEQ' })
   seq: number;
