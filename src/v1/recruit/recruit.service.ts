@@ -1,15 +1,15 @@
-import { HttpException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateRecruitDto } from './dto/create-recruit.dto';
 import { UpdateRecruitDto } from './dto/update-recruit.dto';
-import { Recruit } from '../entites/Recruit';
+import { Recruit } from '../../entites/Recruit';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { SearchRecruitDto } from './dto/search-recruit.dto';
-import { RecruitDate } from '../entites/RecruitDate';
+import { RecruitDate } from '../../entites/RecruitDate';
 import { CreateRecruitApplyDto } from './dto/create-recruit-apply.dto';
-import { RecruitApply } from '../entites/RecruitApply';
+import { RecruitApply } from '../../entites/RecruitApply';
 import { UpdateRecruitApplyDto } from './dto/update-recruit-apply.dto';
-import { Member } from '../entites/Member';
+import { Member } from '../../entites/Member';
 
 @Injectable()
 export class RecruitService {

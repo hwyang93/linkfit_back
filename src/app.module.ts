@@ -14,7 +14,7 @@ import { Community } from './entites/Community';
 import { CommunityComment } from './entites/CommunityComment';
 import { Recruit } from './entites/Recruit';
 import { RecruitDate } from './entites/RecruitDate';
-import { RecruitModule } from './recruit/recruit.module';
+import { RecruitModule } from './v1/recruit/recruit.module';
 import { MemberLink } from './entites/MemberLink';
 import { Resume } from './entites/Resume';
 import { Cs } from './entites/Cs';
@@ -23,10 +23,11 @@ import { Inquiry } from './entites/Inquiry';
 import { InquiryAnswer } from './entites/InquiryAnswer';
 import { SeekDate } from './entites/SeekDate';
 import { Seek } from './entites/Seek';
-import { MemberModule } from './member/member.module';
-import { AuthModule } from './auth/auth.module';
+import { MemberModule } from './v1/member/member.module';
+import { AuthModule } from './v1/auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { JwtAuthenticationMiddleware } from './common/middleweres/jwt-authentication.middlewere';
+import { ResumeModule } from './v1/resume/resume.module';
 
 @Module({
   imports: [
@@ -61,13 +62,14 @@ import { JwtAuthenticationMiddleware } from './common/middleweres/jwt-authentica
         SeekDate
       ],
       charset: 'utf8mb4',
-      synchronize: false,
+      synchronize: true,
       logging: true,
       keepConnectionAlive: true
     }),
     RecruitModule,
     MemberModule,
-    AuthModule
+    AuthModule,
+    ResumeModule
   ],
   controllers: [AppController],
   providers: [AppService]

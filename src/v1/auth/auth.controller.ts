@@ -3,8 +3,8 @@ import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { LocalAuthGuard } from './local-auth.guard';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { MemberDecorator } from '../common/decorators/member.decorator';
-import { Member } from '../entites/Member';
+import { MemberDecorator } from '../../common/decorators/member.decorator';
+import { Member } from '../../entites/Member';
 
 @ApiTags('auth')
 @Controller('auth')

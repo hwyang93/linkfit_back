@@ -1,10 +1,4 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  OneToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { CommonFile } from './CommonFile';
 
 @Entity({ name: 'MEMBER_ALBUM' })
@@ -13,7 +7,7 @@ export class MemberAlbum {
   seq: number;
 
   @Column({ type: 'int', name: 'MEMBER_SEQ' })
-  memberSeq: string;
+  memberSeq: number;
 
   @OneToOne(() => CommonFile)
   @JoinColumn([{ name: 'COMMON_FILE_SEQ' }])

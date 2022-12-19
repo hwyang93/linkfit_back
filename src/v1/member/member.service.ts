@@ -3,9 +3,9 @@ import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
-import { Member } from '../entites/Member';
-import { RecruitDate } from '../entites/RecruitDate';
-import { Company } from '../entites/Company';
+import { Member } from '../../entites/Member';
+import { RecruitDate } from '../../entites/RecruitDate';
+import { Company } from '../../entites/Company';
 
 const bcrypt = require('bcrypt');
 

@@ -9,6 +9,7 @@ declare const module: any;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.setGlobalPrefix('api/v1');
   const port = process.env.PORT || 3000;
   app.useGlobalPipes(
     new ValidationPipe({
@@ -18,6 +19,7 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new StandardResponseInterceptor());
   const config = new DocumentBuilder()
+    .addServer('api/v1')
     .setTitle('linkfit API')
     .setDescription('linkfit API 문서입니다.')
     .setVersion('1.0')
@@ -25,8 +27,9 @@ async function bootstrap() {
     .addTag('recruit', '구인 관련')
     .addTag('member', '회원 관련')
     .addTag('auth', '회원 인증 관련')
+    .addTag('resume', '이력서 관련')
     .build();
-  const document = SwaggerModule.createDocument(app, config);
+  const document = SwaggerModule.createDocument(app, config, { ignoreGlobalPrefix: true });
   SwaggerModule.setup('docs', app, document);
 
   await app.listen(port);

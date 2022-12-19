@@ -43,6 +43,9 @@ export class Resume extends BaseEntity {
   @Column({ type: 'char', length: 1, name: 'IS_OPEN' })
   isOpen: string;
 
-  @OneToMany(() => Career, (Career) => Career.resume)
+  @Column({ type: 'int', name: 'MEMBER_SEQ' })
+  memberSeq: number;
+
+  @OneToMany(() => Career, Career => Career.resume)
   careers: Career[];
 }

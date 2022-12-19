@@ -7,7 +7,7 @@ export class CommonFile extends BaseEntity {
   seq: number;
 
   @Column({ type: 'int', name: 'MEMBER_SEQ' })
-  memberSeq: string;
+  memberSeq: number;
 
   @Column({ type: 'varchar', length: 10, name: 'UPLOAD_DIR' })
   uploadDir: string;

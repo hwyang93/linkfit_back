@@ -2,7 +2,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Repository } from 'typeorm';
-import { Member } from '../entites/Member';
+import { Member } from '../../entites/Member';
 import { JwtService } from '@nestjs/jwt';
 
 const bcrypt = require('bcrypt');

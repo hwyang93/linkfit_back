@@ -6,9 +6,9 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SearchRecruitDto } from './dto/search-recruit.dto';
 import { CreateRecruitApplyDto } from './dto/create-recruit-apply.dto';
 import { UpdateRecruitApplyDto } from './dto/update-recruit-apply.dto';
-import { MemberDecorator } from '../common/decorators/member.decorator';
-import { Member } from '../entites/Member';
-import { LoggedInGuard } from '../common/guards/logged-in.guard';
+import { MemberDecorator } from '../../common/decorators/member.decorator';
+import { Member } from '../../entites/Member';
+import { LoggedInGuard } from '../../common/guards/logged-in.guard';
 
 @ApiTags('recruit')
 @Controller('recruit')

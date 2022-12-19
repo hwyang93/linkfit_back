@@ -1,11 +1,5 @@
 import { BaseEntity } from './BaseEntity';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Resume } from './Resume';
 
 @Entity('CAREER')
@@ -31,7 +25,13 @@ export class Career extends BaseEntity {
   @Column({ type: 'varchar', length: 2000, name: 'CONTENT', nullable: true })
   content: string;
 
-  @ManyToOne(() => Resume, (Resume) => Resume.careers)
+  @Column({ type: 'int', name: 'RESUME_SEQ' })
+  resumeSeq: number;
+
+  @Column({ type: 'int', name: 'MEMBER_SEQ' })
+  memberSeq: number;
+
+  @ManyToOne(() => Resume, Resume => Resume.careers)
   @JoinColumn([{ name: 'RESUME_SEQ' }])
   resume: Resume;
 }

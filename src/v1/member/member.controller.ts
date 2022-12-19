@@ -3,8 +3,8 @@ import { MemberService } from './member.service';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { MemberDecorator } from '../common/decorators/member.decorator';
-import { Member } from '../entites/Member';
+import { MemberDecorator } from '../../common/decorators/member.decorator';
+import { Member } from '../../entites/Member';
 
 @ApiTags('member')
 @Controller('member')

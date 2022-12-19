@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { CreateRecruitDateDto } from './create-recruit-date.dto';
-import { Recruit } from '../../entites/Recruit';
+import { Recruit } from '../../../entites/Recruit';
 
 export class CreateRecruitDto {
   @ApiProperty({ description: '업체명' })

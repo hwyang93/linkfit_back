@@ -1,7 +1,7 @@
 import { Column } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { CreateCompanyDto } from './create-company.dto';
-import { Member } from '../../entites/Member';
+import { Member } from '../../../entites/Member';
 
 export class CreateMemberDto {
   @ApiProperty({ description: '이메일' })

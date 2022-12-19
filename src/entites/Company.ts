@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Member } from './Member';
 import { BaseEntity } from './BaseEntity';
-import { CreateCompanyDto } from '../member/dto/create-company.dto';
+import { CreateCompanyDto } from '../v1/member/dto/create-company.dto';
 
 @Entity({ name: 'COMPANY' })
 export class Company extends BaseEntity {

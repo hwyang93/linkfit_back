@@ -3,7 +3,7 @@ import { BaseEntity } from './BaseEntity';
 import { CommonFile } from './CommonFile';
 import { Company } from './Company';
 import { MemberLink } from './MemberLink';
-import { CreateMemberDto } from '../member/dto/create-member.dto';
+import { CreateMemberDto } from '../v1/member/dto/create-member.dto';
 
 @Entity({ name: 'MEMBER' })
 export class Member extends BaseEntity {
