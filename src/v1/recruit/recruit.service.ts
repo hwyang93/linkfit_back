@@ -26,7 +26,6 @@ export class RecruitService {
     }
 
     const recruit = createRecruitDto.toEntity();
-    const recruitDates = [];
 
     recruit.writerSeq = member.seq;
 
@@ -41,16 +40,13 @@ export class RecruitService {
       savedRecruit = await queryRunner.manager.getRepository(Recruit).save(recruit);
 
       if (createRecruitDto.dates.length > 0) {
-        createRecruitDto.dates.forEach(item => {
+        for (const item of createRecruitDto.dates) {
           const recruitDateEntity = new RecruitDate();
           recruitDateEntity.recruitSeq = savedRecruit.seq;
           recruitDateEntity.day = item.day;
           recruitDateEntity.time = item.time;
-          recruitDates.push(recruitDateEntity);
-        });
-      }
-      for (const item of recruitDates) {
-        await queryRunner.manager.getRepository(RecruitDate).save(item);
+          await queryRunner.manager.getRepository(RecruitDate).save(item);
+        }
       }
 
       await queryRunner.commitTransaction();

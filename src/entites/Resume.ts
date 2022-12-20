@@ -1,6 +1,7 @@
 import { BaseEntity } from './BaseEntity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Career } from './Career';
+import { Education } from './Education';
 
 @Entity('RESUME')
 export class Resume extends BaseEntity {
@@ -37,15 +38,18 @@ export class Resume extends BaseEntity {
   @Column({ type: 'varchar', length: 20, name: 'HOPE_WORK_TYPE' })
   hopeWorkType: string;
 
-  @Column({ type: 'char', length: 1, name: 'IS_MASTER' })
+  @Column({ type: 'char', length: 1, name: 'IS_MASTER', default: 'N' })
   isMaster: string;
 
-  @Column({ type: 'char', length: 1, name: 'IS_OPEN' })
+  @Column({ type: 'char', length: 1, name: 'IS_OPEN', default: 'N' })
   isOpen: string;
 
   @Column({ type: 'int', name: 'MEMBER_SEQ' })
-  memberSeq: number;
+  writerSeq: number;
 
   @OneToMany(() => Career, Career => Career.resume)
   careers: Career[];
+
+  @OneToMany(() => Education, Education => Education.resume)
+  educations: Education[];
 }

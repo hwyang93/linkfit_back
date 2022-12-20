@@ -7,6 +7,6 @@ export class BaseEntity {
   @UpdateDateColumn({ type: 'datetime', name: 'UPDATE_AT' })
   updateAt: number;
 
-  @DeleteDateColumn({ type: 'datetime', name: 'DELETE_AT' })
+  @DeleteDateColumn({ type: 'datetime', name: 'DELETE_AT', select: false })
   deleteAt: number;
 }

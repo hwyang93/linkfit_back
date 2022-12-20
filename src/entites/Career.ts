@@ -25,11 +25,11 @@ export class Career extends BaseEntity {
   @Column({ type: 'varchar', length: 2000, name: 'CONTENT', nullable: true })
   content: string;
 
-  @Column({ type: 'int', name: 'RESUME_SEQ' })
+  @Column({ type: 'int', name: 'RESUME_SEQ', select: false })
   resumeSeq: number;
 
-  @Column({ type: 'int', name: 'MEMBER_SEQ' })
-  memberSeq: number;
+  @Column({ type: 'int', name: 'MEMBER_SEQ', select: false })
+  writerSeq: number;
 
   @ManyToOne(() => Resume, Resume => Resume.careers)
   @JoinColumn([{ name: 'RESUME_SEQ' }])
