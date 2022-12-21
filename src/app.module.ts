@@ -62,6 +62,7 @@ import { ResumeModule } from './v1/resume/resume.module';
         SeekDate
       ],
       charset: 'utf8mb4',
+      autoLoadEntities: true,
       synchronize: true,
       logging: true,
       keepConnectionAlive: true

@@ -28,6 +28,28 @@ export class RecruitController {
     return this.recruitService.getRecruitList(searchParam, member);
   }
 
+  @ApiBearerAuth()
+  // @UseGuards(LoggedInGuard)
+  @ApiOperation({ summary: '구인 공고 지원' })
+  @Post('apply')
+  recruitApply(@Body() createRecruitApplyDto: CreateRecruitApplyDto, @MemberDecorator() member: Member) {
+    return this.recruitService.recruitApply(createRecruitApplyDto, member);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '내 구인 공고 지원목록 조회' })
+  @Get('apply')
+  getRecruitApplyListByMember(@MemberDecorator() member: Member) {
+    return this.recruitService.getRecruitApplyListByMember(member);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '구인 공고 지원 취소' })
+  @Delete('apply/:seq')
+  deleteRecruitApply(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
+    return this.recruitService.deleteRecruitApply(seq, member);
+  }
+
   @ApiOperation({ summary: '구인 공고 상세 조회' })
   @Get(':seq')
   async getRecruit(@Param('seq', ParseIntPipe) seq: number) {
@@ -49,25 +71,10 @@ export class RecruitController {
   }
 
   @ApiBearerAuth()
-  // @UseGuards(LoggedInGuard)
-  @ApiOperation({ summary: '구인 공고 지원' })
-  @Post('apply')
-  recruitApply(@Body() createRecruitApplyDto: CreateRecruitApplyDto, @MemberDecorator() member: Member) {
-    return this.recruitService.recruitApply(createRecruitApplyDto, member);
-  }
-
-  @ApiBearerAuth()
-  @ApiOperation({ summary: '구인 공고 지원 취소' })
-  @Delete('apply/:seq')
-  deleteRecruitApply(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
-    return this.recruitService.deleteRecruitApply(seq, member);
-  }
-
-  @ApiBearerAuth()
   @ApiOperation({ summary: '구인 공고 지원 목록 조회' })
   @Get(':seq/apply')
-  getRecruitApplyList(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
-    return this.recruitService.getRecruitApplyList(seq, member);
+  getRecruitApplyListBySeq(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
+    return this.recruitService.getRecruitApplyListBySeq(seq, member);
   }
 
   @ApiOperation({ summary: '구인 공고 지원 상태 변경' })

@@ -11,6 +11,7 @@ import { Member } from '../../entites/Member';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @ApiOperation({ summary: '로그인' })
   @ApiBody({
     schema: {
       properties: {

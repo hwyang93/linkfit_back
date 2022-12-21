@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,12 +6,19 @@ import { DataSource, Repository } from 'typeorm';
 import { Member } from '../../entites/Member';
 import { RecruitDate } from '../../entites/RecruitDate';
 import { Company } from '../../entites/Company';
+import { CreateMemberLicenceDto } from './dto/create-member-licence.dto';
+import { MemberLicence } from '../../entites/MemberLicence';
 
 const bcrypt = require('bcrypt');
 
 @Injectable()
 export class MemberService {
-  constructor(@InjectRepository(Member) private memberRepository: Repository<Member>, @InjectRepository(Company) private companyRepository: Repository<Company>, private datasource: DataSource) {}
+  constructor(
+    @InjectRepository(Member) private memberRepository: Repository<Member>,
+    @InjectRepository(Company) private companyRepository: Repository<Company>,
+    @InjectRepository(MemberLicence) private memberLicenceRepository: Repository<MemberLicence>,
+    private datasource: DataSource
+  ) {}
   async join(createMemberDto: CreateMemberDto) {
     const queryRunner = this.datasource.createQueryRunner();
     await queryRunner.connect();
@@ -47,6 +54,61 @@ export class MemberService {
     });
     delete result.password;
     return result;
+  }
+
+  async createMemberLicence(createMemberLicenceDto: CreateMemberLicenceDto, member: Member) {
+    const memberLicence = createMemberLicenceDto.toEntity();
+    memberLicence.memberSeq = member.seq;
+    memberLicence.status = 'process';
+
+    const queryRunner = this.datasource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let savedMemberLicence;
+
+    try {
+      savedMemberLicence = await queryRunner.manager.getRepository(MemberLicence).save(memberLicence);
+      await queryRunner.commitTransaction();
+    } catch (e) {
+      console.log(e);
+      await queryRunner.rollbackTransaction();
+    } finally {
+      await queryRunner.release();
+    }
+    return { seq: savedMemberLicence.seq };
+  }
+
+  getMemberLicenceList(member: Member) {
+    return this.memberLicenceRepository.createQueryBuilder('memberLicence').where('memberLicence.memberSeq = :memberSeq', { memberSeq: member.seq }).getMany();
+  }
+
+  async deleteMemberLicence(seq: number, member: Member) {
+    const memberLicence = await this.getMemberLicenceInfo(seq);
+    if (!memberLicence) {
+      throw new NotFoundException('존재하지 않는 리소스입니다..');
+    }
+    if (memberLicence.memberSeq !== member.seq) {
+      throw new UnauthorizedException('허용되지 않은 접근입니다.');
+    }
+
+    const queryRunner = this.datasource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      await queryRunner.commitTransaction();
+    } catch (e) {
+      console.log(e);
+      await queryRunner.rollbackTransaction();
+    } finally {
+      await queryRunner.release();
+    }
+    return { seq: seq };
+  }
+
+  async getMemberLicenceInfo(seq: number) {
+    return this.memberLicenceRepository.createQueryBuilder('memberLicence').where({ seq }).getOne();
   }
 
   async getMemberInfoBySeq(seq: number) {

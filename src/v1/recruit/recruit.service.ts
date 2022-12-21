@@ -45,7 +45,7 @@ export class RecruitService {
           recruitDateEntity.recruitSeq = savedRecruit.seq;
           recruitDateEntity.day = item.day;
           recruitDateEntity.time = item.time;
-          await queryRunner.manager.getRepository(RecruitDate).save(item);
+          await queryRunner.manager.getRepository(RecruitDate).save(recruitDateEntity);
         }
       }
 
@@ -133,6 +133,14 @@ export class RecruitService {
     }
   }
 
+  getRecruitApplyListByMember(member: Member) {
+    return this.recruitApplyRepository
+      .createQueryBuilder('recruitApply')
+      .where('recruitApply.memberSeq = :memberSeq', { memberSeq: member.seq })
+      .innerJoinAndSelect('recruitApply.recruitDate', 'recruitDate')
+      .getMany();
+  }
+
   async deleteRecruitApply(seq: number, member: Member) {
     // 자신이 작성한 게시글인지 확인 로직 추가해야함
     if (!member) {
@@ -142,7 +150,7 @@ export class RecruitService {
     return this.recruitApplyRepository.delete(seq);
   }
 
-  getRecruitApplyList(recruitSeq: number, member: Member) {
+  getRecruitApplyListBySeq(recruitSeq: number, member: Member) {
     if (!member) {
       throw new UnauthorizedException('로그인 후 이용해주세요.');
     }

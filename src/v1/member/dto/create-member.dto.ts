@@ -1,4 +1,3 @@
-import { Column } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { CreateCompanyDto } from './create-company.dto';
 import { Member } from '../../../entites/Member';

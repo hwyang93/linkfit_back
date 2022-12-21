@@ -23,7 +23,6 @@ export class AuthService {
 
     if (result) {
       const { password, ...userWithoutPassword } = member;
-      console.log(userWithoutPassword);
       return userWithoutPassword;
     }
     return null;

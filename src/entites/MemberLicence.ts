@@ -1,10 +1,4 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  OneToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { BaseEntity } from './BaseEntity';
 import { CommonFile } from './CommonFile';
 
@@ -14,7 +8,7 @@ export class MemberLicence extends BaseEntity {
   seq: number;
 
   @Column({ type: 'int', name: 'MEMBER_SEQ' })
-  memberSeq: string;
+  memberSeq: number;
 
   @Column({ type: 'varchar', length: 20, name: 'FIELD' })
   field: string;
