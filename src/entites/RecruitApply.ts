@@ -2,6 +2,7 @@ import { BaseEntity } from './BaseEntity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { RecruitDate } from './RecruitDate';
 import { Recruit } from './Recruit';
+import { Resume } from './Resume';
 
 @Entity('RECRUIT_APPLY')
 export class RecruitApply extends BaseEntity {
@@ -11,6 +12,9 @@ export class RecruitApply extends BaseEntity {
   @Column({ type: 'int', name: 'MEMBER_SEQ' })
   memberSeq: number;
 
+  @Column({ type: 'int', name: 'RESUME_SEQ' })
+  resumeSeq: number;
+
   @Column({ type: 'int', name: 'RECRUIT_SEQ' })
   recruitSeq: number;
 
@@ -19,6 +23,10 @@ export class RecruitApply extends BaseEntity {
 
   @Column({ type: 'varchar', length: 10, name: 'STATUS' })
   status: string;
+
+  @OneToOne(() => Resume)
+  @JoinColumn([{ name: 'RESUME_SEQ' }])
+  resume: Resume;
 
   @ManyToOne(() => Recruit)
   @JoinColumn([{ name: 'RECRUIT_SEQ' }])

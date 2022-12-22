@@ -1,12 +1,5 @@
 import { BaseEntity } from './BaseEntity';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  OneToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-import { Community } from './Community';
+import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Recruit } from './Recruit';
 
 @Entity('RECRUIT_FAVORITE')
@@ -15,9 +8,12 @@ export class RecruitFavorite extends BaseEntity {
   seq: number;
 
   @Column({ type: 'int', name: 'MEMBER_SEQ' })
-  memberSeq: string;
+  memberSeq: number;
 
-  // @OneToOne(() => Recruit)
-  // @JoinColumn([{ name: 'FAVORITE_SEQ' }])
-  // recruit: Recruit;
+  @Column({ type: 'int', name: 'FAVORITE_SEQ' })
+  favoriteSeq: number;
+
+  @OneToOne(() => Recruit)
+  @JoinColumn([{ name: 'FAVORITE_SEQ' }])
+  recruit: Recruit;
 }

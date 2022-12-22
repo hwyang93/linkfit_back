@@ -32,8 +32,8 @@ export class RecruitController {
   // @UseGuards(LoggedInGuard)
   @ApiOperation({ summary: '구인 공고 지원' })
   @Post('apply')
-  recruitApply(@Body() createRecruitApplyDto: CreateRecruitApplyDto, @MemberDecorator() member: Member) {
-    return this.recruitService.recruitApply(createRecruitApplyDto, member);
+  createRecruitApply(@Body() createRecruitApplyDto: CreateRecruitApplyDto, @MemberDecorator() member: Member) {
+    return this.recruitService.createRecruitApply(createRecruitApplyDto, member);
   }
 
   @ApiBearerAuth()
@@ -44,10 +44,41 @@ export class RecruitController {
   }
 
   @ApiBearerAuth()
+  @ApiOperation({ summary: '구인 공고 지원 상세 조회' })
+  @Get('apply/:seq')
+  getRecruitApply(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
+    return this.recruitService.getRecruitApply(seq, member);
+  }
+
+  @ApiBearerAuth()
   @ApiOperation({ summary: '구인 공고 지원 취소' })
   @Delete('apply/:seq')
   deleteRecruitApply(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
     return this.recruitService.deleteRecruitApply(seq, member);
+  }
+
+  @ApiBearerAuth()
+  // @UseGuards(LoggedInGuard)
+  @ApiOperation({ summary: '구인 공고 북마크 목록 조회' })
+  @Get('bookmark')
+  getRecruitBookmarkList(@MemberDecorator() member: Member) {
+    return this.recruitService.getRecruitBookmarkList(member);
+  }
+
+  @ApiBearerAuth()
+  // @UseGuards(LoggedInGuard)
+  @ApiOperation({ summary: '구인 공고 북마크 등록' })
+  @Post('bookmark/:seq')
+  createRecruitBookmark(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
+    return this.recruitService.createRecruitBookmark(seq, member);
+  }
+
+  @ApiBearerAuth()
+  // @UseGuards(LoggedInGuard)
+  @ApiOperation({ summary: '구인 공고 북마크 삭제' })
+  @Delete('bookmark/:seq')
+  deleteRecruitBookmark(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
+    return this.recruitService.deleteRecruitBookmark(seq, member);
   }
 
   @ApiOperation({ summary: '구인 공고 상세 조회' })

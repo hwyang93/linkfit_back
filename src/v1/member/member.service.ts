@@ -86,7 +86,7 @@ export class MemberService {
   async deleteMemberLicence(seq: number, member: Member) {
     const memberLicence = await this.getMemberLicenceInfo(seq);
     if (!memberLicence) {
-      throw new NotFoundException('존재하지 않는 리소스입니다..');
+      throw new NotFoundException('존재하지 않는 리소스입니다.');
     }
     if (memberLicence.memberSeq !== member.seq) {
       throw new UnauthorizedException('허용되지 않은 접근입니다.');
@@ -97,6 +97,7 @@ export class MemberService {
     await queryRunner.startTransaction();
 
     try {
+      await queryRunner.manager.getRepository(MemberLicence).softDelete({ seq });
       await queryRunner.commitTransaction();
     } catch (e) {
       console.log(e);

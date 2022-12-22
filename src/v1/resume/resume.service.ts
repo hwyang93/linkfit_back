@@ -113,7 +113,7 @@ export class ResumeService {
   async setOpenResume(seq: number, updateResumeMasterDto: UpdateResumeMasterDto, member: Member) {
     const resume = await this.getResume(seq);
     if (resume.writerSeq !== member.seq) {
-      throw new UnauthorizedException('권한이 없습니다.');
+      throw new UnauthorizedException('허용되지 않은 접근입니다.');
     }
     if (resume.isMaster === 'N') {
       throw new ForbiddenException('대표 이력서만 공개여부를 설정 할 수 있습니다.');

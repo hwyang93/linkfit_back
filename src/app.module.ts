@@ -28,6 +28,7 @@ import { AuthModule } from './v1/auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { JwtAuthenticationMiddleware } from './common/middleweres/jwt-authentication.middlewere';
 import { ResumeModule } from './v1/resume/resume.module';
+import { LoggerMiddleware } from './common/middleweres/logger.middleware';
 
 @Module({
   imports: [
@@ -77,6 +78,7 @@ import { ResumeModule } from './v1/resume/resume.module';
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer): any {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
     consumer
       .apply(JwtAuthenticationMiddleware)
       .exclude({ path: 'member', method: RequestMethod.POST }, { path: 'auth/login', method: RequestMethod.POST }, { path: 'auth/refresh', method: RequestMethod.POST })

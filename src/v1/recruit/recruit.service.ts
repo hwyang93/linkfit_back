@@ -10,6 +10,7 @@ import { CreateRecruitApplyDto } from './dto/create-recruit-apply.dto';
 import { RecruitApply } from '../../entites/RecruitApply';
 import { UpdateRecruitApplyDto } from './dto/update-recruit-apply.dto';
 import { Member } from '../../entites/Member';
+import { RecruitFavorite } from '../../entites/RecruitFavorite';
 
 @Injectable()
 export class RecruitService {
@@ -17,6 +18,7 @@ export class RecruitService {
     @InjectRepository(Recruit) private recruitRepository: Repository<Recruit>,
     @InjectRepository(RecruitDate) private recruitDateRepository: Repository<RecruitDate>,
     @InjectRepository(RecruitApply) private recruitApplyRepository: Repository<RecruitApply>,
+    @InjectRepository(RecruitFavorite) private recruitFavoriteRepository: Repository<RecruitFavorite>,
     private datasource: DataSource
   ) {}
 
@@ -99,12 +101,12 @@ export class RecruitService {
     }
 
     if (recruit.writerSeq !== member.seq) {
-      throw new UnauthorizedException('작성자가 아닙니다.');
+      throw new UnauthorizedException('허용되지 않은 접근입니다.');
     }
     return this.recruitRepository.delete(seq);
   }
 
-  async recruitApply(createRecruitApplyDto: CreateRecruitApplyDto, member: Member) {
+  async createRecruitApply(createRecruitApplyDto: CreateRecruitApplyDto, member: Member) {
     if (!member) {
       throw new UnauthorizedException('로그인 후 이용해주세요.');
     }
@@ -116,6 +118,7 @@ export class RecruitService {
       for (const recruitDateSeq of createRecruitApplyDto.recruitDateSeq) {
         const apply = new RecruitApply();
         apply.memberSeq = member.seq;
+        apply.resumeSeq = createRecruitApplyDto.resumeSeq;
         apply.recruitSeq = createRecruitApplyDto.recruitSeq;
         apply.recruitDateSeq = recruitDateSeq;
         apply.status = 'apply';
@@ -141,18 +144,85 @@ export class RecruitService {
       .getMany();
   }
 
+  async getRecruitApply(seq: number, member: Member) {
+    const recruitApply = await this.recruitApplyRepository
+      .createQueryBuilder('recruitApply')
+      .where({ seq })
+      .innerJoinAndSelect('recruitApply.resume', 'resume')
+      .innerJoinAndSelect('recruitApply.recruit', 'recruit')
+      .innerJoinAndSelect('recruitApply.recruitDate', 'recruitDate')
+      .getOne();
+    const recruit = await this.recruitRepository.createQueryBuilder('recruit').where({ seq: recruitApply.recruitSeq }).getOne();
+
+    if (recruit.writerSeq !== member.seq || recruitApply.memberSeq !== member.seq) {
+      throw new UnauthorizedException('허용되지 않은 접근입니다.');
+    }
+
+    return recruitApply;
+  }
+
+  getRecruitBookmarkList(member: Member) {
+    return this.recruitFavoriteRepository.createQueryBuilder('recruitFavorite').where({ memberSeq: member.seq }).innerJoinAndSelect('recruitFavorite.recruit', 'recruit').getMany();
+  }
+
   async deleteRecruitApply(seq: number, member: Member) {
-    // 자신이 작성한 게시글인지 확인 로직 추가해야함
     if (!member) {
       throw new UnauthorizedException('로그인 후 이용해주세요.');
+    }
+    const recruitApply = await this.getRecruitApply(seq, member);
+    if (recruitApply.memberSeq !== member.seq) {
+      throw new UnauthorizedException('허용되지 않은 접근입니다.');
     }
 
     return this.recruitApplyRepository.delete(seq);
   }
 
-  getRecruitApplyListBySeq(recruitSeq: number, member: Member) {
+  async createRecruitBookmark(seq: number, member: Member) {
+    const recruitFavorite = new RecruitFavorite();
+    recruitFavorite.memberSeq = member.seq;
+    recruitFavorite.favoriteSeq = seq;
+
+    const checkRecruitBookmark = await this.recruitFavoriteRepository
+      .createQueryBuilder('recruitFavorite')
+      .where('recruitFavorite.memberSeq = :memberSeq', { memberSeq: member.seq })
+      .andWhere('recruitFavorite.favoriteSeq = :favoriteSeq', { favoriteSeq: seq })
+      .withDeleted()
+      .getOne();
+
+    let savedSeq;
+
+    if (!checkRecruitBookmark) {
+      const { seq } = await this.recruitFavoriteRepository.save(recruitFavorite);
+      savedSeq = seq;
+    } else {
+      await this.recruitFavoriteRepository
+        .createQueryBuilder('recruitFavorite')
+        .restore()
+        .where('memberSeq = :memberSeq', { memberSeq: member.seq })
+        .andWhere('favoriteSeq = :favoriteSeq', { favoriteSeq: seq })
+        .execute();
+
+      savedSeq = checkRecruitBookmark.seq;
+    }
+    return { seq: savedSeq };
+  }
+
+  async deleteRecruitBookmark(seq: number, member: Member) {
+    const recruitBookmark = await this.recruitFavoriteRepository.createQueryBuilder('recruitFavorite').where({ seq }).getOne();
+    if (recruitBookmark.memberSeq !== member.seq) {
+      throw new UnauthorizedException('허용되지 않은 접근입니다.');
+    }
+    await this.recruitFavoriteRepository.createQueryBuilder('recruitFavorite').softDelete().where({ seq }).execute();
+    return { seq };
+  }
+
+  async getRecruitApplyListBySeq(recruitSeq: number, member: Member) {
     if (!member) {
       throw new UnauthorizedException('로그인 후 이용해주세요.');
+    }
+    const recruit = await this.getRecruit(recruitSeq);
+    if (recruit.writerSeq !== member.seq) {
+      throw new UnauthorizedException('허용되지 않은 접근입니다.');
     }
     return this.recruitApplyRepository
       .createQueryBuilder('recruitApply')
