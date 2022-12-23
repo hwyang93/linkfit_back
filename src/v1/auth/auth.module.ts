@@ -12,8 +12,8 @@ import { AuthController } from './auth.controller';
   imports: [
     PassportModule,
     JwtModule.register({
-      secret: 'MOVERLAB',
-      signOptions: { expiresIn: '10m' }
+      secret: 'MOVERLAB'
+      // signOptions: { expiresIn: '10m' }
     }),
     TypeOrmModule.forFeature([Member])
   ],

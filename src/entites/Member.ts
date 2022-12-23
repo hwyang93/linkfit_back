@@ -3,6 +3,7 @@ import { BaseEntity } from './BaseEntity';
 import { CommonFile } from './CommonFile';
 import { Company } from './Company';
 import { MemberLink } from './MemberLink';
+import { RegionAuth } from './RegionAuth';
 
 @Entity({ name: 'MEMBER' })
 export class Member extends BaseEntity {
@@ -32,7 +33,7 @@ export class Member extends BaseEntity {
     length: 10,
     name: 'TYPE',
     nullable: true,
-    default: ''
+    default: 'PUBLIC'
   })
   type: string;
 
@@ -54,13 +55,21 @@ export class Member extends BaseEntity {
   addressDetail: string;
 
   @Column({ type: 'datetime', nullable: true })
-  lastLogin: string;
+  lastLogin: Date;
+
+  @Column({
+    type: 'char',
+    length: 1,
+    name: 'IS_OPEN_PROFILE',
+    default: 'N',
+    nullable: true
+  })
+  isOpenProfile: string;
 
   @Column({
     type: 'varchar',
     length: 10,
     name: 'STATUS',
-    default: 'PUBLIC',
     nullable: true
   })
   status: string;
@@ -74,4 +83,7 @@ export class Member extends BaseEntity {
 
   @OneToMany(() => MemberLink, MemberLink => MemberLink.member)
   links: MemberLink[];
+
+  @OneToOne(() => RegionAuth, RegionAuth => RegionAuth.member)
+  regionAuth: RegionAuth;
 }

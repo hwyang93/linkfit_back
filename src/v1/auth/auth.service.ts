@@ -23,6 +23,8 @@ export class AuthService {
 
     if (result) {
       const { password, ...userWithoutPassword } = member;
+      await this.memberRepository.createQueryBuilder('member').update().set({ lastLogin: new Date() }).where({ seq: member.seq }).execute();
+
       return userWithoutPassword;
     }
     return null;

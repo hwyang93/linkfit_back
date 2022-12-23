@@ -29,6 +29,7 @@ import { ConfigModule } from '@nestjs/config';
 import { JwtAuthenticationMiddleware } from './common/middleweres/jwt-authentication.middlewere';
 import { ResumeModule } from './v1/resume/resume.module';
 import { LoggerMiddleware } from './common/middleweres/logger.middleware';
+import { InstructorModule } from './v1/instructor/instructor.module';
 
 @Module({
   imports: [
@@ -71,7 +72,8 @@ import { LoggerMiddleware } from './common/middleweres/logger.middleware';
     RecruitModule,
     MemberModule,
     AuthModule,
-    ResumeModule
+    ResumeModule,
+    InstructorModule
   ],
   controllers: [AppController],
   providers: [AppService]

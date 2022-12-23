@@ -6,6 +6,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { MemberDecorator } from '../../common/decorators/member.decorator';
 import { Member } from '../../entites/Member';
 import { CreateMemberLicenceDto } from './dto/create-member-licence.dto';
+import { CreateRegionAuthDto } from './dto/create-region-auth.dto';
 
 @ApiTags('member')
 @Controller('member')
@@ -50,6 +51,13 @@ export class MemberController {
   @Get('check/:email')
   getMemberInfoByEmail(@Param('email') email: string) {
     return this.memberService.getMemberInfoByEmail(email);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '지역 인증 등록' })
+  @Post('region')
+  createRegion(@Body() createRegionAuthDto: CreateRegionAuthDto, @MemberDecorator() member: Member) {
+    return this.memberService.getMemberLicenceList(member);
   }
 
   @ApiOperation({ summary: '회원정보 조회' })
