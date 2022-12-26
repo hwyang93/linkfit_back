@@ -9,7 +9,6 @@ import { Company } from '../../entites/Company';
 import { CreateMemberLicenceDto } from './dto/create-member-licence.dto';
 import { MemberLicence } from '../../entites/MemberLicence';
 import { CreateRegionAuthDto } from './dto/create-region-auth.dto';
-import { MemberDecorator } from '../../common/decorators/member.decorator';
 import { RegionAuth } from '../../entites/RegionAuth';
 
 const bcrypt = require('bcrypt');
