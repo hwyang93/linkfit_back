@@ -8,6 +8,9 @@ import { RecruitDate } from '../../entites/RecruitDate';
 import { Company } from '../../entites/Company';
 import { CreateMemberLicenceDto } from './dto/create-member-licence.dto';
 import { MemberLicence } from '../../entites/MemberLicence';
+import { CreateRegionAuthDto } from './dto/create-region-auth.dto';
+import { MemberDecorator } from '../../common/decorators/member.decorator';
+import { RegionAuth } from '../../entites/RegionAuth';
 
 const bcrypt = require('bcrypt');
 
@@ -17,6 +20,7 @@ export class MemberService {
     @InjectRepository(Member) private memberRepository: Repository<Member>,
     @InjectRepository(Company) private companyRepository: Repository<Company>,
     @InjectRepository(MemberLicence) private memberLicenceRepository: Repository<MemberLicence>,
+    @InjectRepository(RegionAuth) private regionAuthRepository: Repository<RegionAuth>,
     private datasource: DataSource
   ) {}
   async join(createMemberDto: CreateMemberDto) {
@@ -123,6 +127,34 @@ export class MemberService {
   async getMemberInfoByEmail(email: string) {
     const member = await this.memberRepository.createQueryBuilder('member').where('member.email = :email', { email: email }).getOne();
     return { seq: member?.seq };
+  }
+
+  async createRegionAuth(createRegionAuthDto: CreateRegionAuthDto, member: Member) {
+    const regionAuth = createRegionAuthDto.toEntity();
+    regionAuth.memberSeq = member.seq;
+
+    const existRegionAuth = await this.regionAuthRepository.createQueryBuilder('regionAuth').where({ memberSeq: member.seq }).getOne();
+
+    if (existRegionAuth) {
+      await this.regionAuthRepository.createQueryBuilder('regionAuth').softDelete().where({ seq: existRegionAuth.seq }).execute();
+    }
+
+    const savedRegionAuth = await this.regionAuthRepository.save(regionAuth);
+
+    await this.memberRepository.createQueryBuilder('member').update().set({ updateAt: new Date() }).where({ seq: member.seq }).execute();
+
+    return { seq: savedRegionAuth.seq };
+  }
+
+  async deleteRegionAuth(seq: number, member: Member) {
+    const regionAuth = await this.regionAuthRepository.createQueryBuilder('regionAuth').where({ seq }).getOne();
+
+    if (regionAuth.memberSeq !== member.seq) {
+      throw new UnauthorizedException('허용되지 않은 접근입니다.');
+    }
+    await this.regionAuthRepository.createQueryBuilder('regionAuth').softDelete().where({ seq }).execute();
+
+    return { seq };
   }
 
   findOne(id: number) {

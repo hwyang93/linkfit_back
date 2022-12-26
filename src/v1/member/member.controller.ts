@@ -56,8 +56,15 @@ export class MemberController {
   @ApiBearerAuth()
   @ApiOperation({ summary: '지역 인증 등록' })
   @Post('region')
-  createRegion(@Body() createRegionAuthDto: CreateRegionAuthDto, @MemberDecorator() member: Member) {
-    return this.memberService.getMemberLicenceList(member);
+  createRegionAuth(@Body() createRegionAuthDto: CreateRegionAuthDto, @MemberDecorator() member: Member) {
+    return this.memberService.createRegionAuth(createRegionAuthDto, member);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '지역 인증 삭제' })
+  @Delete('region/:seq')
+  deleteRegionAuth(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
+    return this.memberService.deleteRegionAuth(seq, member);
   }
 
   @ApiOperation({ summary: '회원정보 조회' })
