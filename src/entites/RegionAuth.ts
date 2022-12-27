@@ -1,4 +1,4 @@
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { BaseEntity } from './BaseEntity';
 import { Member } from './Member';
 
@@ -20,5 +20,6 @@ export class RegionAuth extends BaseEntity {
   address: string;
 
   @OneToOne(() => Member, Member => Member.regionAuth)
+  @JoinColumn([{ name: 'MEMBER_SEQ' }])
   member: Member;
 }

@@ -46,6 +46,12 @@ export class Company extends BaseEntity {
   @Column({ type: 'text', name: 'INTRO', nullable: true })
   intro: string;
 
+  @Column({ type: 'double', name: 'LON' })
+  lon: number;
+
+  @Column({ type: 'double', name: 'LAT' })
+  lat: number;
+
   @OneToOne(() => Member, Member => Member.company)
   @JoinColumn([{ name: 'MEMBER_SEQ' }])
   member: Member;

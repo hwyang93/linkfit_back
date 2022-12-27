@@ -21,4 +21,10 @@ export class CreateCompanyDto {
 
   @ApiProperty({ description: '대표자명' })
   owner: string;
+
+  @ApiProperty({ description: '경도' })
+  lon: number;
+
+  @ApiProperty({ description: '위도' })
+  lat: number;
 }

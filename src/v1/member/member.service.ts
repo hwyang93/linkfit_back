@@ -135,7 +135,7 @@ export class MemberService {
     const existRegionAuth = await this.regionAuthRepository.createQueryBuilder('regionAuth').where({ memberSeq: member.seq }).getOne();
 
     if (existRegionAuth) {
-      await this.regionAuthRepository.createQueryBuilder('regionAuth').softDelete().where({ seq: existRegionAuth.seq }).execute();
+      await this.regionAuthRepository.createQueryBuilder('regionAuth').delete().where({ seq: existRegionAuth.seq }).execute();
     }
 
     const savedRegionAuth = await this.regionAuthRepository.save(regionAuth);
@@ -151,7 +151,7 @@ export class MemberService {
     if (regionAuth.memberSeq !== member.seq) {
       throw new UnauthorizedException('허용되지 않은 접근입니다.');
     }
-    await this.regionAuthRepository.createQueryBuilder('regionAuth').softDelete().where({ seq }).execute();
+    await this.regionAuthRepository.createQueryBuilder('regionAuth').delete().where({ seq }).execute();
 
     return { seq };
   }
