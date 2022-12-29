@@ -1,7 +1,8 @@
 import { BaseEntity } from './BaseEntity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Career } from './Career';
 import { Education } from './Education';
+import { Member } from './Member';
 
 @Entity('RESUME')
 export class Resume extends BaseEntity {
@@ -44,7 +45,7 @@ export class Resume extends BaseEntity {
   @Column({ type: 'char', length: 1, name: 'IS_OPEN', default: 'N' })
   isOpen: string;
 
-  @Column({ type: 'int', name: 'MEMBER_SEQ' })
+  @Column({ type: 'int', name: 'WRITER_SEQ' })
   writerSeq: number;
 
   @OneToMany(() => Career, Career => Career.resume)
@@ -52,4 +53,8 @@ export class Resume extends BaseEntity {
 
   @OneToMany(() => Education, Education => Education.resume)
   educations: Education[];
+
+  @ManyToOne(() => Member, Member => Member.resumes)
+  @JoinColumn([{ name: 'WRITER_SEQ' }])
+  member: Member;
 }

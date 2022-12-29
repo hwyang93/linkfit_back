@@ -4,6 +4,7 @@ import { CommonFile } from './CommonFile';
 import { Company } from './Company';
 import { MemberLink } from './MemberLink';
 import { RegionAuth } from './RegionAuth';
+import { Resume } from './Resume';
 
 @Entity({ name: 'MEMBER' })
 export class Member extends BaseEntity {
@@ -66,6 +67,9 @@ export class Member extends BaseEntity {
   })
   isOpenProfile: string;
 
+  @Column({ type: 'varchar', length: 20, name: 'FIELD', nullable: true })
+  field: string;
+
   @Column({
     type: 'varchar',
     length: 10,
@@ -86,4 +90,7 @@ export class Member extends BaseEntity {
 
   @OneToOne(() => RegionAuth, RegionAuth => RegionAuth.member)
   regionAuth: RegionAuth;
+
+  @OneToMany(() => Resume, Resume => Resume.member)
+  resumes: Resume[];
 }

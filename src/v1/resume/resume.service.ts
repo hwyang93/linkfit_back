@@ -74,8 +74,6 @@ export class ResumeService {
       await queryRunner.release();
     }
 
-    console.log('dto', createResumeDto);
-    console.log('member', member);
     return { seq: savedResume.seq };
   }
 
