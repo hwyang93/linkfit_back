@@ -16,7 +16,7 @@ export class PositionSuggest extends BaseEntity {
   recruitSeq: number;
 
   @Column({ type: 'datetime', name: 'CLOSING_DATE' })
-  closingDate: string;
+  closingDate: Date;
 
   @Column({ type: 'int', name: 'SUGGEST_MEMBER_SEQ' })
   suggestMemberSeq: number;

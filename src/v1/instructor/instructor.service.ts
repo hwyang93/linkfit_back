@@ -3,10 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Member } from '../../entites/Member';
 import { Repository } from 'typeorm';
 import * as dayjs from 'dayjs';
+import { CreateInstructorSuggestDto } from './dto/create-instructor-suggest.dto';
+import { PositionSuggest } from '../../entites/PositionSuggest';
+import { UpdateInstructorSuggestDto } from './dto/update-instructor-suggest.dto';
 
 @Injectable()
 export class InstructorService {
-  constructor(@InjectRepository(Member) private memberRepository: Repository<Member>) {}
+  constructor(@InjectRepository(Member) private memberRepository: Repository<Member>, @InjectRepository(PositionSuggest) private positionSuggestRepository: Repository<PositionSuggest>) {}
 
   async getInstructorList(member: Member) {
     const { regionAuth } = await this.memberRepository.createQueryBuilder('member').where('member.seq = :seq', { seq: member.seq }).leftJoinAndSelect('member.regionAuth', 'regionAuth').getOne();
@@ -20,9 +23,9 @@ export class InstructorService {
       .andWhere('member.isOpenProfile = :isOpenProfile', { isOpenProfile: 'Y' })
       .andWhere('regionAuth.address = :address', { address: regionAuth.address })
       .andWhere('resumes.isMaster = :isMaster', { isMaster: 'Y' })
-      .innerJoinAndSelect('member.regionAuth', 'regionAuth')
-      .innerJoinAndSelect('member.resumes', 'resumes')
-      .innerJoinAndSelect('resumes.careers', 'careers')
+      .leftJoinAndSelect('member.regionAuth', 'regionAuth')
+      .leftJoinAndSelect('member.resumes', 'resumes')
+      .leftJoinAndSelect('resumes.careers', 'careers')
       .select(['member.seq', 'member.name', 'member.nickname', 'member.field', 'regionAuth.address', 'resumes', 'careers'])
       .getMany();
 
@@ -54,6 +57,30 @@ export class InstructorService {
       career: career,
       links: instructor.links
     };
+  }
+
+  async createInstructorSuggest(createInstructorSuggestDto: CreateInstructorSuggestDto, member: Member) {
+    const positionSuggest = createInstructorSuggestDto.toEntity();
+    positionSuggest.suggestMemberSeq = member.seq;
+    positionSuggest.status = 'WAITING';
+
+    const savedPositionSuggest = await this.positionSuggestRepository.save(positionSuggest);
+
+    return { seq: savedPositionSuggest.seq };
+  }
+
+  async getInstructorSuggest(seq: number, member: Member) {
+    const positionSuggest = await this.positionSuggestRepository.createQueryBuilder('positionSuggest').where({ seq }).getOne();
+    if (positionSuggest.suggestMemberSeq !== member.seq || positionSuggest.targetMemberSeq !== member.seq) {
+      throw new UnauthorizedException('허용되지 않은 접근입니다.');
+    }
+    return positionSuggest;
+  }
+
+  async updateInstructorSuggestStatus(seq: number, updateInstructorSuggestDto: UpdateInstructorSuggestDto, member: Member) {
+    await this.getInstructorSuggest(seq, member);
+    await this.positionSuggestRepository.createQueryBuilder('positionSuggest').update().set({ status: updateInstructorSuggestDto.status }).where({ seq }).execute();
+    return { seq };
   }
 
   calcCareer(careers: any) {
