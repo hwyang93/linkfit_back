@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { CreateRecruitDateDto } from './create-recruit-date.dto';
 import { Recruit } from '../../../entites/Recruit';
+import { Column } from 'typeorm';
 
 export class CreateRecruitDto {
   @ApiProperty({ description: '업체명' })
@@ -8,6 +9,9 @@ export class CreateRecruitDto {
 
   @ApiProperty({ description: '주소' })
   address: string;
+
+  @ApiProperty({ description: '상세주소' })
+  addressDetail: string;
 
   @ApiProperty({ description: '근무지역' })
   district: string;
@@ -36,6 +40,12 @@ export class CreateRecruitDto {
   @ApiProperty({ description: '내용' })
   content: string;
 
+  @ApiProperty({ description: '경도' })
+  lon: number;
+
+  @ApiProperty({ description: '위도' })
+  lat: number;
+
   @ApiProperty({ description: '구직일시', type: () => Array(CreateRecruitDateDto) })
   dates: CreateRecruitDateDto[];
 
@@ -43,6 +53,7 @@ export class CreateRecruitDto {
     const entity = new Recruit();
     entity.companyName = this?.companyName;
     entity.address = this?.address;
+    entity.addressDetail = this?.addressDetail;
     entity.district = this?.district;
     entity.phone = this?.phone;
     entity.recruitType = this?.recruitType;
@@ -52,6 +63,8 @@ export class CreateRecruitDto {
     entity.pay = this?.pay;
     entity.classType = this?.classType;
     entity.content = this?.content;
+    entity.lon = this.lon;
+    entity.lat = this.lat;
 
     return entity;
   }

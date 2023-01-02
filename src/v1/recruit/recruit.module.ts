@@ -6,9 +6,10 @@ import { RecruitDate } from '../../entites/RecruitDate';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RecruitApply } from '../../entites/RecruitApply';
 import { RecruitFavorite } from '../../entites/RecruitFavorite';
+import { Member } from '../../entites/Member';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Recruit, RecruitDate, RecruitApply, RecruitFavorite])],
+  imports: [TypeOrmModule.forFeature([Recruit, RecruitDate, RecruitApply, RecruitFavorite, Member])],
   controllers: [RecruitController],
   providers: [RecruitService]
 })

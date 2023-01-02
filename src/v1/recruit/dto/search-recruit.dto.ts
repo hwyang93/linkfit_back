@@ -10,6 +10,9 @@ export class SearchRecruitDto {
   @ApiProperty({ description: '채용형태', required: false })
   recruitTypes: string[];
 
-  @ApiProperty({ description: '본인이 작성한 게시글 여부', default: false, required: false })
-  isWriter: boolean;
+  @ApiProperty({ description: '지역', required: true })
+  area: string;
+
+  @ApiProperty({ description: '본인이 작성한 게시글 여부', default: 'N', required: false })
+  isWriter: string;
 }

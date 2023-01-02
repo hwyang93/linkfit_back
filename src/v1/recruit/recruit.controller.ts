@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards, Query } from '@nestjs/common';
 import { RecruitService } from './recruit.service';
 import { CreateRecruitDto } from './dto/create-recruit.dto';
 import { UpdateRecruitDto } from './dto/update-recruit.dto';
@@ -22,9 +22,10 @@ export class RecruitController {
     return await this.recruitService.createRecruit(createRecruitDto, member);
   }
 
+  @ApiBearerAuth()
   @ApiOperation({ summary: '구인 공고 목록 조회' })
   @Get()
-  async getRecruitList(@Param() searchParam: SearchRecruitDto, @MemberDecorator() member: Member) {
+  async getRecruitList(@Query() searchParam: SearchRecruitDto, @MemberDecorator() member: Member) {
     return this.recruitService.getRecruitList(searchParam, member);
   }
 

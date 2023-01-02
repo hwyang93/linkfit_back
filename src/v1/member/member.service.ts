@@ -35,7 +35,7 @@ export class MemberService {
     try {
       savedMember = await this.memberRepository.save(member);
 
-      if (member.type === 'company') {
+      if (member.type === 'COMPANY') {
         const company = new Company(createMemberDto.company);
         company.memberSeq = savedMember.seq;
 
@@ -116,9 +116,11 @@ export class MemberService {
   }
 
   async getMemberInfoBySeq(seq: number) {
-    const result = await this.memberRepository.findOne({
-      where: { seq: seq }
-    });
+    const result = await this.memberRepository.createQueryBuilder('member').leftJoinAndSelect('member.company', 'company').where({ seq }).getOne();
+
+    // const result = await this.memberRepository.findOne({
+    //   where: { seq: seq }
+    // });
     delete result.password;
     return result;
   }

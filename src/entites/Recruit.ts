@@ -14,6 +14,9 @@ export class Recruit extends BaseEntity {
   @Column({ type: 'varchar', length: 255, name: 'ADDRESS' })
   address: string;
 
+  @Column({ type: 'varchar', length: 40, name: 'ADDRESS_DETAIL' })
+  addressDetail: string;
+
   @Column({ type: 'varchar', length: 30, name: 'DISTRICT' })
   district: string;
 
@@ -43,6 +46,12 @@ export class Recruit extends BaseEntity {
 
   @Column({ type: 'varchar', length: 10, name: 'STATUS' })
   status: string;
+
+  @Column({ type: 'double', name: 'LON' })
+  lon: number;
+
+  @Column({ type: 'double', name: 'LAT' })
+  lat: number;
 
   @Column({ type: 'int', name: 'WRITER_SEQ' })
   writerSeq: number;
