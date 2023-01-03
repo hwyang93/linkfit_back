@@ -1,11 +1,4 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { BaseEntity } from './BaseEntity';
 import { CommunityComment } from './CommunityComment';
 import { Member } from './Member';
@@ -27,10 +20,7 @@ export class Community extends BaseEntity {
   @Column({ type: 'int', name: 'VIEW_COUNT', default: () => "'0'" })
   viewCount: string;
 
-  @OneToMany(
-    () => CommunityComment,
-    (CommunityComment) => CommunityComment.community,
-  )
+  @OneToMany(() => CommunityComment, CommunityComment => CommunityComment.community)
   comments: CommunityComment[];
 
   @ManyToOne(() => Member)
