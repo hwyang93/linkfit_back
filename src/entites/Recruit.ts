@@ -11,6 +11,9 @@ export class Recruit extends BaseEntity {
   @Column({ type: 'varchar', length: 60, name: 'COMPANY_NAME' })
   companyName: string;
 
+  @Column({ type: 'varchar', length: 20, name: 'POSITION' })
+  position: string;
+
   @Column({ type: 'varchar', length: 255, name: 'ADDRESS' })
   address: string;
 

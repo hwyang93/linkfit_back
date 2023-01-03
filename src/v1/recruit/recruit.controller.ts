@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards, Query, ParseFloatPipe } from '@nestjs/common';
 import { RecruitService } from './recruit.service';
 import { CreateRecruitDto } from './dto/create-recruit.dto';
 import { UpdateRecruitDto } from './dto/update-recruit.dto';
@@ -27,6 +27,20 @@ export class RecruitController {
   @Get()
   async getRecruitList(@Query() searchParam: SearchRecruitDto, @MemberDecorator() member: Member) {
     return this.recruitService.getRecruitList(searchParam, member);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '구인 공고 마커 목록 조회' })
+  @Get('markers')
+  async getRecruitMarkerList(@Query() searchParam: SearchRecruitDto, @MemberDecorator() member: Member) {
+    return this.recruitService.getRecruitMarkerList(searchParam, member);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '구인 공고 마커 지점 상세조회' })
+  @Get('markers/:lon/:lat')
+  async getRecruitMarker(@Query() searchParam: SearchRecruitDto, @Param('lon', ParseFloatPipe) lon: number, @Param('lat', ParseFloatPipe) lat: number, @MemberDecorator() member: Member) {
+    return this.recruitService.getRecruitMarker(searchParam, lon, lat, member);
   }
 
   @ApiBearerAuth()

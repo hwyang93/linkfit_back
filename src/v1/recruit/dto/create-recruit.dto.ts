@@ -7,6 +7,9 @@ export class CreateRecruitDto {
   @ApiProperty({ description: '업체명' })
   companyName: string;
 
+  @ApiProperty({ description: '포지션' })
+  position: string;
+
   @ApiProperty({ description: '주소' })
   address: string;
 
@@ -52,6 +55,7 @@ export class CreateRecruitDto {
   toEntity() {
     const entity = new Recruit();
     entity.companyName = this?.companyName;
+    entity.position = this.position;
     entity.address = this?.address;
     entity.addressDetail = this?.addressDetail;
     entity.district = this?.district;

@@ -174,6 +174,73 @@ export class RecruitService {
     return result;
   }
 
+  async getRecruitMarkerList(searchParam: SearchRecruitDto, member: Member) {
+    let pinData = await this.recruitRepository
+      .createQueryBuilder('recruit')
+      .select(['lon', 'lat', 'position'])
+      // .addSelect('COUNT(DISTINCT("recruit.WRITER_SEQ"))', 'cnt')
+      .where('recruit.address like :address', { address: `%${searchParam.area}%` });
+
+    if (searchParam.fields) {
+      pinData.andWhere('recruit.field IN (:...fields)', { fields: searchParam.fields });
+    }
+    if (searchParam.recruitTypes) {
+      pinData.andWhere('recruit.recruitType IN (:...recruitTypes)', { recruitTypes: searchParam.recruitTypes });
+    }
+    if (searchParam.times) {
+      pinData.andWhere('recruit.time IN (:...times)', { times: searchParam.times });
+    }
+    if (searchParam.isWriter === 'Y') {
+      pinData.andWhere('recruit.writerSeq = :writerSeq', { writerSeq: member.seq });
+    }
+
+    pinData = pinData.groupBy('recruit.lon').addGroupBy('recruit.lat');
+    return pinData.getRawMany();
+  }
+
+  async getRecruitMarker(searchParam: SearchRecruitDto, lon: number, lat: number, member: Member) {
+    const result = {
+      company: [],
+      instructor: []
+    };
+    const companyRecruit = await this.memberRepository
+      .createQueryBuilder('member')
+      .innerJoinAndSelect('member.company', 'company')
+      .innerJoinAndSelect('member.recruits', 'recruits')
+      .where("member.type = 'COMPANY'")
+      .andWhere('recruits.lon = :lon', { lon: lon })
+      .andWhere('recruits.lat = :lat', { lat: lat });
+
+    const instructorRecruit = await this.memberRepository
+      .createQueryBuilder('member')
+      .innerJoinAndSelect('member.recruits', 'recruits')
+      .where("member.type = 'INSTRUCTOR'")
+      .andWhere('recruits.lon = :lon', { lon: lon })
+      .andWhere('recruits.lat = :lat', { lat: lat });
+
+    if (searchParam.fields) {
+      companyRecruit.andWhere('recruits.position IN (:...fields)', { fields: searchParam.fields });
+      instructorRecruit.andWhere('recruits.position IN (:...fields)', { fields: searchParam.fields });
+    }
+    if (searchParam.recruitTypes) {
+      companyRecruit.andWhere('recruits.recruitType IN (:...recruitTypes)', { recruitTypes: searchParam.recruitTypes });
+      instructorRecruit.andWhere('recruits.recruitType IN (:...recruitTypes)', { recruitTypes: searchParam.recruitTypes });
+    }
+    if (searchParam.times) {
+      companyRecruit.andWhere('recruits.time IN (:...times)', { times: searchParam.times });
+      instructorRecruit.andWhere('recruits.time IN (:...times)', { times: searchParam.times });
+    }
+    if (searchParam.isWriter === 'Y') {
+      companyRecruit.andWhere('recruits.writerSeq = :writerSeq', { writerSeq: member.seq });
+      instructorRecruit.andWhere('recruits.writerSeq = :writerSeq', { writerSeq: member.seq });
+    }
+
+    result.company = await companyRecruit.getMany();
+    result.instructor = await instructorRecruit.getMany();
+
+    return result;
+  }
+
   async getRecruit(seq: number) {
     return await this.recruitRepository.createQueryBuilder('recruit').where('recruit.seq = :seq', { seq: seq }).leftJoinAndSelect('recruit.dates', 'dates').getOne();
   }
