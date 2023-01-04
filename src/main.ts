@@ -29,6 +29,7 @@ async function bootstrap() {
     .addTag('auth', '회원 인증 관련')
     .addTag('resume', '이력서 관련')
     .addTag('instructor', '강사 관련')
+    .addTag('community', '커뮤니티 관련')
     .build();
   const document = SwaggerModule.createDocument(app, config, { ignoreGlobalPrefix: true });
   SwaggerModule.setup('docs', app, document);

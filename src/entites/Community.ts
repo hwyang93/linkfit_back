@@ -8,17 +8,20 @@ export class Community extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'SEQ' })
   seq: number;
 
-  @Column({ type: 'varchar', length: 20, name: 'TYPE' })
-  type: string;
+  @Column({ type: 'varchar', length: 20, name: 'CATEGORY' })
+  category: string;
 
   @Column({ type: 'varchar', length: 100, name: 'TITLE' })
   title: string;
 
-  @Column({ type: 'varchar', length: 2000, name: 'CONTENT' })
-  content: string;
+  @Column({ type: 'varchar', length: 2000, name: 'CONTENTS' })
+  contents: string;
 
   @Column({ type: 'int', name: 'VIEW_COUNT', default: () => "'0'" })
-  viewCount: string;
+  viewCount: number;
+
+  @Column({ type: 'int', name: 'WRITER_SEQ' })
+  writerSeq: number;
 
   @OneToMany(() => CommunityComment, CommunityComment => CommunityComment.community)
   comments: CommunityComment[];

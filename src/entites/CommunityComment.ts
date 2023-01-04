@@ -1,10 +1,4 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { BaseEntity } from './BaseEntity';
 import { Community } from './Community';
 import { Member } from './Member';
@@ -14,10 +8,16 @@ export class CommunityComment extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'SEQ' })
   seq: number;
 
-  @Column({ type: 'varchar', length: 2000, name: 'CONTENT' })
-  content: string;
+  @Column({ type: 'varchar', length: 2000, name: 'CONTENTS' })
+  contents: string;
 
-  @ManyToOne(() => Community, (Community) => Community.comments)
+  @Column({ type: 'int', name: 'COMMUNITY_SEQ' })
+  communitySeq: number;
+
+  @Column({ type: 'int', name: 'WRITER_SEQ' })
+  writerSeq: number;
+
+  @ManyToOne(() => Community, Community => Community.comments)
   @JoinColumn([{ name: 'COMMUNITY_SEQ' }])
   community: Community;
 

@@ -30,6 +30,7 @@ import { JwtAuthenticationMiddleware } from './common/middleweres/jwt-authentica
 import { ResumeModule } from './v1/resume/resume.module';
 import { LoggerMiddleware } from './common/middleweres/logger.middleware';
 import { InstructorModule } from './v1/instructor/instructor.module';
+import { CommunityModule } from './v1/community/community.module';
 
 @Module({
   imports: [
@@ -73,7 +74,8 @@ import { InstructorModule } from './v1/instructor/instructor.module';
     MemberModule,
     AuthModule,
     ResumeModule,
-    InstructorModule
+    InstructorModule,
+    CommunityModule
   ],
   controllers: [AppController],
   providers: [AppService]
