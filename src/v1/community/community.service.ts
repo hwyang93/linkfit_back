@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateCommunityDto } from './dto/create-community.dto';
 import { UpdateCommunityDto } from './dto/update-community.dto';
 import { Member } from '../../entites/Member';
@@ -41,7 +41,7 @@ export class CommunityService {
       .leftJoinAndSelect('comments.writer', 'commentWriter')
       .where({ seq })
       .getOne();
-    console.log(community);
+
     await this.communityRepository
       .createQueryBuilder('community')
       .update()
@@ -56,6 +56,7 @@ export class CommunityService {
     communityComment.communitySeq = seq;
     communityComment.writerSeq = member.seq;
     const savedCommunityComment = await this.communityCommentRepository.save(communityComment);
+
     return { seq: savedCommunityComment.seq };
   }
 
@@ -63,7 +64,21 @@ export class CommunityService {
     return `This action updates a #${id} community`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} community`;
+  async removeCommunity(seq: number, member: Member) {
+    const community = await this.communityRepository.createQueryBuilder('community').where({ seq }).getOne();
+    if (community.writerSeq !== member.seq) {
+      throw new UnauthorizedException('허용되지 않은 접근입니다.');
+    }
+    await this.communityRepository.createQueryBuilder('community').softDelete().where({ seq }).execute();
+    return { seq };
+  }
+
+  async removeCommunityComment(seq: number, member: Member) {
+    const comment = await this.communityCommentRepository.createQueryBuilder('comment').where({ seq }).getOne();
+    if (comment.writerSeq !== member.seq) {
+      throw new UnauthorizedException('허용되지 않은 접근입니다.');
+    }
+    await this.communityCommentRepository.createQueryBuilder('comment').softDelete().where({ seq }).execute();
+    return { seq };
   }
 }

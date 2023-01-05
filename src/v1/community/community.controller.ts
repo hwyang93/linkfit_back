@@ -45,8 +45,17 @@ export class CommunityController {
     return this.communityService.update(+id, updateCommunityDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.communityService.remove(+id);
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '커뮤니티 게시글 댓글 삭제' })
+  @Delete('comment/:seq')
+  removeCommunityComment(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
+    return this.communityService.removeCommunityComment(seq, member);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '커뮤니티 게시글 삭제' })
+  @Delete(':seq')
+  removeCommunity(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
+    return this.communityService.removeCommunity(seq, member);
   }
 }
