@@ -1,9 +1,8 @@
 import { BaseEntity } from './BaseEntity';
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Community } from './Community';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity('COMMUNITY_FAVORITE')
-export class CommunityFavorite extends BaseEntity {
+@Entity('SEEK_FAVORITE')
+export class SeekFavorite extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'SEQ' })
   seq: number;
 

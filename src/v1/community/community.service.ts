@@ -8,10 +8,15 @@ import { Repository } from 'typeorm';
 import { SearchCommunityDto } from './dto/search-community.dto';
 import { CreateCommunityCommentDto } from './dto/create-community-comment.dto';
 import { CommunityComment } from '../../entites/CommunityComment';
+import { CommunityFavorite } from '../../entites/CommunityFavorite';
 
 @Injectable()
 export class CommunityService {
-  constructor(@InjectRepository(Community) private communityRepository: Repository<Community>, @InjectRepository(CommunityComment) private communityCommentRepository: Repository<CommunityComment>) {}
+  constructor(
+    @InjectRepository(Community) private communityRepository: Repository<Community>,
+    @InjectRepository(CommunityComment) private communityCommentRepository: Repository<CommunityComment>,
+    @InjectRepository(CommunityFavorite) private communityFavoriteRepository: Repository<CommunityFavorite>
+  ) {}
 
   async createCommunity(createCommunityDto: CreateCommunityDto, member: Member) {
     const community = createCommunityDto.toEntity();
@@ -70,6 +75,45 @@ export class CommunityService {
       throw new UnauthorizedException('허용되지 않은 접근입니다.');
     }
     await this.communityRepository.createQueryBuilder('community').softDelete().where({ seq }).execute();
+    return { seq };
+  }
+
+  async createCommunityBookmark(seq: number, member: Member) {
+    const communityFavorite = new CommunityFavorite();
+    communityFavorite.memberSeq = member.seq;
+    communityFavorite.favoriteSeq = seq;
+
+    const checkRecruitBookmark = await this.communityFavoriteRepository
+      .createQueryBuilder('communityFavorite')
+      .where('communityFavorite.memberSeq = :memberSeq', { memberSeq: member.seq })
+      .andWhere('communityFavorite.favoriteSeq = :favoriteSeq', { favoriteSeq: seq })
+      .withDeleted()
+      .getOne();
+
+    let savedSeq;
+
+    if (!checkRecruitBookmark) {
+      const { seq } = await this.communityFavoriteRepository.save(communityFavorite);
+      savedSeq = seq;
+    } else {
+      await this.communityFavoriteRepository
+        .createQueryBuilder('communityFavorite')
+        .restore()
+        .where('memberSeq = :memberSeq', { memberSeq: member.seq })
+        .andWhere('favoriteSeq = :favoriteSeq', { favoriteSeq: seq })
+        .execute();
+
+      savedSeq = checkRecruitBookmark.seq;
+    }
+    return { seq: savedSeq };
+  }
+
+  async deleteCommunityBookmark(seq: number, member: Member) {
+    const recruitBookmark = await this.communityFavoriteRepository.createQueryBuilder('communityFavorite').where({ seq }).getOne();
+    if (recruitBookmark.memberSeq !== member.seq) {
+      throw new UnauthorizedException('허용되지 않은 접근입니다.');
+    }
+    await this.communityFavoriteRepository.createQueryBuilder('communityFavorite').softDelete().where({ seq }).execute();
     return { seq };
   }
 

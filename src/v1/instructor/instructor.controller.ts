@@ -33,6 +33,20 @@ export class InstructorController {
   }
 
   @ApiBearerAuth()
+  @ApiOperation({ summary: '강사 팔로우 등록' })
+  @Post('follow/:seq')
+  createInstructorFollow(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
+    return this.instructorService.createInstructorFollow(seq, member);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '강사 팔로우 삭제' })
+  @Delete('follow/:seq')
+  deleteInstructorFollow(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
+    return this.instructorService.deleteInstructorFollow(seq, member);
+  }
+
+  @ApiBearerAuth()
   @ApiOperation({ summary: '강사 정보 상세조회' })
   @Get(':seq')
   getInstructor(@Param('seq', ParseIntPipe) seq: number) {

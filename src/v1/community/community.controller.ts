@@ -53,6 +53,20 @@ export class CommunityController {
   }
 
   @ApiBearerAuth()
+  @ApiOperation({ summary: '커뮤니티 게시글 북마크 등록' })
+  @Post('bookmark/:seq')
+  createCommunityBookmark(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
+    return this.communityService.createCommunityBookmark(seq, member);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '커뮤니티 게시글 북마크 삭제' })
+  @Delete('bookmark/:seq')
+  deleteCommunityBookmark(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
+    return this.communityService.deleteCommunityBookmark(seq, member);
+  }
+
+  @ApiBearerAuth()
   @ApiOperation({ summary: '커뮤니티 게시글 삭제' })
   @Delete(':seq')
   removeCommunity(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {

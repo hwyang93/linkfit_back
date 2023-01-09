@@ -10,6 +10,9 @@ export class MemberFavorite extends BaseEntity {
   @Column({ type: 'int', name: 'MEMBER_SEQ' })
   memberSeq: number;
 
+  @Column({ type: 'int', name: 'FAVORITE_SEQ' })
+  favoriteSeq: number;
+
   // @OneToOne(() => Member)
   // @JoinColumn([{ name: 'FAVORITE_SEQ' }])
   // member: Member;

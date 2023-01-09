@@ -6,10 +6,15 @@ import * as dayjs from 'dayjs';
 import { CreateInstructorSuggestDto } from './dto/create-instructor-suggest.dto';
 import { PositionSuggest } from '../../entites/PositionSuggest';
 import { UpdateInstructorSuggestDto } from './dto/update-instructor-suggest.dto';
+import { MemberFavorite } from '../../entites/MemberFavorite';
 
 @Injectable()
 export class InstructorService {
-  constructor(@InjectRepository(Member) private memberRepository: Repository<Member>, @InjectRepository(PositionSuggest) private positionSuggestRepository: Repository<PositionSuggest>) {}
+  constructor(
+    @InjectRepository(Member) private memberRepository: Repository<Member>,
+    @InjectRepository(PositionSuggest) private positionSuggestRepository: Repository<PositionSuggest>,
+    @InjectRepository(MemberFavorite) private memberFavoriteRepository: Repository<MemberFavorite>
+  ) {}
 
   async getInstructorList(member: Member) {
     const { regionAuth } = await this.memberRepository.createQueryBuilder('member').where('member.seq = :seq', { seq: member.seq }).leftJoinAndSelect('member.regionAuth', 'regionAuth').getOne();
@@ -80,6 +85,45 @@ export class InstructorService {
   async updateInstructorSuggestStatus(seq: number, updateInstructorSuggestDto: UpdateInstructorSuggestDto, member: Member) {
     await this.getInstructorSuggest(seq, member);
     await this.positionSuggestRepository.createQueryBuilder('positionSuggest').update().set({ status: updateInstructorSuggestDto.status }).where({ seq }).execute();
+    return { seq };
+  }
+
+  async createInstructorFollow(seq: number, member: Member) {
+    const memberFavorite = new MemberFavorite();
+    memberFavorite.memberSeq = member.seq;
+    memberFavorite.favoriteSeq = seq;
+
+    const checkInstructorFollow = await this.memberFavoriteRepository
+      .createQueryBuilder('memberFavorite')
+      .where('memberFavorite.memberSeq = :memberSeq', { memberSeq: member.seq })
+      .andWhere('memberFavorite.favoriteSeq = :favoriteSeq', { favoriteSeq: seq })
+      .withDeleted()
+      .getOne();
+
+    let savedSeq;
+
+    if (!checkInstructorFollow) {
+      const { seq } = await this.memberFavoriteRepository.save(memberFavorite);
+      savedSeq = seq;
+    } else {
+      await this.memberFavoriteRepository
+        .createQueryBuilder('memberFavorite')
+        .restore()
+        .where('memberSeq = :memberSeq', { memberSeq: member.seq })
+        .andWhere('favoriteSeq = :favoriteSeq', { favoriteSeq: seq })
+        .execute();
+
+      savedSeq = checkInstructorFollow.seq;
+    }
+    return { seq: savedSeq };
+  }
+
+  async deleteInstructorFollow(seq: number, member: Member) {
+    const recruitBookmark = await this.memberFavoriteRepository.createQueryBuilder('memberFavorite').where({ seq }).getOne();
+    if (recruitBookmark.memberSeq !== member.seq) {
+      throw new UnauthorizedException('허용되지 않은 접근입니다.');
+    }
+    await this.memberFavoriteRepository.createQueryBuilder('memberFavorite').softDelete().where({ seq }).execute();
     return { seq };
   }
 
