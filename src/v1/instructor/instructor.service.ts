@@ -119,8 +119,8 @@ export class InstructorService {
   }
 
   async deleteInstructorFollow(seq: number, member: Member) {
-    const recruitBookmark = await this.memberFavoriteRepository.createQueryBuilder('memberFavorite').where({ seq }).getOne();
-    if (recruitBookmark.memberSeq !== member.seq) {
+    const instructorFollow = await this.memberFavoriteRepository.createQueryBuilder('memberFavorite').where({ seq }).getOne();
+    if (instructorFollow.memberSeq !== member.seq) {
       throw new UnauthorizedException('허용되지 않은 접근입니다.');
     }
     await this.memberFavoriteRepository.createQueryBuilder('memberFavorite').softDelete().where({ seq }).execute();

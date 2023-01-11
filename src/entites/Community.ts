@@ -17,7 +17,7 @@ export class Community extends BaseEntity {
   @Column({ type: 'varchar', length: 2000, name: 'CONTENTS' })
   contents: string;
 
-  @Column({ type: 'int', name: 'VIEW_COUNT', default: () => "'0'" })
+  @Column({ type: 'int', name: 'VIEW_COUNT', default: () => 0 })
   viewCount: number;
 
   @Column({ type: 'int', name: 'WRITER_SEQ' })
