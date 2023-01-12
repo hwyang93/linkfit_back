@@ -7,6 +7,9 @@ export class MemberLink extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'SEQ' })
   seq: number;
 
+  @Column({ type: 'int', name: 'MEMBER_SEQ' })
+  memberSeq: number;
+
   @Column({ type: 'varchar', length: 30, name: 'LINK_TYPE' })
   type: string;
 

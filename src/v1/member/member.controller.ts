@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { MemberService } from './member.service';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
@@ -7,6 +7,8 @@ import { MemberDecorator } from '../../common/decorators/member.decorator';
 import { Member } from '../../entites/Member';
 import { CreateMemberLicenceDto } from './dto/create-member-licence.dto';
 import { CreateRegionAuthDto } from './dto/create-region-auth.dto';
+import { UpdateMemberProfileDto } from './dto/update-member-profile.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('member')
 @Controller('member')
@@ -24,6 +26,16 @@ export class MemberController {
   @Get()
   getMemberInfo(@MemberDecorator() member: Member) {
     return this.memberService.getMemberInfo(member);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '프로필 수정' })
+  @UseInterceptors(FileInterceptor('file'))
+  @Patch('profile/:seq')
+  updateMemberProfile(@Param('seq', ParseIntPipe) seq: number, @Body() updateMemberProfileDto: UpdateMemberProfileDto, @UploadedFile() file: Express.Multer.File) {
+    console.log(file);
+    console.log(updateMemberProfileDto);
+    return null;
   }
 
   @ApiBearerAuth()
