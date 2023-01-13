@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { HttpExceptionFilter } from '../http-exception.filter';
 import { ValidationPipe } from '@nestjs/common';
-import { StandardResponseInterceptor } from './common/interceptor/standard-response.interceptor';
+import { StandardResponseInterceptor } from './common/interceptors/standard-response.interceptor';
 
 declare const module: any;
 

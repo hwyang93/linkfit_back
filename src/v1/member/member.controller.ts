@@ -2,13 +2,12 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseInt
 import { MemberService } from './member.service';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { MemberDecorator } from '../../common/decorators/member.decorator';
 import { Member } from '../../entites/Member';
 import { CreateMemberLicenceDto } from './dto/create-member-licence.dto';
 import { CreateRegionAuthDto } from './dto/create-region-auth.dto';
 import { UpdateMemberProfileDto } from './dto/update-member-profile.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('member')
 @Controller('member')
@@ -30,12 +29,9 @@ export class MemberController {
 
   @ApiBearerAuth()
   @ApiOperation({ summary: '프로필 수정' })
-  @UseInterceptors(FileInterceptor('file'))
-  @Patch('profile/:seq')
-  updateMemberProfile(@Param('seq', ParseIntPipe) seq: number, @Body() updateMemberProfileDto: UpdateMemberProfileDto, @UploadedFile() file: Express.Multer.File) {
-    console.log(file);
-    console.log(updateMemberProfileDto);
-    return null;
+  @Patch('profile')
+  updateMemberProfile(@Body() updateMemberProfileDto: UpdateMemberProfileDto, @MemberDecorator() member: Member) {
+    return this.memberService.updateMemberProfile(updateMemberProfileDto, member);
   }
 
   @ApiBearerAuth()
@@ -60,9 +56,15 @@ export class MemberController {
   }
 
   @ApiOperation({ summary: '이메일 확인' })
-  @Get('check/:email')
+  @Get('check/email/:email')
   getMemberInfoByEmail(@Param('email') email: string) {
     return this.memberService.getMemberInfoByEmail(email);
+  }
+
+  @ApiOperation({ summary: '닉네임 중복확인' })
+  @Get('check/nickname/:nickname')
+  checkMemberNickname(@Param('nickname') nickname: string) {
+    return this.memberService.checkMemberNickname(nickname);
   }
 
   @ApiBearerAuth()

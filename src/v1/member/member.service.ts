@@ -1,15 +1,17 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Member } from '../../entites/Member';
-import { RecruitDate } from '../../entites/RecruitDate';
 import { Company } from '../../entites/Company';
 import { CreateMemberLicenceDto } from './dto/create-member-licence.dto';
 import { MemberLicence } from '../../entites/MemberLicence';
 import { CreateRegionAuthDto } from './dto/create-region-auth.dto';
 import { RegionAuth } from '../../entites/RegionAuth';
+import { UpdateMemberProfileDto } from './dto/update-member-profile.dto';
+import { Resume } from '../../entites/Resume';
+import { MemberLink } from '../../entites/MemberLink';
 
 const bcrypt = require('bcrypt');
 
@@ -57,6 +59,49 @@ export class MemberService {
     });
     delete result.password;
     return result;
+  }
+
+  async checkMemberNickname(nickname: string) {
+    const checkNickname = await this.memberRepository.createQueryBuilder('member').where('member.nickname = :nickname', { nickname: nickname }).getOne();
+    if (checkNickname) {
+      return { duplication: true };
+    }
+    return { duplication: false };
+  }
+
+  async updateMemberProfile(updateMemberProfileDto: UpdateMemberProfileDto, member: Member) {
+    const { duplication } = await this.checkMemberNickname(updateMemberProfileDto.nickname);
+
+    if (duplication) {
+      throw new ForbiddenException('이미 사용중인 닉네임입니다.');
+    }
+
+    const queryRunner = this.datasource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      await queryRunner.manager.update(Member, { seq: member.seq }, { nickname: updateMemberProfileDto.nickname, intro: updateMemberProfileDto.intro, field: updateMemberProfileDto.field });
+      for (const link of updateMemberProfileDto.links) {
+        if (link.seq) {
+          await queryRunner.manager.delete(MemberLink, { seq: link.seq });
+        } else {
+          const saveLink = new MemberLink();
+          saveLink.memberSeq = member.seq;
+          saveLink.type = link.type;
+          saveLink.url = link.url;
+          await queryRunner.manager.insert(MemberLink, saveLink);
+        }
+      }
+
+      await queryRunner.commitTransaction();
+    } catch (e) {
+      console.log(e);
+      await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException('서버에서 에러가 발생했습니다.');
+    } finally {
+      await queryRunner.release();
+    }
+    return { seq: member.seq };
   }
 
   async createMemberLicence(createMemberLicenceDto: CreateMemberLicenceDto, member: Member) {

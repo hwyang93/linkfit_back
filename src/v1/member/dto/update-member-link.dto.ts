@@ -1,11 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { MemberLink } from '../../../entites/MemberLink';
 
-export class CreateMemberLinkDto {
-  @ApiProperty({ description: '위도' })
+export class UpdateMemberLinkDto {
+  @ApiProperty({ description: '고유번호' })
+  seq: number;
+
+  @ApiProperty({ description: '링크 타입' })
   type: string;
 
-  @ApiProperty({ description: '위도' })
+  @ApiProperty({ description: '링크 URL' })
   url: string;
 
   toEntity() {
