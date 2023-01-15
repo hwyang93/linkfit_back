@@ -28,6 +28,13 @@ export class MemberController {
   }
 
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'my page 조회' })
+  @Get('my')
+  getMemberMy(@Body() @MemberDecorator() member: Member) {
+    return this.memberService.getMemberMy(member);
+  }
+
+  @ApiBearerAuth()
   @ApiOperation({ summary: '프로필 수정' })
   @Patch('profile')
   updateMemberProfile(@Body() updateMemberProfileDto: UpdateMemberProfileDto, @MemberDecorator() member: Member) {

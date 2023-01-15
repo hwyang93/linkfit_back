@@ -61,6 +61,17 @@ export class MemberService {
     return result;
   }
 
+  async getMemberMy(member: Member) {
+    const result = {
+      memberInfo: {}
+    };
+    const memberInfo = await this.getMemberInfo(member);
+    result.memberInfo = memberInfo;
+
+    const applyCount = '';
+    return result;
+  }
+
   async checkMemberNickname(nickname: string) {
     const checkNickname = await this.memberRepository.createQueryBuilder('member').where('member.nickname = :nickname', { nickname: nickname }).getOne();
     if (checkNickname) {
