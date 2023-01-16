@@ -53,6 +53,13 @@ export class InstructorService {
       .leftJoinAndSelect('resumes.careers', 'careers')
       .select(['member.seq', 'member.name', 'member.nickname', 'member.field', 'regionAuth.address', 'resumes', 'careers', 'links'])
       .getOne();
+
+    const { follower } = await this.memberFavoriteRepository
+      .createQueryBuilder('memberFavorite')
+      .select('COUNT(*)', 'follower')
+      .where('memberFavorite.favoriteSeq = :favoriteSeq', { favoriteSeq: seq })
+      .getRawOne();
+
     const career = this.calcCareer(instructor.resumes[0].careers);
     return {
       seq: instructor.seq,
@@ -60,7 +67,8 @@ export class InstructorService {
       nickname: instructor.nickname,
       address: instructor.regionAuth.address,
       career: career,
-      links: instructor.links
+      links: instructor.links,
+      follower: follower
     };
   }
 

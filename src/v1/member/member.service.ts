@@ -10,8 +10,10 @@ import { MemberLicence } from '../../entites/MemberLicence';
 import { CreateRegionAuthDto } from './dto/create-region-auth.dto';
 import { RegionAuth } from '../../entites/RegionAuth';
 import { UpdateMemberProfileDto } from './dto/update-member-profile.dto';
-import { Resume } from '../../entites/Resume';
 import { MemberLink } from '../../entites/MemberLink';
+import { RecruitApply } from '../../entites/RecruitApply';
+import { PositionSuggest } from '../../entites/PositionSuggest';
+import { Resume } from '../../entites/Resume';
 
 const bcrypt = require('bcrypt');
 
@@ -22,6 +24,9 @@ export class MemberService {
     @InjectRepository(Company) private companyRepository: Repository<Company>,
     @InjectRepository(MemberLicence) private memberLicenceRepository: Repository<MemberLicence>,
     @InjectRepository(RegionAuth) private regionAuthRepository: Repository<RegionAuth>,
+    @InjectRepository(Resume) private resumeRepository: Repository<Resume>,
+    @InjectRepository(RecruitApply) private recruitApplyRepository: Repository<RecruitApply>,
+    @InjectRepository(PositionSuggest) private positionSuggestRepository: Repository<PositionSuggest>,
     private datasource: DataSource
   ) {}
   async join(createMemberDto: CreateMemberDto) {
@@ -63,12 +68,32 @@ export class MemberService {
 
   async getMemberMy(member: Member) {
     const result = {
-      memberInfo: {}
+      memberInfo: {},
+      masterResume: {},
+      applyCountInfo: {},
+      suggestCountInfo: {}
     };
-    const memberInfo = await this.getMemberInfo(member);
-    result.memberInfo = memberInfo;
+    result.memberInfo = await this.getMemberInfo(member);
 
-    const applyCount = '';
+    result.masterResume = await this.resumeRepository.createQueryBuilder('resume').where('resume.writerSeq = :writerSeq', { writerSeq: member.seq }).andWhere('resume.isMaster="Y"').getOne();
+
+    result.applyCountInfo = await this.recruitApplyRepository
+      .createQueryBuilder('recruitApply')
+      .select('COUNT(*)', 'totalApplyCount')
+      .addSelect('COUNT(CASE WHEN recruitApply.status = "pass" THEN 1 END)', 'passApplyCount')
+      .addSelect('COUNT(CASE WHEN recruitApply.status = "fail" THEN 1 END)', 'failApplyCount')
+      .addSelect('COUNT(CASE WHEN recruitApply.status = "cancel" THEN 1 END)', 'cancelApplyCount')
+      .where('recruitApply.memberSeq = :memberSeq', { memberSeq: member.seq })
+      .getRawOne();
+
+    result.suggestCountInfo = await this.positionSuggestRepository
+      .createQueryBuilder('positionSuggest')
+      .select('COUNT(*)', 'totalApplyCount')
+      .addSelect('COUNT(CASE WHEN positionSuggest.status = "pass" THEN 1 END)', 'passApplyCount')
+      .addSelect('COUNT(CASE WHEN positionSuggest.status = "fail" THEN 1 END)', 'failApplyCount')
+      .addSelect('COUNT(CASE WHEN positionSuggest.status = "cancel" THEN 1 END)', 'cancelApplyCount')
+      .where('positionSuggest.targetMemberSeq = :memberSeq', { memberSeq: member.seq })
+      .getRawOne();
     return result;
   }
 

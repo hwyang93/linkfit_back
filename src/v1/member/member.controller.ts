@@ -30,7 +30,7 @@ export class MemberController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'my page 조회' })
   @Get('my')
-  getMemberMy(@Body() @MemberDecorator() member: Member) {
+  getMemberMy(@MemberDecorator() member: Member) {
     return this.memberService.getMemberMy(member);
   }
 
