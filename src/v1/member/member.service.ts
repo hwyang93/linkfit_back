@@ -14,6 +14,7 @@ import { MemberLink } from '../../entites/MemberLink';
 import { RecruitApply } from '../../entites/RecruitApply';
 import { PositionSuggest } from '../../entites/PositionSuggest';
 import { Resume } from '../../entites/Resume';
+import { UpdatePositionSuggestDto } from './dto/update-position-suggest.dto';
 
 const bcrypt = require('bcrypt');
 
@@ -59,9 +60,7 @@ export class MemberService {
   }
 
   async getMemberInfo(member: Member) {
-    const result = await this.memberRepository.findOne({
-      where: { seq: member.seq }
-    });
+    const result = await this.memberRepository.createQueryBuilder('member').leftJoinAndSelect('member.company', 'company').where('member.seq = :seq', { seq: member.seq }).getOne();
     delete result.password;
     return result;
   }
@@ -94,6 +93,7 @@ export class MemberService {
       .addSelect('COUNT(CASE WHEN positionSuggest.status = "cancel" THEN 1 END)', 'cancelApplyCount')
       .where('positionSuggest.targetMemberSeq = :memberSeq', { memberSeq: member.seq })
       .getRawOne();
+
     return result;
   }
 
@@ -103,6 +103,48 @@ export class MemberService {
       return { duplication: true };
     }
     return { duplication: false };
+  }
+
+  async getSuggestToList(member: Member) {
+    return await this.positionSuggestRepository
+      .createQueryBuilder('positionSuggest')
+      .innerJoinAndSelect('positionSuggest.writer', 'writer')
+      .leftJoinAndSelect('writer.company', 'company')
+      .where('positionSuggest.targetMemberSeq = :memberSeq', { memberSeq: member.seq })
+      .getMany();
+  }
+
+  async getSuggestFromList(member: Member) {
+    return await this.positionSuggestRepository
+      .createQueryBuilder('positionSuggest')
+      .innerJoinAndSelect('positionSuggest.writer', 'writer')
+      .leftJoinAndSelect('writer.company', 'company')
+      .where('positionSuggest.suggestMemberSeq = :memberSeq', { memberSeq: member.seq })
+      .getMany();
+  }
+
+  async updatePositionSuggestStatus(seq: number, updatePositionSuggestDto: UpdatePositionSuggestDto, member: Member) {
+    const positionSuggest = await this.positionSuggestRepository.createQueryBuilder('positionSuggest').where({ seq }).getOne();
+    if (positionSuggest.suggestMemberSeq !== member.seq || positionSuggest.targetMemberSeq !== member.seq) {
+      throw new UnauthorizedException('허용되지 않은 접근입니다.');
+    }
+    await this.positionSuggestRepository.createQueryBuilder('positionSuggest').update().set({ status: updatePositionSuggestDto.status }).where({ seq }).execute();
+    return { seq };
+  }
+
+  async getPositionSuggest(seq: number, member: Member) {
+    const positionSuggest = await this.positionSuggestRepository
+      .createQueryBuilder('positionSuggest')
+      .innerJoinAndSelect('positionSuggest.writer', 'writer')
+      .leftJoinAndSelect('writer.company', 'company')
+      .where('positionSuggest.seq = :seq', { seq: seq })
+      .getOne();
+
+    if (positionSuggest.suggestMemberSeq !== member.seq || positionSuggest.targetMemberSeq !== member.seq) {
+      throw new UnauthorizedException('허용되지 않은 접근입니다.');
+    }
+
+    return positionSuggest;
   }
 
   async updateMemberProfile(updateMemberProfileDto: UpdateMemberProfileDto, member: Member) {

@@ -5,7 +5,6 @@ import { Repository } from 'typeorm';
 import * as dayjs from 'dayjs';
 import { CreateInstructorSuggestDto } from './dto/create-instructor-suggest.dto';
 import { PositionSuggest } from '../../entites/PositionSuggest';
-import { UpdateInstructorSuggestDto } from './dto/update-instructor-suggest.dto';
 import { MemberFavorite } from '../../entites/MemberFavorite';
 
 @Injectable()
@@ -74,26 +73,13 @@ export class InstructorService {
 
   async createInstructorSuggest(createInstructorSuggestDto: CreateInstructorSuggestDto, member: Member) {
     const positionSuggest = createInstructorSuggestDto.toEntity();
+    positionSuggest.writerSeq = member.seq;
     positionSuggest.suggestMemberSeq = member.seq;
     positionSuggest.status = 'WAITING';
 
     const savedPositionSuggest = await this.positionSuggestRepository.save(positionSuggest);
 
     return { seq: savedPositionSuggest.seq };
-  }
-
-  async getInstructorSuggest(seq: number, member: Member) {
-    const positionSuggest = await this.positionSuggestRepository.createQueryBuilder('positionSuggest').where({ seq }).getOne();
-    if (positionSuggest.suggestMemberSeq !== member.seq || positionSuggest.targetMemberSeq !== member.seq) {
-      throw new UnauthorizedException('허용되지 않은 접근입니다.');
-    }
-    return positionSuggest;
-  }
-
-  async updateInstructorSuggestStatus(seq: number, updateInstructorSuggestDto: UpdateInstructorSuggestDto, member: Member) {
-    await this.getInstructorSuggest(seq, member);
-    await this.positionSuggestRepository.createQueryBuilder('positionSuggest').update().set({ status: updateInstructorSuggestDto.status }).where({ seq }).execute();
-    return { seq };
   }
 
   async createInstructorFollow(seq: number, member: Member) {

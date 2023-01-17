@@ -1,13 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
 import { MemberService } from './member.service';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
-import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { MemberDecorator } from '../../common/decorators/member.decorator';
 import { Member } from '../../entites/Member';
 import { CreateMemberLicenceDto } from './dto/create-member-licence.dto';
 import { CreateRegionAuthDto } from './dto/create-region-auth.dto';
 import { UpdateMemberProfileDto } from './dto/update-member-profile.dto';
+import { UpdatePositionSuggestDto } from './dto/update-position-suggest.dto';
 
 @ApiTags('member')
 @Controller('member')
@@ -72,6 +73,34 @@ export class MemberController {
   @Get('check/nickname/:nickname')
   checkMemberNickname(@Param('nickname') nickname: string) {
     return this.memberService.checkMemberNickname(nickname);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '제안 받은 포지션 목록 조회' })
+  @Get('suggest/to')
+  getSuggestToList(@MemberDecorator() member: Member) {
+    return this.memberService.getSuggestToList(member);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '제안한 포지션 목록 조회' })
+  @Get('suggest/from')
+  getSuggestFromList(@MemberDecorator() member: Member) {
+    return this.memberService.getSuggestFromList(member);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '포지션 제안 상세 조회' })
+  @Get('suggest/:seq')
+  getPositionSuggest(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
+    return this.memberService.getPositionSuggest(seq, member);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '포지션 제안 상태 변경' })
+  @Patch('suggest/:seq')
+  updatePositionSuggestStatus(@Param('seq', ParseIntPipe) seq: number, @Body() updatePositionSuggestDto: UpdatePositionSuggestDto, @MemberDecorator() member: Member) {
+    return this.memberService.updatePositionSuggestStatus(seq, updatePositionSuggestDto, member);
   }
 
   @ApiBearerAuth()

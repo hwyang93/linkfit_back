@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class UpdateInstructorSuggestDto {
+export class UpdatePositionSuggestDto {
   @ApiProperty({ description: '상태' })
   status: string;
 }

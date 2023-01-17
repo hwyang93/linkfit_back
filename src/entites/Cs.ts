@@ -13,7 +13,7 @@ export class Cs extends BaseEntity {
   title: string;
 
   @Column({ type: 'int', name: 'WRITER_SEQ' })
-  writerSeq: string;
+  writerSeq: number;
 
   @Column({ type: 'varchar', length: 20, name: 'WRITER_ID' })
   writeId: string;
