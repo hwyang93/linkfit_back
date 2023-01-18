@@ -30,6 +30,7 @@ async function bootstrap() {
     .addTag('resume', '이력서 관련')
     .addTag('instructor', '강사 관련')
     .addTag('community', '커뮤니티 관련')
+    .addTag('cs', '고객센터 관련')
     .build();
   const document = SwaggerModule.createDocument(app, config, { ignoreGlobalPrefix: true });
   SwaggerModule.setup('docs', app, document);

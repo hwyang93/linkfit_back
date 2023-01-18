@@ -1,11 +1,4 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { BaseEntity } from './BaseEntity';
 import { InquiryAnswer } from './InquiryAnswer';
 import { Member } from './Member';
@@ -15,13 +8,16 @@ export class Inquiry extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'SEQ' })
   seq: number;
 
+  @Column({ type: 'int', name: 'WRITER_SEQ' })
+  writerSeq: number;
+
   @Column({ type: 'varchar', length: 100, name: 'TITLE' })
   title: string;
 
   @Column({ type: 'varchar', length: 2000, name: 'CONTENT' })
   content: string;
 
-  @OneToMany(() => InquiryAnswer, (InquiryAnswer) => InquiryAnswer.inquiry)
+  @OneToMany(() => InquiryAnswer, InquiryAnswer => InquiryAnswer.inquiry)
   answers: InquiryAnswer[];
 
   @ManyToOne(() => Member)

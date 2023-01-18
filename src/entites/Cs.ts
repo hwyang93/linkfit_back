@@ -15,9 +15,6 @@ export class Cs extends BaseEntity {
   @Column({ type: 'int', name: 'WRITER_SEQ' })
   writerSeq: number;
 
-  @Column({ type: 'varchar', length: 20, name: 'WRITER_ID' })
-  writeId: string;
-
   @Column({ type: 'varchar', length: 2000, name: 'CONTENT' })
   content: string;
 }

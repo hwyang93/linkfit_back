@@ -15,6 +15,7 @@ import { RecruitApply } from '../../entites/RecruitApply';
 import { PositionSuggest } from '../../entites/PositionSuggest';
 import { Resume } from '../../entites/Resume';
 import { UpdatePositionSuggestDto } from './dto/update-position-suggest.dto';
+import { Recruit } from '../../entites/Recruit';
 
 const bcrypt = require('bcrypt');
 
@@ -70,7 +71,8 @@ export class MemberService {
       memberInfo: {},
       masterResume: {},
       applyCountInfo: {},
-      suggestCountInfo: {}
+      suggestCountInfo: {},
+      noticeCountInfo: {}
     };
     result.memberInfo = await this.getMemberInfo(member);
 
@@ -92,6 +94,15 @@ export class MemberService {
       .addSelect('COUNT(CASE WHEN positionSuggest.status = "fail" THEN 1 END)', 'failApplyCount')
       .addSelect('COUNT(CASE WHEN positionSuggest.status = "cancel" THEN 1 END)', 'cancelApplyCount')
       .where('positionSuggest.targetMemberSeq = :memberSeq', { memberSeq: member.seq })
+      .getRawOne();
+    result.noticeCountInfo = await this.datasource
+      .createQueryBuilder()
+      .select('recruitCount', 'totalNoticeCount')
+      .addSelect('recruitCount', 'recruitCount')
+      .addSelect('"준비중"', 'seekCount')
+      .from(sq => {
+        return sq.select('COUNT(*)', 'recruitCount').from(Recruit, 'recruit').where('recruit.writerSeq = :writerSeq', { writerSeq: member.seq });
+      }, 'recruit')
       .getRawOne();
 
     return result;

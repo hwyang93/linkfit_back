@@ -31,6 +31,7 @@ import { ResumeModule } from './v1/resume/resume.module';
 import { LoggerMiddleware } from './common/middleweres/logger.middleware';
 import { InstructorModule } from './v1/instructor/instructor.module';
 import { CommunityModule } from './v1/community/community.module';
+import { CsModule } from './v1/cs/cs.module';
 
 @Module({
   imports: [
@@ -75,7 +76,8 @@ import { CommunityModule } from './v1/community/community.module';
     AuthModule,
     ResumeModule,
     InstructorModule,
-    CommunityModule
+    CommunityModule,
+    CsModule
   ],
   controllers: [AppController],
   providers: [AppService]
