@@ -8,7 +8,7 @@ import { StandardResponseInterceptor } from './common/interceptors/standard-resp
 declare const module: any;
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { cors: true });
   app.setGlobalPrefix('api/v1');
   const port = process.env.PORT || 3000;
   app.useGlobalPipes(
@@ -16,6 +16,7 @@ async function bootstrap() {
       transform: true
     })
   );
+
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new StandardResponseInterceptor());
   const config = new DocumentBuilder()
