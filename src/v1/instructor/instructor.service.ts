@@ -36,7 +36,7 @@ export class InstructorService {
     const result = [];
     instructors.forEach(item => {
       const career = this.calcCareer(item.resumes[0].careers);
-      result.push({ seq: item.seq, name: item.name, nickname: item.nickname, field: item.field, address: item.regionAuth.address, career: career });
+      result.push({ seq: item.seq, name: item.name, nickname: item.nickname, address: item.regionAuth.address, career: career });
     });
     return result;
   }
