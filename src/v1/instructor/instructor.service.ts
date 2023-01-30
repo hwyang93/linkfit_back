@@ -21,6 +21,19 @@ export class InstructorService {
       throw new UnauthorizedException('지역 인증이 필요합니다.');
     }
 
+    // const instructors = await this.memberRepository
+    //   .createQueryBuilder('member')
+    //   .where('member.type = :type', { type: 'INSTRUCTOR' })
+    //   .andWhere('member.isOpenProfile = :isOpenProfile', { isOpenProfile: 'Y' })
+    //   .andWhere('regionAuth.address = :address', { address: regionAuth.address })
+    //   .andWhere('resumes.isMaster = :isMaster', { isMaster: 'Y' })
+    //   .leftJoinAndSelect('member.regionAuth', 'regionAuth')
+    //   .leftJoinAndSelect('member.resumes', 'resumes')
+    //   .leftJoinAndSelect('resumes.careers', 'careers')
+    //   .leftJoinAndSelect('member.follower', 'follower')
+    //   .select(['member.seq', 'member.name', 'member.nickname', 'member.field', 'regionAuth.address', 'resumes', 'careers', 'follower'])
+    //   .getMany();
+
     const instructors = await this.memberRepository
       .createQueryBuilder('member')
       .where('member.type = :type', { type: 'INSTRUCTOR' })
@@ -30,13 +43,42 @@ export class InstructorService {
       .leftJoinAndSelect('member.regionAuth', 'regionAuth')
       .leftJoinAndSelect('member.resumes', 'resumes')
       .leftJoinAndSelect('resumes.careers', 'careers')
+      .leftJoinAndSelect(
+        sq => {
+          return sq
+            .select('memberFavorite.favoriteSeq', 'favoriteSeq')
+            .addSelect('COUNT(memberFavorite.favoriteSeq)', 'followerCount')
+            .from(MemberFavorite, 'memberFavorite')
+            .groupBy('memberFavorite.favoriteSeq');
+        },
+        'follower',
+        'member.seq = follower.favoriteSeq'
+      )
+      // .addFrom(sq => {
+      //   return sq.select('memberFavorite.favoriteSeq', 'favoriteSeq').from(MemberFavorite, 'memberFavorite').where('memberFavorite.memberSeq = :memberSeq', { memberSeq: member.seq });
+      // }, 'follow')
       .select(['member.seq', 'member.name', 'member.nickname', 'member.field', 'regionAuth.address', 'resumes', 'careers'])
-      .getMany();
-
+      .addSelect('IFNULL(follower.followerCount, 0)', 'followerCount')
+      .orderBy('member.updateAt', 'DESC')
+      .getRawAndEntities();
     const result = [];
-    instructors.forEach(item => {
+    console.log(instructors);
+    instructors.entities.forEach((item, idx) => {
       const career = this.calcCareer(item.resumes[0].careers);
-      result.push({ seq: item.seq, name: item.name, nickname: item.nickname, field: item.field, address: item.regionAuth.address, career: career });
+      result.push({
+        seq: item.seq,
+        name: item.name,
+        nickname: item.nickname,
+        field: item.field,
+        address: item.regionAuth.address,
+        career: career,
+        followerCount: parseInt(
+          instructors.raw.find(raw => {
+            console.log(raw);
+            return raw.memberSeq === item.seq;
+          }).followerCount
+        )
+      });
     });
     return result;
   }
