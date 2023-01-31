@@ -16,6 +16,8 @@ import { PositionSuggest } from '../../entites/PositionSuggest';
 import { Resume } from '../../entites/Resume';
 import { UpdatePositionSuggestDto } from './dto/update-position-suggest.dto';
 import { Recruit } from '../../entites/Recruit';
+import { CreateMemberReputationDto } from './dto/create-member-reputation.dto';
+import { MemberDecorator } from '../../common/decorators/member.decorator';
 
 const bcrypt = require('bcrypt');
 
@@ -291,6 +293,8 @@ export class MemberService {
 
     return { seq };
   }
+
+  async createMemberReputation(createMemberReputationDto: CreateMemberReputationDto, member: Member) {}
 
   findOne(id: number) {
     return `This action returns a #${id} member`;

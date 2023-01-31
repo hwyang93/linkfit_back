@@ -9,6 +9,7 @@ import { CreateMemberLicenceDto } from './dto/create-member-licence.dto';
 import { CreateRegionAuthDto } from './dto/create-region-auth.dto';
 import { UpdateMemberProfileDto } from './dto/update-member-profile.dto';
 import { UpdatePositionSuggestDto } from './dto/update-position-suggest.dto';
+import { CreateMemberReputationDto } from './dto/create-member-reputation.dto';
 
 @ApiTags('member')
 @Controller('member')
@@ -115,6 +116,13 @@ export class MemberController {
   @Delete('region/:seq')
   deleteRegionAuth(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
     return this.memberService.deleteRegionAuth(seq, member);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '회원 후기 등록' })
+  @Post('reputation')
+  createMemberReputation(@Body() createMemberReputationDto: CreateMemberReputationDto, @MemberDecorator() member: Member) {
+    return this.memberService.createMemberReputation(createMemberReputationDto, member);
   }
 
   @ApiOperation({ summary: '회원정보 조회' })
