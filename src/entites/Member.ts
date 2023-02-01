@@ -79,6 +79,15 @@ export class Member extends BaseEntity {
   })
   status: string;
 
+  @Column({
+    type: 'char',
+    length: 1,
+    name: 'IS_VERIFICATION',
+    default: 'N',
+    nullable: true
+  })
+  isVerification: string;
+
   @OneToOne(() => CommonFile)
   @JoinColumn([{ name: 'PROFILE_FILE_SEQ' }])
   profileImage: CommonFile;

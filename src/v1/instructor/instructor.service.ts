@@ -6,13 +6,15 @@ import * as dayjs from 'dayjs';
 import { CreateInstructorSuggestDto } from './dto/create-instructor-suggest.dto';
 import { PositionSuggest } from '../../entites/PositionSuggest';
 import { MemberFavorite } from '../../entites/MemberFavorite';
+import { MemberReputation } from '../../entites/MemberReputation';
 
 @Injectable()
 export class InstructorService {
   constructor(
     @InjectRepository(Member) private memberRepository: Repository<Member>,
     @InjectRepository(PositionSuggest) private positionSuggestRepository: Repository<PositionSuggest>,
-    @InjectRepository(MemberFavorite) private memberFavoriteRepository: Repository<MemberFavorite>
+    @InjectRepository(MemberFavorite) private memberFavoriteRepository: Repository<MemberFavorite>,
+    @InjectRepository(MemberReputation) private memberReputationRepository: Repository<MemberReputation>
   ) {}
 
   async getInstructorList(member: Member) {
@@ -20,19 +22,6 @@ export class InstructorService {
     if (!regionAuth) {
       throw new UnauthorizedException('지역 인증이 필요합니다.');
     }
-
-    // const instructors = await this.memberRepository
-    //   .createQueryBuilder('member')
-    //   .where('member.type = :type', { type: 'INSTRUCTOR' })
-    //   .andWhere('member.isOpenProfile = :isOpenProfile', { isOpenProfile: 'Y' })
-    //   .andWhere('regionAuth.address = :address', { address: regionAuth.address })
-    //   .andWhere('resumes.isMaster = :isMaster', { isMaster: 'Y' })
-    //   .leftJoinAndSelect('member.regionAuth', 'regionAuth')
-    //   .leftJoinAndSelect('member.resumes', 'resumes')
-    //   .leftJoinAndSelect('resumes.careers', 'careers')
-    //   .leftJoinAndSelect('member.follower', 'follower')
-    //   .select(['member.seq', 'member.name', 'member.nickname', 'member.field', 'regionAuth.address', 'resumes', 'careers', 'follower'])
-    //   .getMany();
 
     const instructors = await this.memberRepository
       .createQueryBuilder('member')
@@ -54,16 +43,15 @@ export class InstructorService {
         'follower',
         'member.seq = follower.favoriteSeq'
       )
-      // .addFrom(sq => {
-      //   return sq.select('memberFavorite.favoriteSeq', 'favoriteSeq').from(MemberFavorite, 'memberFavorite').where('memberFavorite.memberSeq = :memberSeq', { memberSeq: member.seq });
-      // }, 'follow')
       .select(['member.seq', 'member.name', 'member.nickname', 'member.field', 'regionAuth.address', 'resumes', 'careers'])
       .addSelect('IFNULL(follower.followerCount, 0)', 'followerCount')
       .orderBy('member.updateAt', 'DESC')
       .getRawAndEntities();
+
+    const follower = await this.memberFavoriteRepository.createQueryBuilder('memberFavorite').where('memberFavorite.memberSeq = :memberSeq', { memberSeq: member.seq }).getMany();
+
     const result = [];
-    console.log(instructors);
-    instructors.entities.forEach((item, idx) => {
+    instructors.entities.forEach(item => {
       const career = this.calcCareer(item.resumes[0].careers);
       result.push({
         seq: item.seq,
@@ -74,10 +62,14 @@ export class InstructorService {
         career: career,
         followerCount: parseInt(
           instructors.raw.find(raw => {
-            console.log(raw);
-            return raw.memberSeq === item.seq;
-          }).followerCount
-        )
+            return raw.member_SEQ === item.seq;
+          })?.followerCount
+        ),
+        isFollow: follower.find(follower => {
+          return follower.favoriteSeq === item.seq;
+        })
+          ? 'Y'
+          : 'N'
       });
     });
     return result;
@@ -101,6 +93,12 @@ export class InstructorService {
       .where('memberFavorite.favoriteSeq = :favoriteSeq', { favoriteSeq: seq })
       .getRawOne();
 
+    const reputations = await this.memberReputationRepository
+      .createQueryBuilder('memberReputation')
+      .leftJoinAndSelect('memberReputation.evaluationMember', 'evaluationMember')
+      .where('memberReputation.targetMemberSeq = :memberSeq', { memberSeq: seq })
+      .getMany();
+
     const career = this.calcCareer(instructor.resumes[0].careers);
     return {
       seq: instructor.seq,
@@ -109,7 +107,8 @@ export class InstructorService {
       address: instructor.regionAuth.address,
       career: career,
       links: instructor.links,
-      follower: follower
+      follower: follower,
+      reputations: reputations
     };
   }
 

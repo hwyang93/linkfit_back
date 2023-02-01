@@ -123,6 +123,7 @@ export class RecruitController {
     return this.recruitService.getRecruitApplyListBySeq(seq, member);
   }
 
+  @ApiBearerAuth()
   @ApiOperation({ summary: '구인 공고 지원 상태 변경' })
   @Patch(':seq/apply')
   updateRecruitApply(@Param('seq', ParseIntPipe) seq: number, @Body() updateRecruitApplyDto: UpdateRecruitApplyDto, @MemberDecorator() member: Member) {

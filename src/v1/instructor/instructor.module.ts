@@ -5,9 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Member } from '../../entites/Member';
 import { PositionSuggest } from '../../entites/PositionSuggest';
 import { MemberFavorite } from '../../entites/MemberFavorite';
+import { MemberReputation } from '../../entites/MemberReputation';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Member, PositionSuggest, MemberFavorite])],
+  imports: [TypeOrmModule.forFeature([Member, PositionSuggest, MemberFavorite, MemberReputation])],
   controllers: [InstructorController],
   providers: [InstructorService]
 })

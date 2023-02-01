@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Body, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -17,7 +17,8 @@ import { Resume } from '../../entites/Resume';
 import { UpdatePositionSuggestDto } from './dto/update-position-suggest.dto';
 import { Recruit } from '../../entites/Recruit';
 import { CreateMemberReputationDto } from './dto/create-member-reputation.dto';
-import { MemberDecorator } from '../../common/decorators/member.decorator';
+import { MemberReputation } from '../../entites/MemberReputation';
+import { UpdateMemberReputationDto } from './dto/update-member-reputation.dto';
 
 const bcrypt = require('bcrypt');
 
@@ -31,6 +32,8 @@ export class MemberService {
     @InjectRepository(Resume) private resumeRepository: Repository<Resume>,
     @InjectRepository(RecruitApply) private recruitApplyRepository: Repository<RecruitApply>,
     @InjectRepository(PositionSuggest) private positionSuggestRepository: Repository<PositionSuggest>,
+    @InjectRepository(Recruit) private recruitRepository: Repository<Recruit>,
+    @InjectRepository(MemberReputation) private memberReputationRepository: Repository<MemberReputation>,
     private datasource: DataSource
   ) {}
   async join(createMemberDto: CreateMemberDto) {
@@ -294,7 +297,67 @@ export class MemberService {
     return { seq };
   }
 
-  async createMemberReputation(createMemberReputationDto: CreateMemberReputationDto, member: Member) {}
+  async createMemberReputation(createMemberReputationDto: CreateMemberReputationDto, member: Member) {
+    if (member.seq === createMemberReputationDto.targetMemberSeq) {
+      throw new BadRequestException('평가자와 대상자가 동일합니다.');
+    }
+
+    const recruit = await this.recruitRepository.createQueryBuilder('recruit').where('recruit.seq = :recruitSeq', { recruitSeq: createMemberReputationDto.recruitSeq }).getOne();
+    const recruitApply = await this.recruitApplyRepository
+      .createQueryBuilder('recruitApply')
+      .where('recruitApply.recruitSeq = :recruitSeq', { recruitSeq: createMemberReputationDto.recruitSeq })
+      .andWhere('recruitApply.status = "PASS"')
+      .getMany();
+    if (!recruit) {
+      throw new UnauthorizedException('허용되지 않은 접근입니다.');
+    }
+
+    const isPass = recruitApply.find(item => {
+      return item.memberSeq === createMemberReputationDto.evaluationMemberSeq || item.memberSeq === createMemberReputationDto.targetMemberSeq;
+    });
+    const canReputation = !!((recruit.writerSeq === createMemberReputationDto.targetMemberSeq || recruit.writerSeq === createMemberReputationDto.evaluationMemberSeq) && isPass);
+
+    if (!canReputation) {
+      throw new UnauthorizedException('평가 권한이 없습니다.');
+    }
+
+    const memberReputation = createMemberReputationDto.toEntity();
+    const { seq } = await this.memberReputationRepository.save(memberReputation);
+
+    return { seq };
+  }
+
+  async updateMemberReputation(seq: number, updateMemberReputationDto: UpdateMemberReputationDto, member: Member) {
+    const reputation = await this.memberReputationRepository
+      .createQueryBuilder('memberReputation')
+      .where({ seq })
+      .andWhere('memberReputation.evaluationMemberSeq = :memberSeq', { memberSeq: member.seq })
+      .getOne();
+
+    if (!reputation) {
+      throw new UnauthorizedException('허용되지 않은 접근입니다.');
+    }
+
+    await this.memberReputationRepository.createQueryBuilder('memberReputation').update().set({ comment: updateMemberReputationDto.comment }).where({ seq }).execute();
+
+    return { seq };
+  }
+
+  async deleteMemberReputation(seq: number, member: Member) {
+    const reputation = await this.memberReputationRepository
+      .createQueryBuilder('memberReputation')
+      .where({ seq })
+      .andWhere('memberReputation.evaluationMemberSeq = :memberSeq', { memberSeq: member.seq })
+      .getOne();
+
+    if (!reputation) {
+      throw new UnauthorizedException('허용되지 않은 접근입니다.');
+    }
+
+    await this.memberReputationRepository.createQueryBuilder('memberReputation').delete().where({ seq }).execute();
+
+    return { seq };
+  }
 
   findOne(id: number) {
     return `This action returns a #${id} member`;

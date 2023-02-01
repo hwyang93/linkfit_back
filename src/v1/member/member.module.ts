@@ -9,9 +9,11 @@ import { RegionAuth } from '../../entites/RegionAuth';
 import { RecruitApply } from '../../entites/RecruitApply';
 import { PositionSuggest } from '../../entites/PositionSuggest';
 import { Resume } from '../../entites/Resume';
+import { Recruit } from '../../entites/Recruit';
+import { MemberReputation } from '../../entites/MemberReputation';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Member, Company, MemberLicence, RegionAuth, Resume, RecruitApply, PositionSuggest])],
+  imports: [TypeOrmModule.forFeature([Member, Company, MemberLicence, RegionAuth, Resume, RecruitApply, PositionSuggest, Recruit, MemberReputation])],
   controllers: [MemberController],
   providers: [MemberService]
 })

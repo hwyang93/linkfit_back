@@ -78,12 +78,10 @@ export class RecruitService {
       .createQueryBuilder('recruit')
       .where('recruit.address like :address', { address: `%${searchParam.area}%` })
       .getMany();
-    console.log(pinData);
+
     pinData = _.chain(pinData)
       .groupBy('lon')
       .map(function (v, i) {
-        console.log('==================================================');
-        console.log(v);
         return {
           lat: v[0]?.lat,
           lon: parseFloat(i),
@@ -277,7 +275,7 @@ export class RecruitService {
         apply.resumeSeq = createRecruitApplyDto.resumeSeq;
         apply.recruitSeq = createRecruitApplyDto.recruitSeq;
         apply.recruitDateSeq = recruitDateSeq;
-        apply.status = 'apply';
+        apply.status = 'APPLY';
 
         await queryRunner.manager.getRepository(RecruitApply).save(apply);
       }
@@ -391,7 +389,7 @@ export class RecruitService {
     if (!member) {
       throw new UnauthorizedException('로그인 후 이용해주세요.');
     }
-
-    return this.recruitApplyRepository.createQueryBuilder('recruitApply').update(RecruitApply).set({ status: updateRecruitApplyDto.status }).where('recruitApply.seq = :seq', { seq: seq });
+    await this.recruitApplyRepository.createQueryBuilder('recruitApply').update().set({ status: updateRecruitApplyDto.status }).where({ seq }).execute();
+    return { seq };
   }
 }
