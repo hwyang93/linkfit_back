@@ -32,6 +32,7 @@ import { LoggerMiddleware } from './common/middleweres/logger.middleware';
 import { InstructorModule } from './v1/instructor/instructor.module';
 import { CommunityModule } from './v1/community/community.module';
 import { CsModule } from './v1/cs/cs.module';
+import { CompanyModule } from './company/company.module';
 
 @Module({
   imports: [
@@ -77,7 +78,8 @@ import { CsModule } from './v1/cs/cs.module';
     ResumeModule,
     InstructorModule,
     CommunityModule,
-    CsModule
+    CsModule,
+    CompanyModule
   ],
   controllers: [AppController],
   providers: [AppService]

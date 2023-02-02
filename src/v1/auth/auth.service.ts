@@ -12,17 +12,15 @@ export class AuthService {
   constructor(@InjectRepository(Member) private memberRepository: Repository<Member>, private jwtService: JwtService) {}
 
   async validateUser(email: string, password: string) {
-    const member = await this.memberRepository.findOne({
-      where: { email },
-      select: ['seq', 'email', 'password']
-    });
+    const member = await this.memberRepository.createQueryBuilder('member').select().addSelect('member.password').where({ email }).getOne();
+
     if (!member) {
       return null;
     }
     const result = await bcrypt.compare(password, member.password);
 
     if (result) {
-      const { password, ...userWithoutPassword } = member;
+      const { ...userWithoutPassword } = member;
       await this.memberRepository.createQueryBuilder('member').update().set({ lastLogin: new Date() }).where({ seq: member.seq }).execute();
 
       return userWithoutPassword;

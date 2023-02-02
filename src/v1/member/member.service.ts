@@ -66,8 +66,12 @@ export class MemberService {
   }
 
   async getMemberInfo(member: Member) {
-    const result = await this.memberRepository.createQueryBuilder('member').leftJoinAndSelect('member.company', 'company').where('member.seq = :seq', { seq: member.seq }).getOne();
-    delete result.password;
+    const result = await this.memberRepository
+      .createQueryBuilder('member')
+      .leftJoinAndSelect('member.company', 'company')
+      .leftJoinAndSelect('member.links', 'links')
+      .where('member.seq = :seq', { seq: member.seq })
+      .getOne();
     return result;
   }
 
@@ -260,7 +264,6 @@ export class MemberService {
     // const result = await this.memberRepository.findOne({
     //   where: { seq: seq }
     // });
-    delete result.password;
     return result;
   }
 
