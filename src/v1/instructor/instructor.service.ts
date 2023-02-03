@@ -84,7 +84,7 @@ export class InstructorService {
       .leftJoinAndSelect('member.resumes', 'resumes')
       .leftJoinAndSelect('member.links', 'links')
       .leftJoinAndSelect('resumes.careers', 'careers')
-      .select(['member.seq', 'member.name', 'member.nickname', 'member.field', 'regionAuth.address', 'resumes', 'careers', 'links'])
+      .select(['member.seq', 'member.name', 'member.nickname', 'member.field', 'member.intro', 'regionAuth.address', 'resumes', 'careers', 'links'])
       .getOne();
 
     const { follower } = await this.memberFavoriteRepository
@@ -105,6 +105,7 @@ export class InstructorService {
       name: instructor.name,
       nickname: instructor.nickname,
       address: instructor.regionAuth.address,
+      intro: instructor.intro,
       career: career,
       links: instructor.links,
       follower: follower,
