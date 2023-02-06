@@ -97,6 +97,7 @@ export class InstructorService {
       .createQueryBuilder('memberReputation')
       .leftJoinAndSelect('memberReputation.evaluationMember', 'evaluationMember')
       .where('memberReputation.targetMemberSeq = :memberSeq', { memberSeq: seq })
+      .orderBy('memberReputation.updateAt', 'DESC')
       .getMany();
 
     const career = this.calcCareer(instructor.resumes[0].careers);

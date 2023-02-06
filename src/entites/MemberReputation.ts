@@ -1,5 +1,5 @@
 import { BaseEntity } from './BaseEntity';
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Member } from './Member';
 
 @Entity({ name: 'MEMBER_REPUTATION' })
@@ -19,11 +19,11 @@ export class MemberReputation extends BaseEntity {
   @Column({ type: 'int', name: 'TARGET_MEMBER_SEQ' })
   targetMemberSeq: number;
 
-  @OneToOne(() => Member)
+  @ManyToOne(() => Member)
   @JoinColumn([{ name: 'EVALUATION_MEMBER_SEQ' }])
   evaluationMember: Member;
 
-  @OneToOne(() => Member)
+  @ManyToOne(() => Member)
   @JoinColumn([{ name: 'TARGET_MEMBER_SEQ' }])
   targetMember: Member;
 }

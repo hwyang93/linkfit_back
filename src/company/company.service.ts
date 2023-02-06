@@ -33,11 +33,12 @@ export class CompanyService {
       .getOne();
 
     let recruits = await this.recruitRepository.createQueryBuilder('recruit').leftJoinAndSelect('recruit.dates', 'dates').where('recruit.writerSeq = :writerSeq', { writerSeq: seq }).getMany();
-    console.log(recruits);
+
     const reputations = await this.memberReputationRepository
       .createQueryBuilder('memberReputation')
       .leftJoinAndSelect('memberReputation.evaluationMember', 'evaluationMember')
       .where('memberReputation.targetMemberSeq = :memberSeq', { memberSeq: seq })
+      .orderBy('memberReputation.updateAt', 'DESC')
       .getMany();
 
     if (member) {
