@@ -2,11 +2,11 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Member } from '../../entites/Member';
 import { Repository } from 'typeorm';
-import * as dayjs from 'dayjs';
 import { CreateInstructorSuggestDto } from './dto/create-instructor-suggest.dto';
 import { PositionSuggest } from '../../entites/PositionSuggest';
 import { MemberFavorite } from '../../entites/MemberFavorite';
 import { MemberReputation } from '../../entites/MemberReputation';
+import { calcCareer } from '../../common/utils/utils';
 
 @Injectable()
 export class InstructorService {
@@ -45,14 +45,14 @@ export class InstructorService {
       )
       .select(['member.seq', 'member.name', 'member.nickname', 'member.field', 'regionAuth.address', 'resumes', 'careers'])
       .addSelect('IFNULL(follower.followerCount, 0)', 'followerCount')
-      .orderBy('member.updateAt', 'DESC')
+      .orderBy('member.updatedAt', 'DESC')
       .getRawAndEntities();
 
     const follower = await this.memberFavoriteRepository.createQueryBuilder('memberFavorite').where('memberFavorite.memberSeq = :memberSeq', { memberSeq: member.seq }).getMany();
 
     const result = [];
     instructors.entities.forEach(item => {
-      const career = this.calcCareer(item.resumes[0].careers);
+      const career = calcCareer(item.resumes[0].careers);
       result.push({
         seq: item.seq,
         name: item.name,
@@ -97,10 +97,10 @@ export class InstructorService {
       .createQueryBuilder('memberReputation')
       .leftJoinAndSelect('memberReputation.evaluationMember', 'evaluationMember')
       .where('memberReputation.targetMemberSeq = :memberSeq', { memberSeq: seq })
-      .orderBy('memberReputation.updateAt', 'DESC')
+      .orderBy('memberReputation.updatedAt', 'DESC')
       .getMany();
 
-    const career = this.calcCareer(instructor.resumes[0].careers);
+    const career = calcCareer(instructor.resumes[0].careers);
     return {
       seq: instructor.seq,
       name: instructor.name,
@@ -162,23 +162,5 @@ export class InstructorService {
     }
     await this.memberFavoriteRepository.createQueryBuilder('memberFavorite').softDelete().where({ seq }).execute();
     return { seq };
-  }
-
-  calcCareer(careers: any) {
-    let totalDay = 0;
-    let career;
-    careers.forEach(item => {
-      const startDate = dayjs(new Date(item.startDate));
-      const endDate = dayjs(new Date(item.endDate));
-      const diffDay = endDate.diff(startDate, 'month', true);
-      totalDay += diffDay;
-    });
-
-    if (totalDay === 0) {
-      career = '경력 없음';
-    } else {
-      career = (totalDay / 12 + 1).toFixed(0) + '년차';
-    }
-    return career;
   }
 }

@@ -34,7 +34,7 @@ export class CommunityService {
     if (searchParam.isWriter === 'Y') {
       communityList.andWhere('community.writerSeq = :writerSeq', { writerSeq: member.seq });
     }
-    communityList.orderBy('community.updateAt', 'DESC');
+    communityList.orderBy('community.updatedAt', 'DESC');
     return communityList.getMany();
   }
 

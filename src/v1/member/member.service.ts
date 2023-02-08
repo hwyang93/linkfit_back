@@ -19,6 +19,8 @@ import { Recruit } from '../../entites/Recruit';
 import { CreateMemberReputationDto } from './dto/create-member-reputation.dto';
 import { MemberReputation } from '../../entites/MemberReputation';
 import { UpdateMemberReputationDto } from './dto/update-member-reputation.dto';
+import { MemberFavorite } from '../../entites/MemberFavorite';
+import { calcCareer } from '../../common/utils/utils';
 
 const bcrypt = require('bcrypt');
 
@@ -70,9 +72,22 @@ export class MemberService {
       .createQueryBuilder('member')
       .leftJoinAndSelect('member.company', 'company')
       .leftJoinAndSelect('member.links', 'links')
+      .leftJoinAndSelect(
+        sq => {
+          return sq
+            .select('memberFavorite.favoriteSeq', 'favoriteSeq')
+            .addSelect('COUNT(memberFavorite.favoriteSeq)', 'followerCount')
+            .from(MemberFavorite, 'memberFavorite')
+            .groupBy('memberFavorite.favoriteSeq');
+        },
+        'follower',
+        'member.seq = follower.favoriteSeq'
+      )
       .where('member.seq = :seq', { seq: member.seq })
-      .getOne();
-    return result;
+      .addSelect('IFNULL(follower.followerCount, 0)', 'followerCount')
+      .getRawAndEntities();
+    console.log(result);
+    return { ...result.entities[0], followerCount: result.raw[0].followerCount };
   }
 
   async getMemberMy(member: Member) {
@@ -83,25 +98,30 @@ export class MemberService {
       suggestCountInfo: {},
       noticeCountInfo: {}
     };
-    result.memberInfo = await this.getMemberInfo(member);
+    const memberInfo = await this.getMemberInfo(member);
 
-    result.masterResume = await this.resumeRepository.createQueryBuilder('resume').where('resume.writerSeq = :writerSeq', { writerSeq: member.seq }).andWhere('resume.isMaster="Y"').getOne();
+    const masterResume = await this.resumeRepository
+      .createQueryBuilder('resume')
+      .leftJoinAndSelect('resume.careers', 'careers')
+      .where('resume.writerSeq = :writerSeq', { writerSeq: member.seq })
+      .andWhere('resume.isMaster="Y"')
+      .getOne();
 
     result.applyCountInfo = await this.recruitApplyRepository
       .createQueryBuilder('recruitApply')
       .select('COUNT(*)', 'totalApplyCount')
-      .addSelect('COUNT(CASE WHEN recruitApply.status = "pass" THEN 1 END)', 'passApplyCount')
-      .addSelect('COUNT(CASE WHEN recruitApply.status = "fail" THEN 1 END)', 'failApplyCount')
-      .addSelect('COUNT(CASE WHEN recruitApply.status = "cancel" THEN 1 END)', 'cancelApplyCount')
+      .addSelect('COUNT(CASE WHEN recruitApply.status = "PASS" THEN 1 END)', 'passApplyCount')
+      .addSelect('COUNT(CASE WHEN recruitApply.status = "FAIL" THEN 1 END)', 'failApplyCount')
+      .addSelect('COUNT(CASE WHEN recruitApply.status = "CANCEL" THEN 1 END)', 'cancelApplyCount')
       .where('recruitApply.memberSeq = :memberSeq', { memberSeq: member.seq })
       .getRawOne();
 
     result.suggestCountInfo = await this.positionSuggestRepository
       .createQueryBuilder('positionSuggest')
-      .select('COUNT(*)', 'totalApplyCount')
-      .addSelect('COUNT(CASE WHEN positionSuggest.status = "pass" THEN 1 END)', 'passApplyCount')
-      .addSelect('COUNT(CASE WHEN positionSuggest.status = "fail" THEN 1 END)', 'failApplyCount')
-      .addSelect('COUNT(CASE WHEN positionSuggest.status = "cancel" THEN 1 END)', 'cancelApplyCount')
+      .select('COUNT(*)', 'totalSuggestCount')
+      .addSelect('COUNT(CASE WHEN positionSuggest.status = "WAITING" THEN 1 END)', 'waitingSuggestCount')
+      .addSelect('COUNT(CASE WHEN positionSuggest.status = "COMPLETE" THEN 1 END)', 'completeSuggestCount')
+      .addSelect('COUNT(CASE WHEN positionSuggest.status = "CLOSE" THEN 1 END)', 'closeSuggestCount')
       .where('positionSuggest.targetMemberSeq = :memberSeq', { memberSeq: member.seq })
       .getRawOne();
     result.noticeCountInfo = await this.datasource
@@ -113,6 +133,12 @@ export class MemberService {
         return sq.select('COUNT(*)', 'recruitCount').from(Recruit, 'recruit').where('recruit.writerSeq = :writerSeq', { writerSeq: member.seq });
       }, 'recruit')
       .getRawOne();
+
+    const career = calcCareer(masterResume.careers);
+
+    result.memberInfo = { ...memberInfo, career: career };
+
+    result.masterResume = { ...masterResume };
 
     return result;
   }
@@ -284,7 +310,7 @@ export class MemberService {
 
     const savedRegionAuth = await this.regionAuthRepository.save(regionAuth);
 
-    await this.memberRepository.createQueryBuilder('member').update().set({ updateAt: new Date() }).where({ seq: member.seq }).execute();
+    await this.memberRepository.createQueryBuilder('member').update().set({ updatedAt: new Date() }).where({ seq: member.seq }).execute();
 
     return { seq: savedRegionAuth.seq };
   }

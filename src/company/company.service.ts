@@ -38,7 +38,7 @@ export class CompanyService {
       .createQueryBuilder('memberReputation')
       .leftJoinAndSelect('memberReputation.evaluationMember', 'evaluationMember')
       .where('memberReputation.targetMemberSeq = :memberSeq', { memberSeq: seq })
-      .orderBy('memberReputation.updateAt', 'DESC')
+      .orderBy('memberReputation.updatedAt', 'DESC')
       .getMany();
 
     if (member) {
