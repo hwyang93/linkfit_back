@@ -31,11 +31,12 @@ export class AuthService {
 
   async login(member: any) {
     const payload = { email: member.email, seq: member.seq };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '10m' });
-    const refreshToken = this.jwtService.sign(payload, { expiresIn: '30d', secret: 'MOVERLAB_REFRESH' });
-    await this.cacheManager.set(member.email, refreshToken, 0);
-
-    return { accessToken, refreshToken };
+    const accessToken = this.jwtService.sign(payload);
+    return { accessToken };
+    // const refreshToken = this.jwtService.sign(payload, { expiresIn: '30d', secret: 'MOVERLAB_REFRESH' });
+    // await this.cacheManager.set(member.email, refreshToken, 0);
+    //
+    // return { accessToken, refreshToken };
   }
 
   async refresh(token: string) {
