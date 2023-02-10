@@ -3,7 +3,7 @@ import * as dayjs from 'dayjs';
 export function calcCareer(careers: any) {
   let totalDay = 0;
   let career;
-  careers.forEach(item => {
+  careers?.forEach(item => {
     const startDate = dayjs(new Date(item.startDate));
     const endDate = dayjs(new Date(item.endDate));
     const diffDay = endDate.diff(startDate, 'month', true);

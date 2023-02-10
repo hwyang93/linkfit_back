@@ -106,7 +106,9 @@ export class MemberService {
       .where('resume.writerSeq = :writerSeq', { writerSeq: member.seq })
       .andWhere('resume.isMaster="Y"')
       .getOne();
-
+    console.log('============================');
+    console.log(masterResume);
+    console.log('============================');
     result.applyCountInfo = await this.recruitApplyRepository
       .createQueryBuilder('recruitApply')
       .select('COUNT(*)', 'totalApplyCount')
@@ -134,7 +136,7 @@ export class MemberService {
       }, 'recruit')
       .getRawOne();
 
-    const career = calcCareer(masterResume.careers);
+    const career = calcCareer(masterResume?.careers);
 
     result.memberInfo = { ...memberInfo, career: career };
 
