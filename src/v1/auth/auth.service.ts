@@ -1,15 +1,16 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { CACHE_MANAGER, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Repository } from 'typeorm';
 import { Member } from '../../entites/Member';
 import { JwtService } from '@nestjs/jwt';
+import { Cache } from 'cache-manager';
 
 const bcrypt = require('bcrypt');
 
 @Injectable()
 export class AuthService {
-  constructor(@InjectRepository(Member) private memberRepository: Repository<Member>, private jwtService: JwtService) {}
+  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache, @InjectRepository(Member) private memberRepository: Repository<Member>, private jwtService: JwtService) {}
 
   async validateUser(email: string, password: string) {
     const member = await this.memberRepository.createQueryBuilder('member').select().addSelect('member.password').where({ email }).getOne();
@@ -30,9 +31,11 @@ export class AuthService {
 
   async login(member: any) {
     const payload = { email: member.email, seq: member.seq };
-    return {
-      accessToken: this.jwtService.sign(payload)
-    };
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '10m' });
+    const refreshToken = this.jwtService.sign(payload, { expiresIn: '30d', secret: 'MOVERLAB_REFRESH' });
+    await this.cacheManager.set(member.email, refreshToken, 0);
+
+    return { accessToken, refreshToken };
   }
 
   async refresh(token: string) {

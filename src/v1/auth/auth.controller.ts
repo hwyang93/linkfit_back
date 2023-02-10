@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { CACHE_MANAGER, Controller, Get, Inject, Post, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Cache } from 'cache-manager';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { LocalAuthGuard } from './local-auth.guard';
 import { AuthService } from './auth.service';

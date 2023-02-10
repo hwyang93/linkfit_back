@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { CacheModule, Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './local.strategy';
 import { JwtModule } from '@nestjs/jwt';
@@ -10,9 +10,10 @@ import { AuthController } from './auth.controller';
 
 @Module({
   imports: [
+    CacheModule.register(),
     PassportModule,
     JwtModule.register({
-      secret: 'MOVERLAB'
+      secret: 'MOVERLAB_ACCESS'
       // signOptions: { expiresIn: '10m' }
     }),
     TypeOrmModule.forFeature([Member])
