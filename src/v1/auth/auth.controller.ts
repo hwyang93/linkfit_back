@@ -1,4 +1,4 @@
-import { CACHE_MANAGER, Controller, Get, Inject, Post, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Body, CACHE_MANAGER, Controller, Get, Inject, Post, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { LocalAuthGuard } from './local-auth.guard';
@@ -30,14 +30,14 @@ export class AuthController {
   @ApiOperation({ summary: '토큰 재발급' })
   @ApiBearerAuth()
   @Post('/refresh')
-  async refresh(@Req() req) {
+  async refresh(@Req() req, @MemberDecorator() member: Member) {
     let token;
     if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
       token = req.headers.authorization.split(' ')[1];
     } else {
-      throw new UnauthorizedException('인증이 필요합니다.');
+      throw new UnauthorizedException('토큰이 없습니다.');
     }
 
-    return this.authService.refresh(token);
+    return this.authService.refresh(token, member);
   }
 }

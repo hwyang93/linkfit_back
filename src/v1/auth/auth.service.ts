@@ -32,25 +32,29 @@ export class AuthService {
   async login(member: any) {
     const payload = { email: member.email, seq: member.seq };
     const accessToken = this.jwtService.sign(payload);
-    return { accessToken };
-    // const refreshToken = this.jwtService.sign(payload, { expiresIn: '30d', secret: 'MOVERLAB_REFRESH' });
-    // await this.cacheManager.set(member.email, refreshToken, 0);
-    //
-    // return { accessToken, refreshToken };
+    // return { accessToken };
+    const refreshToken = this.jwtService.sign(payload, { expiresIn: '30d', secret: 'MOVERLAB_REFRESH' });
+    await this.cacheManager.set(member.email, refreshToken, 0);
+
+    return { accessToken, refreshToken };
   }
 
-  async refresh(token: string) {
+  async refresh(token: string, member: Member) {
+    const cachingedRefreshToken = this.cacheManager.get(member.email);
+    console.log('=====================');
+    console.log(cachingedRefreshToken);
+    console.log('=====================');
     let decodedToken;
     try {
       decodedToken = this.jwtService.decode(token);
     } catch (e) {
-      throw new InternalServerErrorException('서버에서 에러가 발생하였습니다.');
+      throw new InternalServerErrorException('만료된 리프레시 토큰입니다.');
     }
-    const member = await this.memberRepository.findOne({
+    const memberInfo = await this.memberRepository.findOne({
       where: { seq: decodedToken.seq },
       select: ['seq', 'email']
     });
-    const payload = { member };
+    const payload = { memberInfo };
     return {
       accessToken: this.jwtService.sign(payload, { expiresIn: '10m' })
     };
