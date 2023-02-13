@@ -13,8 +13,8 @@ import { AuthController } from './auth.controller';
     CacheModule.register(),
     PassportModule,
     JwtModule.register({
-      secretOrPrivateKey: 'MOVERLAB_ACCESS'
-      // signOptions: { expiresIn: '10m' }
+      secretOrPrivateKey: process.env.JWT_PRIVATE_KEY,
+      signOptions: { expiresIn: '10m' }
     }),
     TypeOrmModule.forFeature([Member])
   ],

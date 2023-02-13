@@ -31,22 +31,20 @@ export class AuthService {
 
   async login(member: any) {
     const payload = { email: member.email, seq: member.seq };
-    const accessToken = this.jwtService.sign(payload);
-    // return { accessToken };
-    const refreshToken = this.jwtService.sign(payload, { expiresIn: '30d', secret: 'MOVERLAB_REFRESH' });
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '1m', secret: process.env.JWT_PRIVATE_KEY });
+
+    const refreshToken = this.jwtService.sign(payload, { expiresIn: '30d', secret: process.env.JWT_PUBLIC_KEY });
     await this.cacheManager.set(member.email, refreshToken, 0);
 
     return { accessToken, refreshToken };
   }
 
   async refresh(token: string, member: Member) {
-    const cachingedRefreshToken = this.cacheManager.get(member.email);
-    console.log('=====================');
-    console.log(cachingedRefreshToken);
-    console.log('=====================');
+    const cachedRefreshToken = (await this.cacheManager.get(member.email))?.toString();
+    console.log('cachedRefreshToken::::', cachedRefreshToken);
     let decodedToken;
     try {
-      decodedToken = this.jwtService.decode(token);
+      decodedToken = this.jwtService.verify(cachedRefreshToken, { secret: process.env.JWT_PUBLIC_KEY });
     } catch (e) {
       throw new InternalServerErrorException('만료된 리프레시 토큰입니다.');
     }
@@ -54,9 +52,9 @@ export class AuthService {
       where: { seq: decodedToken.seq },
       select: ['seq', 'email']
     });
-    const payload = { memberInfo };
+    const payload = { seq: memberInfo.seq, email: member.email };
     return {
-      accessToken: this.jwtService.sign(payload, { expiresIn: '10m' })
+      accessToken: this.jwtService.sign(payload, { expiresIn: '1m', secret: process.env.JWT_PRIVATE_KEY })
     };
   }
 }

@@ -86,8 +86,7 @@ export class MemberService {
       .where('member.seq = :seq', { seq: member.seq })
       .addSelect('IFNULL(follower.followerCount, 0)', 'followerCount')
       .getRawAndEntities();
-    console.log(result);
-    return { ...result.entities[0], followerCount: result.raw[0].followerCount };
+    return { ...result.entities[0], followerCount: result.raw[0]?.followerCount };
   }
 
   async getMemberMy(member: Member) {
@@ -106,9 +105,6 @@ export class MemberService {
       .where('resume.writerSeq = :writerSeq', { writerSeq: member.seq })
       .andWhere('resume.isMaster="Y"')
       .getOne();
-    console.log('============================');
-    console.log(masterResume);
-    console.log('============================');
     result.applyCountInfo = await this.recruitApplyRepository
       .createQueryBuilder('recruitApply')
       .select('COUNT(*)', 'totalApplyCount')

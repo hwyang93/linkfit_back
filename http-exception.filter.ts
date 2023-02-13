@@ -12,7 +12,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       return response.status(status).json({
         success: false,
         code: status,
-        data: err.message
+        message: err.message
       });
     }
 
@@ -20,7 +20,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     response.status(status).json({
       success: false,
       code: status,
-      data: err.message
+      message: err.message
     });
   }
 }

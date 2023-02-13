@@ -1,4 +1,4 @@
-import { Injectable, NestMiddleware } from '@nestjs/common';
+import { Injectable, NestMiddleware, UnauthorizedException } from '@nestjs/common';
 import { pick } from 'lodash';
 
 const jwt = require('jsonwebtoken');
@@ -7,8 +7,17 @@ export class JwtAuthenticationMiddleware implements NestMiddleware {
   async use(req: any, res: any, next: () => void) {
     const token = this.getToken(req);
     if (token) {
-      const verifyInfo = jwt.verify(token, process.env.JWT_PRIVATE_KEY);
-      req.member = pick(verifyInfo, ['seq', 'email']);
+      try {
+        let verifyInfo;
+        if (req.originalUrl.includes('/refresh')) {
+          verifyInfo = jwt.verify(token, process.env.JWT_PUBLIC_KEY);
+        } else {
+          verifyInfo = jwt.verify(token, process.env.JWT_PRIVATE_KEY);
+        }
+        req.member = pick(verifyInfo, ['seq', 'email']);
+      } catch (e) {
+        throw new UnauthorizedException('expired');
+      }
     }
 
     next();
