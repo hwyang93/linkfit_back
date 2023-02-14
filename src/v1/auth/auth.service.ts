@@ -1,4 +1,4 @@
-import { CACHE_MANAGER, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { CACHE_MANAGER, Inject, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Repository } from 'typeorm';
@@ -46,7 +46,7 @@ export class AuthService {
     try {
       decodedToken = this.jwtService.verify(cachedRefreshToken, { secret: process.env.JWT_PUBLIC_KEY });
     } catch (e) {
-      throw new InternalServerErrorException('만료된 리프레시 토큰입니다.');
+      throw new UnauthorizedException('만료된 리프레시 토큰입니다.');
     }
     const memberInfo = await this.memberRepository.findOne({
       where: { seq: decodedToken.seq },

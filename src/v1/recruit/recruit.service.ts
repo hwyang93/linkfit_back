@@ -11,7 +11,6 @@ import { RecruitApply } from '../../entites/RecruitApply';
 import { UpdateRecruitApplyDto } from './dto/update-recruit-apply.dto';
 import { Member } from '../../entites/Member';
 import { RecruitFavorite } from '../../entites/RecruitFavorite';
-// import _ from 'lodash';
 const _ = require('lodash');
 
 @Injectable()
@@ -67,111 +66,27 @@ export class RecruitService {
   }
 
   async getRecruitList(searchParam: SearchRecruitDto, member: Member) {
-    const qb = this.recruitRepository.createQueryBuilder('recruit').leftJoin('recruit.dates', 'dates').where('recruit.status = "ING"');
+    const qb = this.recruitRepository
+      .createQueryBuilder('recruit')
+      .leftJoinAndSelect('recruit.writer', 'writer')
+      .leftJoinAndSelect('writer.company', 'company')
+      .where('recruit.status = "ING"')
+      .select(['recruit', 'writer.name', 'company.companyName'])
+      .andWhere('recruit.address like :address', { address: `%${searchParam.area}%` });
 
-    // const pinData = await this.recruitRepository
-    //   .createQueryBuilder('recruit')
-    //   .where('recruit.address like :address', { address: `%${searchParam.area}%` })
-    //   .groupBy('recruit.lon')
-    //   .addGroupBy('recruit.lat')
-    //   .select(['recruit.lon', 'recruit.lat'])
-    //   .getMany();
-    // let pinData = await this.recruitRepository
-    //   .createQueryBuilder('recruit')
-    //   .where('recruit.address like :address', { address: `%${searchParam.area}%` })
-    //   .getMany();
-    //
-    // pinData = _.chain(pinData)
-    //   .groupBy('lon')
-    //   .map(function (v, i) {
-    //     return {
-    //       lat: v[0]?.lat,
-    //       lon: parseFloat(i),
-    //       company: _.chain(v).groupBy('writerSeq'),
-    //       recruits: _.chain(v)
-    //         .map(v => {
-    //           return v;
-    //         })
-    //         .value()
-    //     };
-    //   })
-    //   .value();
-    // const result = pinData;
-    //
-    // // for (const item of pinData) {
-    // //   const pinInfo = {
-    // //     lon: item.lon,
-    // //     lat: item.lat,
-    // //     company: [],
-    // //     instructor: []
-    // //   };
-    // //   const companyRecruits = await this.recruitRepository
-    // //     .createQueryBuilder('recruit')
-    // //     .leftJoin('recruit.dates', 'dates')
-    // //     .innerJoinAndSelect('recruit.writer', 'writer')
-    // //     .innerJoinAndSelect('writer.company', 'company')
-    // //     .where('writer.type = :type', { type: 'COMPANY' })
-    // //     .andWhere('recruit.lon = :lon', { lon: item.lon })
-    // //     .andWhere('recruit.lat = :lat', { lat: item.lat });
-    // //   if (searchParam.fields) {
-    // //     companyRecruits.andWhere('recruit.field IN (:...fields)', { fields: searchParam.fields });
-    // //   }
-    // //   if (searchParam.recruitTypes) {
-    // //     companyRecruits.andWhere('recruit.recruitType IN (:...recruitTypes)', { recruitTypes: searchParam.recruitTypes });
-    // //   }
-    // //   if (searchParam.times) {
-    // //     companyRecruits.andWhere('recruit.time IN (:...times)', { times: searchParam.times });
-    // //   }
-    // //   if (searchParam.isWriter === 'Y') {
-    // //     companyRecruits.andWhere('recruit.writerSeq = :writerSeq', { writerSeq: member.seq });
-    // //   }
-    // //   pinInfo.company = await companyRecruits.getMany();
-    // //
-    // //   const instructorRecruits = await this.recruitRepository
-    // //     .createQueryBuilder('recruit')
-    // //     .leftJoin('recruit.dates', 'dates')
-    // //     .innerJoinAndSelect('recruit.writer', 'writer')
-    // //     .where('writer.type = :type', { type: 'INSTRUCTOR' })
-    // //     .andWhere('recruit.lon = :lon', { lon: item.lon })
-    // //     .andWhere('recruit.lat = :lat', { lat: item.lat });
-    // //   if (searchParam.fields) {
-    // //     instructorRecruits.andWhere('recruit.field IN (:...fields)', { fields: searchParam.fields });
-    // //   }
-    // //   if (searchParam.recruitTypes) {
-    // //     instructorRecruits.andWhere('recruit.recruitType IN (:...recruitTypes)', { recruitTypes: searchParam.recruitTypes });
-    // //   }
-    // //   if (searchParam.times) {
-    // //     instructorRecruits.andWhere('recruit.time IN (:...times)', { times: searchParam.times });
-    // //   }
-    // //   if (searchParam.isWriter === 'Y') {
-    // //     instructorRecruits.andWhere('recruit.writerSeq = :writerSeq', { writerSeq: member.seq });
-    // //   }
-    // //
-    // //   pinInfo.instructor = await instructorRecruits.getMany();
-    // //
-    // //   result.push(pinInfo);
-    // // }
-    //
-    // // const qb = this.recruitRepository.createQueryBuilder('recruit').leftJoin('recruit.dates', 'dates').where('1=1');
-    // //
-    // // if (searchParam.fields) {
-    // //   qb.andWhere('recruit.field IN (:...fields)', { fields: searchParam.fields });
-    // // }
-    // //
-    // // if (searchParam.recruitTypes) {
-    // //   qb.andWhere('recruit.recruitType IN (:...recruitTypes)', { recruitTypes: searchParam.recruitTypes });
-    // // }
-    // //
-    // // if (searchParam.times) {
-    // //   qb.andWhere('recruit.time IN (:...times)', { times: searchParam.times });
-    // // }
-    // //
-    // // if (searchParam.isWriter === 'Y') {
-    // //   qb.andWhere('recruit.writerSeq = :writerSeq', { writerSeq: member.seq });
-    // // }
-    // //
-    return qb.getMany();
-    // return result;
+    if (searchParam.fields) {
+      qb.andWhere('recruit.field IN (:...fields)', { fields: searchParam.fields });
+    }
+    if (searchParam.recruitTypes) {
+      qb.andWhere('recruit.recruitType IN (:...recruitTypes)', { recruitTypes: searchParam.recruitTypes });
+    }
+    if (searchParam.times) {
+      qb.andWhere('recruit.time IN (:...times)', { times: searchParam.times });
+    }
+    if (searchParam.isWriter === 'Y') {
+      qb.andWhere('recruit.writerSeq = :writerSeq', { writerSeq: member.seq });
+    }
+    return qb.orderBy('recruit.updatedAt', 'DESC').getMany();
   }
 
   async getRecruitMarkerList(searchParam: SearchRecruitDto, member: Member) {

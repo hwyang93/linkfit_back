@@ -31,6 +31,7 @@
     "db:generate-migration": "npm run typeorm migration:generate -- ./src/migrations -d ./dataSource.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.267.0",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.2.0",
     "@nestjs/core": "^9.0.0",
@@ -46,6 +47,7 @@
     "dayjs": "^1.11.7",
     "dotenv": "^16.0.3",
     "lodash": "^4.17.21",
+    "multer-s3": "^3.0.1",
     "mysql2": "^2.3.3",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.0",
@@ -64,6 +66,7 @@
     "@types/express": "^4.17.13",
     "@types/jest": "28.1.8",
     "@types/multer": "^1.4.7",
+    "@types/multer-s3": "^3.0.0",
     "@types/node": "^16.0.0",
     "@types/passport-jwt": "^3.0.7",
     "@types/passport-local": "^1.0.34",

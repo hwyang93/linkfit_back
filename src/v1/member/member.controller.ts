@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { MemberService } from './member.service';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
@@ -11,6 +11,7 @@ import { UpdateMemberProfileDto } from './dto/update-member-profile.dto';
 import { UpdatePositionSuggestDto } from './dto/update-position-suggest.dto';
 import { CreateMemberReputationDto } from './dto/create-member-reputation.dto';
 import { UpdateMemberReputationDto } from './dto/update-member-reputation.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('member')
 @Controller('member')
@@ -46,8 +47,13 @@ export class MemberController {
 
   @ApiBearerAuth()
   @ApiOperation({ summary: '자격증 등록' })
+  @UseInterceptors(FileInterceptor('file'))
   @Post('licence')
-  createMemberLicence(@Body() createMemberLicenceDto: CreateMemberLicenceDto, @MemberDecorator() member: Member) {
+  createMemberLicence(@UploadedFile() file: Express.MulterS3.File, @Body() createMemberLicenceDto: CreateMemberLicenceDto, @MemberDecorator() member: Member) {
+    console.log('====================file======================');
+    console.log(file);
+    console.log('====================dto======================');
+    console.log(createMemberLicenceDto);
     return this.memberService.createMemberLicence(createMemberLicenceDto, member);
   }
 

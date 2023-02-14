@@ -2,6 +2,9 @@ import { ApiProperty } from '@nestjs/swagger';
 import { PaginationDto } from '../../../common/dtos/pagination.dto';
 
 export class SearchRecruitDto extends PaginationDto {
+  @ApiProperty({ description: 'type', default: 'list', enum: ['list', 'marker'] })
+  type: string;
+
   @ApiProperty({ description: '직무', required: false })
   fields: string[];
 

@@ -26,15 +26,23 @@ export class RecruitController {
   @ApiOperation({ summary: '구인 공고 목록 조회' })
   @Get()
   async getRecruitList(@Query() searchParam: SearchRecruitDto, @MemberDecorator() member: Member) {
-    return this.recruitService.getRecruitList(searchParam, member);
+    let result;
+    if (searchParam.type === 'list') {
+      result = this.recruitService.getRecruitList(searchParam, member);
+    }
+
+    if (searchParam.type === 'marker') {
+      result = this.recruitService.getRecruitMarkerList(searchParam, member);
+    }
+    return result;
   }
 
-  @ApiBearerAuth()
-  @ApiOperation({ summary: '구인 공고 마커 목록 조회' })
-  @Get('markers')
-  async getRecruitMarkerList(@Query() searchParam: SearchRecruitDto, @MemberDecorator() member: Member) {
-    return this.recruitService.getRecruitMarkerList(searchParam, member);
-  }
+  // @ApiBearerAuth()
+  // @ApiOperation({ summary: '구인 공고 마커 목록 조회' })
+  // @Get('markers')
+  // async getRecruitMarkerList(@Query() searchParam: SearchRecruitDto, @MemberDecorator() member: Member) {
+  //   return this.recruitService.getRecruitMarkerList(searchParam, member);
+  // }
 
   @ApiBearerAuth()
   @ApiOperation({ summary: '구인 공고 마커 지점 상세조회' })

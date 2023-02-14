@@ -229,7 +229,7 @@ export class MemberService {
   async createMemberLicence(createMemberLicenceDto: CreateMemberLicenceDto, member: Member) {
     const memberLicence = createMemberLicenceDto.toEntity();
     memberLicence.memberSeq = member.seq;
-    memberLicence.status = 'process';
+    memberLicence.status = 'PROCESS';
 
     const queryRunner = this.datasource.createQueryRunner();
     await queryRunner.connect();
