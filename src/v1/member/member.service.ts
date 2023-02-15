@@ -21,6 +21,7 @@ import { MemberReputation } from '../../entites/MemberReputation';
 import { UpdateMemberReputationDto } from './dto/update-member-reputation.dto';
 import { MemberFavorite } from '../../entites/MemberFavorite';
 import { calcCareer } from '../../common/utils/utils';
+import { CommonFile } from '../../entites/CommonFile';
 
 const bcrypt = require('bcrypt');
 
@@ -36,6 +37,7 @@ export class MemberService {
     @InjectRepository(PositionSuggest) private positionSuggestRepository: Repository<PositionSuggest>,
     @InjectRepository(Recruit) private recruitRepository: Repository<Recruit>,
     @InjectRepository(MemberReputation) private memberReputationRepository: Repository<MemberReputation>,
+    @InjectRepository(CommonFile) private commonFileRepository: Repository<CommonFile>,
     private datasource: DataSource
   ) {}
   async join(createMemberDto: CreateMemberDto) {
@@ -226,7 +228,7 @@ export class MemberService {
     return { seq: member.seq };
   }
 
-  async createMemberLicence(createMemberLicenceDto: CreateMemberLicenceDto, member: Member) {
+  async createMemberLicence(createMemberLicenceDto: CreateMemberLicenceDto, file: Express.MulterS3.File, member: Member) {
     const memberLicence = createMemberLicenceDto.toEntity();
     memberLicence.memberSeq = member.seq;
     memberLicence.status = 'PROCESS';
@@ -236,8 +238,20 @@ export class MemberService {
     await queryRunner.startTransaction();
 
     let savedMemberLicence;
+    let savedCommonFile;
 
     try {
+      if (file) {
+        const location = file.location;
+        const commonFile = new CommonFile();
+        commonFile.memberSeq = member.seq;
+        commonFile.originFileName = file.originalname;
+        commonFile.originFileUrl = location;
+        console.log('=========location=============');
+        console.log(location);
+        savedCommonFile = await queryRunner.manager.getRepository(CommonFile).save(commonFile);
+        memberLicence.licenceFileSeq = savedCommonFile.seq;
+      }
       savedMemberLicence = await queryRunner.manager.getRepository(MemberLicence).save(memberLicence);
       await queryRunner.commitTransaction();
     } catch (e) {

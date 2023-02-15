@@ -5,7 +5,6 @@ import { S3Client } from '@aws-sdk/client-s3';
 import path from 'path';
 
 export const multerOptionsFactory = (configService: ConfigService): MulterOptions => {
-  // s3 인스턴스를 생성합니다.
   const s3 = new S3Client({
     region: configService.get('AWS_BUCKET_REGION'),
     credentials: {

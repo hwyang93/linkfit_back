@@ -1,4 +1,4 @@
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 
 export function calcCareer(careers: any) {
   let totalDay = 0;

@@ -31,7 +31,7 @@ export class AuthService {
 
   async login(member: any) {
     const payload = { email: member.email, seq: member.seq };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '1m', secret: process.env.JWT_PRIVATE_KEY });
+    const accessToken = this.jwtService.sign(payload, { secret: process.env.JWT_PRIVATE_KEY });
 
     const refreshToken = this.jwtService.sign(payload, { expiresIn: '30d', secret: process.env.JWT_PUBLIC_KEY });
     await this.cacheManager.set(member.email, refreshToken, 0);
@@ -41,7 +41,7 @@ export class AuthService {
 
   async refresh(token: string, member: Member) {
     const cachedRefreshToken = (await this.cacheManager.get(member.email))?.toString();
-    console.log('cachedRefreshToken::::', cachedRefreshToken);
+
     let decodedToken;
     try {
       decodedToken = this.jwtService.verify(cachedRefreshToken, { secret: process.env.JWT_PUBLIC_KEY });

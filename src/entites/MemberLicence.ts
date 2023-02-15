@@ -22,6 +22,9 @@ export class MemberLicence extends BaseEntity {
   @Column({ type: 'varchar', length: 10, name: 'STATUS' })
   status: string;
 
+  @Column({ type: 'int', name: 'LICENCE_FILE_SEQ', nullable: true })
+  licenceFileSeq: number;
+
   @OneToOne(() => CommonFile)
   @JoinColumn([{ name: 'LICENCE_FILE_SEQ' }])
   licenceFile: CommonFile;

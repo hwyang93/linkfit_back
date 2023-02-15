@@ -11,9 +11,20 @@ import { PositionSuggest } from '../../entites/PositionSuggest';
 import { Resume } from '../../entites/Resume';
 import { Recruit } from '../../entites/Recruit';
 import { MemberReputation } from '../../entites/MemberReputation';
+import { MulterModule } from '@nestjs/platform-express';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { multerOptionsFactory } from '../../common/utils/multer.option';
+import { CommonFile } from '../../entites/CommonFile';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Member, Company, MemberLicence, RegionAuth, Resume, RecruitApply, PositionSuggest, Recruit, MemberReputation])],
+  imports: [
+    MulterModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: multerOptionsFactory,
+      inject: [ConfigService]
+    }),
+    TypeOrmModule.forFeature([Member, Company, MemberLicence, RegionAuth, Resume, RecruitApply, PositionSuggest, Recruit, MemberReputation, CommonFile])
+  ],
   controllers: [MemberController],
   providers: [MemberService]
 })

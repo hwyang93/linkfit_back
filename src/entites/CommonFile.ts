@@ -9,15 +9,12 @@ export class CommonFile extends BaseEntity {
   @Column({ type: 'int', name: 'MEMBER_SEQ' })
   memberSeq: number;
 
-  @Column({ type: 'varchar', length: 10, name: 'UPLOAD_DIR' })
-  uploadDir: string;
-
-  @Column({ type: 'varchar', length: 50, name: 'ORIGIN_FILE_NAME' })
+  @Column({ type: 'varchar', length: 1000, name: 'ORIGIN_FILE_NAME' })
   originFileName: string;
 
-  @Column({ type: 'varchar', length: 50, name: 'UPLOAD_FILE_NAME' })
-  uploadFileName: string;
+  @Column({ type: 'varchar', length: 1000, name: 'ORIGIN_FILE_URL' })
+  originFileUrl: string;
 
-  @Column({ type: 'varchar', length: 10, name: 'EXTENSION' })
-  extension: string;
+  @Column({ type: 'varchar', length: 100, name: 'THUMBNAIL_FILE_URL' })
+  thumbnailFileUrl: string;
 }

@@ -50,11 +50,7 @@ export class MemberController {
   @UseInterceptors(FileInterceptor('file'))
   @Post('licence')
   createMemberLicence(@UploadedFile() file: Express.MulterS3.File, @Body() createMemberLicenceDto: CreateMemberLicenceDto, @MemberDecorator() member: Member) {
-    console.log('====================file======================');
-    console.log(file);
-    console.log('====================dto======================');
-    console.log(createMemberLicenceDto);
-    return this.memberService.createMemberLicence(createMemberLicenceDto, member);
+    return this.memberService.createMemberLicence(createMemberLicenceDto, file, member);
   }
 
   @ApiBearerAuth()
