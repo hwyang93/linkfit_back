@@ -18,11 +18,11 @@ import { CommonFile } from '../../entites/CommonFile';
 
 @Module({
   imports: [
-    MulterModule.registerAsync({
-      imports: [ConfigModule],
-      useFactory: multerOptionsFactory,
-      inject: [ConfigService]
-    }),
+    // MulterModule.registerAsync({
+    //   imports: [ConfigModule],
+    //   useFactory: multerOptionsFactory,
+    //   inject: [ConfigService]
+    // }),
     TypeOrmModule.forFeature([Member, Company, MemberLicence, RegionAuth, Resume, RecruitApply, PositionSuggest, Recruit, MemberReputation, CommonFile])
   ],
   controllers: [MemberController],
