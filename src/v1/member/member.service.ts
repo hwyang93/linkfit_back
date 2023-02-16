@@ -310,11 +310,15 @@ export class MemberService {
     return { seq: member?.seq };
   }
 
+  async getRegionAuth(member: Member) {
+    return await this.regionAuthRepository.createQueryBuilder('regionAuth').where({ memberSeq: member.seq }).getOne();
+  }
+
   async createRegionAuth(createRegionAuthDto: CreateRegionAuthDto, member: Member) {
     const regionAuth = createRegionAuthDto.toEntity();
     regionAuth.memberSeq = member.seq;
 
-    const existRegionAuth = await this.regionAuthRepository.createQueryBuilder('regionAuth').where({ memberSeq: member.seq }).getOne();
+    const existRegionAuth = await this.getRegionAuth(member);
 
     if (existRegionAuth) {
       await this.regionAuthRepository.createQueryBuilder('regionAuth').delete().where({ seq: existRegionAuth.seq }).execute();

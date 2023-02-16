@@ -27,7 +27,7 @@ export class InstructorService {
       .createQueryBuilder('member')
       .where('member.type = :type', { type: 'INSTRUCTOR' })
       .andWhere('member.isOpenProfile = :isOpenProfile', { isOpenProfile: 'Y' })
-      .andWhere('regionAuth.address = :address', { address: regionAuth.address })
+      .andWhere('regionAuth.region2depth = :region2depth', { region2depth: regionAuth.region2depth })
       .andWhere('resumes.isMaster = :isMaster', { isMaster: 'Y' })
       .leftJoinAndSelect('member.regionAuth', 'regionAuth')
       .leftJoinAndSelect('member.resumes', 'resumes')
@@ -43,7 +43,7 @@ export class InstructorService {
         'follower',
         'member.seq = follower.favoriteSeq'
       )
-      .select(['member.seq', 'member.name', 'member.nickname', 'member.field', 'regionAuth.address', 'resumes', 'careers'])
+      .select(['member.seq', 'member.name', 'member.nickname', 'member.field', 'regionAuth.region1depth', 'regionAuth.region2depth', 'regionAuth.region3depth', 'resumes', 'careers'])
       .addSelect('IFNULL(follower.followerCount, 0)', 'followerCount')
       .orderBy('member.updatedAt', 'DESC')
       .getRawAndEntities();
@@ -58,7 +58,7 @@ export class InstructorService {
         name: item.name,
         nickname: item.nickname,
         field: item.field,
-        address: item.regionAuth.address,
+        address: `${item.regionAuth.region1depth} ${item.regionAuth.region2depth} ${item.regionAuth.region3depth}`,
         career: career,
         followerCount: parseInt(
           instructors.raw.find(raw => {
@@ -84,7 +84,19 @@ export class InstructorService {
       .leftJoinAndSelect('member.resumes', 'resumes')
       .leftJoinAndSelect('member.links', 'links')
       .leftJoinAndSelect('resumes.careers', 'careers')
-      .select(['member.seq', 'member.name', 'member.nickname', 'member.field', 'member.intro', 'regionAuth.address', 'resumes', 'careers', 'links'])
+      .select([
+        'member.seq',
+        'member.name',
+        'member.nickname',
+        'member.field',
+        'member.intro',
+        'regionAuth.region1depth',
+        'regionAuth.region2depth',
+        'regionAuth.region3depth',
+        'resumes',
+        'careers',
+        'links'
+      ])
       .getOne();
 
     const { follower } = await this.memberFavoriteRepository
@@ -105,7 +117,7 @@ export class InstructorService {
       seq: instructor.seq,
       name: instructor.name,
       nickname: instructor.nickname,
-      address: instructor.regionAuth.address,
+      address: `${instructor.regionAuth.region1depth} ${instructor.regionAuth.region2depth} ${instructor.regionAuth.region3depth}`,
       intro: instructor.intro,
       career: career,
       links: instructor.links,

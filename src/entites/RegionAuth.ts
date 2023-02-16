@@ -16,8 +16,14 @@ export class RegionAuth extends BaseEntity {
   @Column({ type: 'double', name: 'LAT' })
   lat: number;
 
-  @Column({ type: 'varchar', length: 50, name: 'ADDRESS' })
-  address: string;
+  @Column({ type: 'varchar', length: 50, name: 'REGION_1DEPTH' })
+  region1depth: string;
+
+  @Column({ type: 'varchar', length: 50, name: 'REGION_2DEPTH' })
+  region2depth: string;
+
+  @Column({ type: 'varchar', length: 50, name: 'REGION_3DEPTH' })
+  region3depth: string;
 
   @OneToOne(() => Member, Member => Member.regionAuth)
   @JoinColumn([{ name: 'MEMBER_SEQ' }])

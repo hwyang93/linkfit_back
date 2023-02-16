@@ -108,6 +108,13 @@ export class MemberController {
   }
 
   @ApiBearerAuth()
+  @ApiOperation({ summary: '지역 인증 조회' })
+  @Get('region')
+  getRegionAuth(@MemberDecorator() member: Member) {
+    return this.memberService.getRegionAuth(member);
+  }
+
+  @ApiBearerAuth()
   @ApiOperation({ summary: '지역 인증 등록' })
   @Post('region')
   createRegionAuth(@Body() createRegionAuthDto: CreateRegionAuthDto, @MemberDecorator() member: Member) {
