@@ -40,8 +40,9 @@ export class MemberController {
 
   @ApiBearerAuth()
   @ApiOperation({ summary: '프로필 수정' })
+  @UseInterceptors(FileInterceptor('file'))
   @Patch('profile')
-  updateMemberProfile(@Body() updateMemberProfileDto: UpdateMemberProfileDto, @MemberDecorator() member: Member) {
+  updateMemberProfile(@UploadedFile() file: Express.MulterS3.File, @Body() updateMemberProfileDto: UpdateMemberProfileDto, @MemberDecorator() member: Member) {
     return this.memberService.updateMemberProfile(updateMemberProfileDto, member);
   }
 

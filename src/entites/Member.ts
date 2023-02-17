@@ -6,6 +6,7 @@ import { MemberLink } from './MemberLink';
 import { RegionAuth } from './RegionAuth';
 import { Resume } from './Resume';
 import { Recruit } from './Recruit';
+import { MemberLicence } from './MemberLicence';
 
 @Entity({ name: 'MEMBER' })
 export class Member extends BaseEntity {
@@ -106,4 +107,7 @@ export class Member extends BaseEntity {
 
   @OneToMany(() => Recruit, Recruit => Recruit.writer)
   recruits: Recruit[];
+
+  @OneToMany(() => MemberLicence, MemberLicence => MemberLicence.member)
+  licences: MemberLicence[];
 }

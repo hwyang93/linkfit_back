@@ -74,6 +74,7 @@ export class MemberService {
       .createQueryBuilder('member')
       .leftJoinAndSelect('member.company', 'company')
       .leftJoinAndSelect('member.links', 'links')
+      .leftJoinAndSelect('member.licences', 'licences', 'licences.status="APPROVAL"')
       .leftJoinAndSelect(
         sq => {
           return sq
@@ -90,7 +91,6 @@ export class MemberService {
       .getRawAndEntities();
     return { ...result.entities[0], followerCount: result.raw[0]?.followerCount };
   }
-
   async getMemberMy(member: Member) {
     const result = {
       memberInfo: {},
@@ -248,7 +248,7 @@ export class MemberService {
         commonFile.originFileName = file.originalname;
         commonFile.originFileUrl = location;
         console.log('=========location=============');
-        console.log(location);
+        console.log(file);
         savedCommonFile = await queryRunner.manager.getRepository(CommonFile).save(commonFile);
         memberLicence.licenceFileSeq = savedCommonFile.seq;
       }

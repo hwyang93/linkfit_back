@@ -1,6 +1,8 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { BaseEntity } from './BaseEntity';
 import { CommonFile } from './CommonFile';
+import { Seek } from './Seek';
+import { Member } from './Member';
 
 @Entity({ name: 'MEMBER_LICENCE' })
 export class MemberLicence extends BaseEntity {
@@ -28,4 +30,8 @@ export class MemberLicence extends BaseEntity {
   @OneToOne(() => CommonFile)
   @JoinColumn([{ name: 'LICENCE_FILE_SEQ' }])
   licenceFile: CommonFile;
+
+  @ManyToOne(() => Member, Member => Member.licences)
+  @JoinColumn([{ name: 'MEMBER_SEQ' }])
+  member: Member;
 }
