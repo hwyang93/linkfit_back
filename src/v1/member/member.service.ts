@@ -75,6 +75,7 @@ export class MemberService {
       .leftJoinAndSelect('member.company', 'company')
       .leftJoinAndSelect('member.links', 'links')
       .leftJoinAndSelect('member.licences', 'licences', 'licences.status="APPROVAL"')
+      .leftJoinAndSelect('member.profileImage', 'profileImage')
       .leftJoinAndSelect(
         sq => {
           return sq
@@ -193,29 +194,39 @@ export class MemberService {
     return positionSuggest;
   }
 
-  async updateMemberProfile(updateMemberProfileDto: UpdateMemberProfileDto, member: Member) {
+  async updateMemberProfile(updateMemberProfileDto: UpdateMemberProfileDto, file: Express.MulterS3.File, member: Member) {
+    const memberInfo = await this.getMemberInfo(member);
     const { duplication } = await this.checkMemberNickname(updateMemberProfileDto.nickname);
 
-    if (duplication) {
+    if (memberInfo.nickname !== updateMemberProfileDto.nickname && duplication) {
       throw new ForbiddenException('이미 사용중인 닉네임입니다.');
     }
-
+    let savedCommonFile;
     const queryRunner = this.datasource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      await queryRunner.manager.update(Member, { seq: member.seq }, { nickname: updateMemberProfileDto.nickname, intro: updateMemberProfileDto.intro, field: updateMemberProfileDto.field });
-      for (const link of updateMemberProfileDto.links) {
-        if (link.seq) {
-          await queryRunner.manager.delete(MemberLink, { seq: link.seq });
-        } else {
-          const saveLink = new MemberLink();
-          saveLink.memberSeq = member.seq;
-          saveLink.type = link.type;
-          saveLink.url = link.url;
-          await queryRunner.manager.insert(MemberLink, saveLink);
-        }
+      if (file) {
+        const location = file.location;
+        const commonFile = new CommonFile();
+        commonFile.memberSeq = member.seq;
+        commonFile.originFileName = file.originalname;
+        commonFile.originFileUrl = location;
+        savedCommonFile = await queryRunner.manager.getRepository(CommonFile).save(commonFile);
+        await queryRunner.manager.update(Member, { seq: member.seq }, { profileFileSeq: savedCommonFile.seq });
       }
+      await queryRunner.manager.update(Member, { seq: member.seq }, { nickname: updateMemberProfileDto.nickname, intro: updateMemberProfileDto.intro, field: updateMemberProfileDto.field });
+      // for (const link of updateMemberProfileDto.links) {
+      //   if (link.seq) {
+      //     await queryRunner.manager.delete(MemberLink, { seq: link.seq });
+      //   } else {
+      //     const saveLink = new MemberLink();
+      //     saveLink.memberSeq = member.seq;
+      //     saveLink.type = link.type;
+      //     saveLink.url = link.url;
+      //     await queryRunner.manager.insert(MemberLink, saveLink);
+      //   }
+      // }
 
       await queryRunner.commitTransaction();
     } catch (e) {

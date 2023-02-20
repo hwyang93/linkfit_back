@@ -80,6 +80,9 @@ export class Member extends BaseEntity {
   })
   status: string;
 
+  @Column({ type: 'int', name: 'PROFILE_FILE_SEQ', nullable: true })
+  profileFileSeq: number;
+
   @Column({
     type: 'char',
     length: 1,

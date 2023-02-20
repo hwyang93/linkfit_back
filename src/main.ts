@@ -9,6 +9,10 @@ declare const module: any;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
+  app.enableCors({
+    origin: true,
+    credentials: true
+  });
   app.setGlobalPrefix('api/v1');
   const port = process.env.PORT || 3000;
   app.useGlobalPipes(

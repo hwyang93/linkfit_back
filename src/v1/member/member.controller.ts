@@ -43,7 +43,7 @@ export class MemberController {
   @UseInterceptors(FileInterceptor('file'))
   @Patch('profile')
   updateMemberProfile(@UploadedFile() file: Express.MulterS3.File, @Body() updateMemberProfileDto: UpdateMemberProfileDto, @MemberDecorator() member: Member) {
-    return this.memberService.updateMemberProfile(updateMemberProfileDto, member);
+    return this.memberService.updateMemberProfile(updateMemberProfileDto, file, member);
   }
 
   @ApiBearerAuth()

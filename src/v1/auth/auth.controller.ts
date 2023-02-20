@@ -16,7 +16,7 @@ export class AuthController {
   @ApiBody({
     schema: {
       properties: {
-        email: { type: 'string' },
+        email: { type: 'string', default: 'test@test.com' },
         password: { type: 'string' }
       }
     }
