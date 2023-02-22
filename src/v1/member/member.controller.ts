@@ -130,6 +130,13 @@ export class MemberController {
   }
 
   @ApiBearerAuth()
+  @ApiOperation({ summary: '작성한 후기 목록 조회' })
+  @Get('reputation')
+  getMemberReputation(@MemberDecorator() member: Member) {
+    return this.memberService.getMemberReputation(member);
+  }
+
+  @ApiBearerAuth()
   @ApiOperation({ summary: '회원 후기 등록' })
   @Post('reputation')
   createMemberReputation(@Body() createMemberReputationDto: CreateMemberReputationDto, @MemberDecorator() member: Member) {

@@ -356,6 +356,17 @@ export class MemberService {
     return { seq };
   }
 
+  getMemberReputation(member: Member) {
+    return this.memberReputationRepository
+      .createQueryBuilder('memberReputation')
+      .leftJoinAndSelect('memberReputation.targetMember', 'targetMember')
+      .leftJoinAndSelect('targetMember.company', 'company')
+      .leftJoinAndSelect('targetMember.profileImage', 'profileImage')
+      .where('memberReputation.evaluationMemberSeq = :memberSeq', { memberSeq: member.seq })
+      .orderBy('memberReputation.updatedAt', 'DESC')
+      .getMany();
+  }
+
   async createMemberReputation(createMemberReputationDto: CreateMemberReputationDto, member: Member) {
     if (member.seq === createMemberReputationDto.targetMemberSeq) {
       throw new BadRequestException('평가자와 대상자가 동일합니다.');
