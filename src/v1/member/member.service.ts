@@ -258,8 +258,6 @@ export class MemberService {
         commonFile.memberSeq = member.seq;
         commonFile.originFileName = file.originalname;
         commonFile.originFileUrl = location;
-        console.log('=========location=============');
-        console.log(file);
         savedCommonFile = await queryRunner.manager.getRepository(CommonFile).save(commonFile);
         memberLicence.licenceFileSeq = savedCommonFile.seq;
       }
@@ -275,10 +273,14 @@ export class MemberService {
   }
 
   getMemberLicenceList(member: Member) {
-    return this.memberLicenceRepository.createQueryBuilder('memberLicence').where('memberLicence.memberSeq = :memberSeq', { memberSeq: member.seq }).getMany();
+    return this.memberLicenceRepository
+      .createQueryBuilder('memberLicence')
+      .where('memberLicence.memberSeq = :memberSeq', { memberSeq: member.seq })
+      .orderBy('memberLicence.createdAt', 'DESC')
+      .getMany();
   }
 
-  async deleteMemberLicence(seq: number, member: Member) {
+  async updateMemberLicence(seq: number, member: Member) {
     const memberLicence = await this.getMemberLicenceInfo(seq);
     if (!memberLicence) {
       throw new NotFoundException('존재하지 않는 리소스입니다.');
@@ -292,7 +294,8 @@ export class MemberService {
     await queryRunner.startTransaction();
 
     try {
-      await queryRunner.manager.getRepository(MemberLicence).softDelete({ seq });
+      // await queryRunner.manager.getRepository(MemberLicence).softDelete({ seq });
+      await queryRunner.manager.getRepository(MemberLicence).update({ seq }, { status: 'CANCEL' });
       await queryRunner.commitTransaction();
     } catch (e) {
       console.log(e);
@@ -300,7 +303,7 @@ export class MemberService {
     } finally {
       await queryRunner.release();
     }
-    return { seq: seq };
+    return { seq };
   }
 
   async getMemberLicenceInfo(seq: number) {

@@ -62,10 +62,10 @@ export class MemberController {
   }
 
   @ApiBearerAuth()
-  @ApiOperation({ summary: '내 자격증 삭제' })
-  @Delete('licence/:seq')
-  deleteMemberLicence(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
-    return this.memberService.deleteMemberLicence(seq, member);
+  @ApiOperation({ summary: '내 자격증 인증 취소' })
+  @Patch('licence/:seq')
+  updateMemberLicence(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
+    return this.memberService.updateMemberLicence(seq, member);
   }
 
   @ApiOperation({ summary: '이메일 확인' })
