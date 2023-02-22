@@ -124,7 +124,14 @@ export class ResumeService {
     return `This action updates a #${id} resume`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} resume`;
+  async deleteResume(seq: number, member: Member) {
+    const resume = await this.getResume(seq);
+    if (resume.writerSeq !== member.seq) {
+      throw new UnauthorizedException('허용되지 않은 접근입니다.');
+    }
+    await this.resumeRepository.createQueryBuilder('resume').softDelete().where({ seq }).execute();
+    // const resumes = await this.getResumeList(member);
+
+    return { seq };
   }
 }

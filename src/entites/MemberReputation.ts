@@ -7,6 +7,9 @@ export class MemberReputation extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'SEQ' })
   seq: number;
 
+  @Column({ type: 'varchar', length: 10, name: 'TYPE' })
+  type: string;
+
   @Column({ type: 'int', name: 'SCORE' })
   score: number;
 

@@ -363,6 +363,7 @@ export class MemberService {
       .leftJoinAndSelect('targetMember.company', 'company')
       .leftJoinAndSelect('targetMember.profileImage', 'profileImage')
       .where('memberReputation.evaluationMemberSeq = :memberSeq', { memberSeq: member.seq })
+      .andWhere('memberReputation.type="SEEK"')
       .orderBy('memberReputation.updatedAt', 'DESC')
       .getMany();
   }
@@ -392,6 +393,7 @@ export class MemberService {
     }
 
     const memberReputation = createMemberReputationDto.toEntity();
+    memberReputation.type = 'SEEK';
     const { seq } = await this.memberReputationRepository.save(memberReputation);
 
     return { seq };
@@ -424,7 +426,7 @@ export class MemberService {
       throw new UnauthorizedException('허용되지 않은 접근입니다.');
     }
 
-    await this.memberReputationRepository.createQueryBuilder('memberReputation').delete().where({ seq }).execute();
+    await this.memberReputationRepository.createQueryBuilder('memberReputation').softDelete().where({ seq }).execute();
 
     return { seq };
   }

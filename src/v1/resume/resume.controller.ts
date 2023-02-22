@@ -50,9 +50,10 @@ export class ResumeController {
   update(@Param('id') id: string, @Body() updateResumeDto: UpdateResumeDto) {
     return this.resumeService.update(+id, updateResumeDto);
   }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.resumeService.remove(+id);
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '이력서 삭제' })
+  @Delete(':seq')
+  deleteResume(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
+    return this.resumeService.deleteResume(seq, member);
   }
 }
