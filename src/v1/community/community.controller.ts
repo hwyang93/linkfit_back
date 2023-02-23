@@ -27,29 +27,18 @@ export class CommunityController {
     return this.communityService.getCommunityList(searchParam, member);
   }
 
-  @ApiOperation({ summary: '커뮤니티 게시글 상세 조회' })
-  @Get(':seq')
-  getCommunity(@Param('seq', ParseIntPipe) seq: number) {
-    return this.communityService.getCommunity(seq);
-  }
-
-  @ApiBearerAuth()
-  @ApiOperation({ summary: '커뮤니티 게시글 댓글 등록' })
-  @Post(':seq/comment')
-  createCommunityComment(@Param('seq', ParseIntPipe) seq: number, @Body() createCommunityCommentDto: CreateCommunityCommentDto, @MemberDecorator() member: Member) {
-    return this.communityService.createCommunityComment(seq, createCommunityCommentDto, member);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCommunityDto: UpdateCommunityDto) {
-    return this.communityService.update(+id, updateCommunityDto);
-  }
-
   @ApiBearerAuth()
   @ApiOperation({ summary: '커뮤니티 게시글 댓글 삭제' })
   @Delete('comment/:seq')
   removeCommunityComment(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
     return this.communityService.removeCommunityComment(seq, member);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '커뮤니티 게시글 북마크 조회' })
+  @Get('bookmark')
+  getCommunityBookmarks(@MemberDecorator() member: Member) {
+    return this.communityService.getCommunityBookmarks(member);
   }
 
   @ApiBearerAuth()
@@ -64,6 +53,24 @@ export class CommunityController {
   @Delete('bookmark/:seq')
   deleteCommunityBookmark(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
     return this.communityService.deleteCommunityBookmark(seq, member);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '커뮤니티 게시글 댓글 등록' })
+  @Post(':seq/comment')
+  createCommunityComment(@Param('seq', ParseIntPipe) seq: number, @Body() createCommunityCommentDto: CreateCommunityCommentDto, @MemberDecorator() member: Member) {
+    return this.communityService.createCommunityComment(seq, createCommunityCommentDto, member);
+  }
+
+  @ApiOperation({ summary: '커뮤니티 게시글 상세 조회' })
+  @Get(':seq')
+  getCommunity(@Param('seq', ParseIntPipe) seq: number) {
+    return this.communityService.getCommunity(seq);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateCommunityDto: UpdateCommunityDto) {
+    return this.communityService.update(+id, updateCommunityDto);
   }
 
   @ApiBearerAuth()

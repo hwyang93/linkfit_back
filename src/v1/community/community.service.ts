@@ -125,4 +125,14 @@ export class CommunityService {
     await this.communityCommentRepository.createQueryBuilder('comment').softDelete().where({ seq }).execute();
     return { seq };
   }
+
+  async getCommunityBookmarks(member: Member) {
+    return this.communityFavoriteRepository
+      .createQueryBuilder('communityFavorite')
+      .leftJoinAndSelect('communityFavorite.community', 'community')
+      .leftJoinAndSelect('community.writer', 'writer')
+      .leftJoinAndSelect('writer.company', 'company')
+      .where('communityFavorite.memberSeq = :memberSeq', { memberSeq: member.seq })
+      .getMany();
+  }
 }

@@ -8,6 +8,9 @@ export class Recruit extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'SEQ' })
   seq: number;
 
+  @Column({ type: 'varchar', length: 100, name: 'TITLE' })
+  title: string;
+
   @Column({ type: 'varchar', length: 60, name: 'COMPANY_NAME' })
   companyName: string;
 
