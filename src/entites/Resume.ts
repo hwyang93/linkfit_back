@@ -56,5 +56,5 @@ export class Resume extends BaseEntity {
 
   @ManyToOne(() => Member, Member => Member.resumes)
   @JoinColumn([{ name: 'WRITER_SEQ' }])
-  member: Member;
+  writer: Member;
 }

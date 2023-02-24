@@ -105,7 +105,7 @@ export class Member extends BaseEntity {
   @OneToOne(() => RegionAuth, RegionAuth => RegionAuth.member)
   regionAuth: RegionAuth;
 
-  @OneToMany(() => Resume, Resume => Resume.member)
+  @OneToMany(() => Resume, Resume => Resume.writer)
   resumes: Resume[];
 
   @OneToMany(() => Recruit, Recruit => Recruit.writer)

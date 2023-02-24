@@ -208,11 +208,14 @@ export class RecruitService {
   }
 
   getRecruitApplyListByMember(member: Member) {
-    return this.recruitApplyRepository
-      .createQueryBuilder('recruitApply')
-      .where('recruitApply.memberSeq = :memberSeq', { memberSeq: member.seq })
-      .innerJoinAndSelect('recruitApply.recruitDate', 'recruitDate')
-      .getMany();
+    return (
+      this.recruitApplyRepository
+        .createQueryBuilder('recruitApply')
+        .where('recruitApply.memberSeq = :memberSeq', { memberSeq: member.seq })
+        .leftJoinAndSelect('recruitApply.recruit', 'recruit')
+        // .innerJoinAndSelect('recruitApply.recruitDate', 'recruitDate')
+        .getMany()
+    );
   }
 
   async getRecruitApply(seq: number, member: Member) {

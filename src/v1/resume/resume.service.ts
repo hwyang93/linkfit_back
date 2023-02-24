@@ -84,9 +84,10 @@ export class ResumeService {
   getResume(seq: number) {
     return this.resumeRepository
       .createQueryBuilder('resume')
-      .where('resume.seq=:seq', { seq: seq })
       .leftJoinAndSelect('resume.careers', 'careers')
       .leftJoinAndSelect('resume.educations', 'educations')
+      .leftJoinAndSelect('resume.writer', 'writer')
+      .where('resume.seq=:seq', { seq: seq })
       .getOne();
   }
 
