@@ -27,6 +27,10 @@ export class RecruitController {
   @Get()
   async getRecruitList(@Query() searchParam: SearchRecruitDto, @MemberDecorator() member: Member) {
     let result;
+
+    if (searchParam.isWriter === 'Y') {
+      result = this.recruitService.getRecruitListByMy(searchParam, member);
+    }
     if (searchParam.type === 'list') {
       result = this.recruitService.getRecruitList(searchParam, member);
     }

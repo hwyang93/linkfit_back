@@ -24,7 +24,7 @@ export class RecruitApply extends BaseEntity {
   @Column({ type: 'varchar', length: 10, name: 'STATUS' })
   status: string;
 
-  @ManyToMany(() => Resume)
+  @ManyToOne(() => Resume)
   @JoinColumn([{ name: 'RESUME_SEQ' }])
   resume: Resume;
 
@@ -32,7 +32,7 @@ export class RecruitApply extends BaseEntity {
   @JoinColumn([{ name: 'RECRUIT_SEQ' }])
   recruit: Recruit;
 
-  @ManyToMany(() => RecruitDate)
+  @ManyToOne(() => RecruitDate)
   @JoinColumn([{ name: 'RECRUIT_DATE_SEQ' }])
   recruitDate: RecruitDate;
 }

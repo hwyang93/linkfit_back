@@ -65,15 +65,32 @@ export class RecruitService {
     return { seq: savedRecruit.seq };
   }
 
+  async getRecruitListByMy(searchParam: SearchRecruitDto, member: Member) {
+    const qb = this.recruitRepository
+      .createQueryBuilder('recruit')
+      .leftJoinAndSelect('recruit.writer', 'writer')
+      .leftJoinAndSelect('writer.company', 'company')
+      .select(['recruit', 'writer.name', 'company.companyName'])
+      .where('recruit.writerSeq = :writerSeq', { writerSeq: member.seq });
+
+    if (searchParam.status) {
+      qb.andWhere('recruit.status = :status', { status: searchParam.status });
+    }
+
+    return qb.withDeleted().orderBy('recruit.updatedAt', 'DESC').getMany();
+  }
+
   async getRecruitList(searchParam: SearchRecruitDto, member: Member) {
     const qb = this.recruitRepository
       .createQueryBuilder('recruit')
       .leftJoinAndSelect('recruit.writer', 'writer')
       .leftJoinAndSelect('writer.company', 'company')
       .where('recruit.status = "ING"')
-      .select(['recruit', 'writer.name', 'company.companyName'])
-      .andWhere('recruit.address like :address', { address: `%${searchParam.area}%` });
+      .select(['recruit', 'writer.name', 'company.companyName']);
 
+    if (searchParam.area) {
+      qb.andWhere('recruit.field IN (:...fields)', { address: `%${searchParam.area}%` });
+    }
     if (searchParam.fields) {
       qb.andWhere('recruit.field IN (:...fields)', { fields: searchParam.fields });
     }
@@ -85,6 +102,7 @@ export class RecruitService {
     }
     if (searchParam.isWriter === 'Y') {
       qb.andWhere('recruit.writerSeq = :writerSeq', { writerSeq: member.seq });
+      return qb.withDeleted().orderBy('recruit.updatedAt', 'DESC').getMany();
     }
     return qb.orderBy('recruit.updatedAt', 'DESC').getMany();
   }
@@ -301,7 +319,10 @@ export class RecruitService {
     return this.recruitApplyRepository
       .createQueryBuilder('recruitApply')
       .where('recruitApply.recruitSeq = :recruitSeq', { recruitSeq: recruitSeq })
-      .innerJoinAndSelect('recruitApply.recruitDate', 'recruitDate')
+      .leftJoinAndSelect('recruitApply.resume', 'resume')
+      .leftJoinAndSelect('recruitApply.recruit', 'recruit')
+      .leftJoinAndSelect('recruitApply.recruitDate', 'recruitDate')
+      .orderBy('recruitApply.updatedAt', 'DESC')
       .getMany();
   }
 
