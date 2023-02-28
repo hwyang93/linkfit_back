@@ -309,6 +309,7 @@ export class RecruitService {
   }
 
   async getRecruitApplyListBySeq(recruitSeq: number, member: Member) {
+    const result: any = {};
     if (!member) {
       throw new UnauthorizedException('로그인 후 이용해주세요.');
     }
@@ -316,14 +317,18 @@ export class RecruitService {
     if (recruit.writerSeq !== member.seq) {
       throw new UnauthorizedException('허용되지 않은 접근입니다.');
     }
-    return this.recruitApplyRepository
+    const recruitApply = await this.recruitApplyRepository
       .createQueryBuilder('recruitApply')
       .where('recruitApply.recruitSeq = :recruitSeq', { recruitSeq: recruitSeq })
       .leftJoinAndSelect('recruitApply.resume', 'resume')
-      .leftJoinAndSelect('recruitApply.recruit', 'recruit')
       .leftJoinAndSelect('recruitApply.recruitDate', 'recruitDate')
       .orderBy('recruitApply.updatedAt', 'DESC')
       .getMany();
+
+    result.recruit = recruit;
+    result.recruitApply = recruitApply;
+
+    return result;
   }
 
   async updateRecruitApply(seq: number, updateRecruitApplyDto: UpdateRecruitApplyDto, member: Member) {
