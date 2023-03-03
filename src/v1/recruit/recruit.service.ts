@@ -246,7 +246,7 @@ export class RecruitService {
       .getOne();
     const recruit = await this.recruitRepository.createQueryBuilder('recruit').where({ seq: recruitApply.recruitSeq }).getOne();
 
-    if (recruit.writerSeq !== member.seq || recruitApply.memberSeq !== member.seq) {
+    if (recruit.writerSeq !== member.seq && recruitApply.memberSeq !== member.seq) {
       throw new UnauthorizedException('허용되지 않은 접근입니다.');
     }
 
