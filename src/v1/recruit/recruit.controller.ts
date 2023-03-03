@@ -26,19 +26,16 @@ export class RecruitController {
   @ApiOperation({ summary: '구인 공고 목록 조회' })
   @Get()
   async getRecruitList(@Query() searchParam: SearchRecruitDto, @MemberDecorator() member: Member) {
-    let result;
-
     if (searchParam.isWriter === 'Y') {
-      result = this.recruitService.getRecruitListByMy(searchParam, member);
+      return this.recruitService.getRecruitListByMy(searchParam, member);
     }
     if (searchParam.type === 'list') {
-      result = this.recruitService.getRecruitList(searchParam, member);
+      return this.recruitService.getRecruitList(searchParam, member);
     }
 
     if (searchParam.type === 'marker') {
-      result = this.recruitService.getRecruitMarkerList(searchParam, member);
+      return this.recruitService.getRecruitMarkerList(searchParam, member);
     }
-    return result;
   }
 
   // @ApiBearerAuth()
