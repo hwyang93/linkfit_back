@@ -172,7 +172,7 @@ export class MemberService {
 
   async updatePositionSuggestStatus(seq: number, updatePositionSuggestDto: UpdatePositionSuggestDto, member: Member) {
     const positionSuggest = await this.positionSuggestRepository.createQueryBuilder('positionSuggest').where({ seq }).getOne();
-    if (positionSuggest.suggestMemberSeq !== member.seq || positionSuggest.targetMemberSeq !== member.seq) {
+    if (positionSuggest.suggestMemberSeq !== member.seq && positionSuggest.targetMemberSeq !== member.seq) {
       throw new UnauthorizedException('허용되지 않은 접근입니다.');
     }
     await this.positionSuggestRepository.createQueryBuilder('positionSuggest').update().set({ status: updatePositionSuggestDto.status }).where({ seq }).execute();
@@ -184,14 +184,17 @@ export class MemberService {
       .createQueryBuilder('positionSuggest')
       .innerJoinAndSelect('positionSuggest.writer', 'writer')
       .leftJoinAndSelect('writer.company', 'company')
-      .where('positionSuggest.seq = :seq', { seq: seq })
+      .leftJoinAndSelect(Recruit, 'recruit', 'recruit.seq = positionSuggest.recruitSeq')
+      .where('positionSuggest.seq = :seq', { seq })
       .getOne();
 
-    if (positionSuggest.suggestMemberSeq !== member.seq || positionSuggest.targetMemberSeq !== member.seq) {
+    const recruit = await this.recruitRepository.createQueryBuilder('recruit').where('recruit.seq = :recruitSeq', { recruitSeq: positionSuggest.recruitSeq }).getOne();
+
+    if (positionSuggest.suggestMemberSeq !== member.seq && positionSuggest.targetMemberSeq !== member.seq) {
       throw new UnauthorizedException('허용되지 않은 접근입니다.');
     }
 
-    return positionSuggest;
+    return { ...positionSuggest, recruit: recruit };
   }
 
   async updateMemberProfile(updateMemberProfileDto: UpdateMemberProfileDto, file: Express.MulterS3.File, member: Member) {
