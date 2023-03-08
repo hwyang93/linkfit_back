@@ -92,6 +92,34 @@ export class MemberService {
       .getRawAndEntities();
     return { ...result.entities[0], followerCount: result.raw[0]?.followerCount };
   }
+
+  async getMemberMyCompany(member: Member) {
+    const result = {
+      memberInfo: {},
+      suggestCountInfo: {},
+      recruitCountInfo: {}
+    };
+    result.memberInfo = await this.getMemberInfo(member);
+
+    result.suggestCountInfo = await this.positionSuggestRepository
+      .createQueryBuilder('positionSuggest')
+      .select('COUNT(*)', 'totalSuggestCount')
+      .addSelect('COUNT(CASE WHEN positionSuggest.status = "WAITING" THEN 1 END)', 'waitingSuggestCount')
+      .addSelect('COUNT(CASE WHEN positionSuggest.status = "ACCEPT" OR positionSuggest.status = "REJECT" THEN 1 END)', 'completeSuggestCount')
+      .addSelect('COUNT(CASE WHEN positionSuggest.status = "CLOSED" THEN 1 END)', 'closeSuggestCount')
+      .where('positionSuggest.suggestMemberSeq = :memberSeq', { memberSeq: member.seq })
+      .getRawOne();
+
+    result.recruitCountInfo = await this.recruitRepository
+      .createQueryBuilder('recruit')
+      .select('COUNT(CASE WHEN recruit.status = "ING" THEN 1 END)', 'ingRecruitCount')
+      .addSelect('COUNT(CASE WHEN recruit.status != "ING" THEN 1 END)', 'closedRecruitCount')
+      .where('recruit.writerSeq = :memberSeq', { memberSeq: member.seq })
+      .getRawOne();
+
+    return result;
+  }
+
   async getMemberMy(member: Member) {
     const result = {
       memberInfo: {},
@@ -121,8 +149,8 @@ export class MemberService {
       .createQueryBuilder('positionSuggest')
       .select('COUNT(*)', 'totalSuggestCount')
       .addSelect('COUNT(CASE WHEN positionSuggest.status = "WAITING" THEN 1 END)', 'waitingSuggestCount')
-      .addSelect('COUNT(CASE WHEN positionSuggest.status = "COMPLETE" THEN 1 END)', 'completeSuggestCount')
-      .addSelect('COUNT(CASE WHEN positionSuggest.status = "CLOSE" THEN 1 END)', 'closeSuggestCount')
+      .addSelect('COUNT(CASE WHEN positionSuggest.status = "ACCEPT" OR positionSuggest.status = "REJECT" THEN 1 END)', 'completeSuggestCount')
+      .addSelect('COUNT(CASE WHEN positionSuggest.status = "CLOSED" THEN 1 END)', 'closedSuggestCount')
       .where('positionSuggest.targetMemberSeq = :memberSeq', { memberSeq: member.seq })
       .getRawOne();
     result.noticeCountInfo = await this.datasource

@@ -34,8 +34,13 @@ export class MemberController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'my page 조회' })
   @Get('my')
-  getMemberMy(@MemberDecorator() member: Member) {
-    return this.memberService.getMemberMy(member);
+  async getMemberMy(@MemberDecorator() member: Member) {
+    const memberInfo = await this.memberService.getMemberInfo(member);
+    if (memberInfo.type === 'COMPANY') {
+      return this.memberService.getMemberMyCompany(member);
+    } else {
+      return this.memberService.getMemberMy(member);
+    }
   }
 
   @ApiBearerAuth()
