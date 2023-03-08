@@ -105,8 +105,8 @@ export class MemberService {
       .createQueryBuilder('positionSuggest')
       .select('COUNT(*)', 'totalSuggestCount')
       .addSelect('COUNT(CASE WHEN positionSuggest.status = "WAITING" THEN 1 END)', 'waitingSuggestCount')
-      .addSelect('COUNT(CASE WHEN positionSuggest.status = "ACCEPT" OR positionSuggest.status = "REJECT" THEN 1 END)', 'completeSuggestCount')
-      .addSelect('COUNT(CASE WHEN positionSuggest.status = "CLOSED" THEN 1 END)', 'closeSuggestCount')
+      .addSelect('COUNT(CASE WHEN positionSuggest.status = "ACCEPT" OR positionSuggest.status = "REJECT" THEN 1 END)', 'completedSuggestCount')
+      .addSelect('COUNT(CASE WHEN positionSuggest.status = "CLOSED" THEN 1 END)', 'closedSuggestCount')
       .where('positionSuggest.suggestMemberSeq = :memberSeq', { memberSeq: member.seq })
       .getRawOne();
 
@@ -149,7 +149,7 @@ export class MemberService {
       .createQueryBuilder('positionSuggest')
       .select('COUNT(*)', 'totalSuggestCount')
       .addSelect('COUNT(CASE WHEN positionSuggest.status = "WAITING" THEN 1 END)', 'waitingSuggestCount')
-      .addSelect('COUNT(CASE WHEN positionSuggest.status = "ACCEPT" OR positionSuggest.status = "REJECT" THEN 1 END)', 'completeSuggestCount')
+      .addSelect('COUNT(CASE WHEN positionSuggest.status = "ACCEPT" OR positionSuggest.status = "REJECT" THEN 1 END)', 'completedSuggestCount')
       .addSelect('COUNT(CASE WHEN positionSuggest.status = "CLOSED" THEN 1 END)', 'closedSuggestCount')
       .where('positionSuggest.targetMemberSeq = :memberSeq', { memberSeq: member.seq })
       .getRawOne();
