@@ -84,9 +84,10 @@ export class RecruitService {
     const qb = this.recruitRepository
       .createQueryBuilder('recruit')
       .leftJoinAndSelect('recruit.writer', 'writer')
+      .leftJoinAndSelect('writer.profileImage', 'profileImage')
       .leftJoinAndSelect('writer.company', 'company')
       .where('recruit.status = "ING"')
-      .select(['recruit', 'writer.name', 'company.companyName']);
+      .select(['recruit', 'writer.name', 'company.companyName', 'profileImage']);
 
     if (searchParam.area) {
       qb.andWhere('recruit.field IN (:...fields)', { address: `%${searchParam.area}%` });
