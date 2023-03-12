@@ -9,6 +9,7 @@ import { UpdateRecruitApplyDto } from './dto/update-recruit-apply.dto';
 import { MemberDecorator } from '../../common/decorators/member.decorator';
 import { Member } from '../../entites/Member';
 import { LoggedInGuard } from '../../common/guards/logged-in.guard';
+import { CancelRecruitApplyDto } from './dto/cancel-recruit-apply.dto';
 
 @ApiTags('recruit')
 @Controller('recruit')
@@ -65,6 +66,15 @@ export class RecruitController {
   @Get('apply')
   getRecruitApplyListByMember(@MemberDecorator() member: Member) {
     return this.recruitService.getRecruitApplyListByMember(member);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '지원한 구인공고 취소' })
+  @Patch('apply')
+  cancelRecruitApply(@Body() cancelRecruitApplyDto: CancelRecruitApplyDto, @MemberDecorator() member: Member) {
+    console.log('====================');
+    console.log(cancelRecruitApplyDto);
+    return this.recruitService.cancelRecruitApply(cancelRecruitApplyDto, member);
   }
 
   @ApiBearerAuth()

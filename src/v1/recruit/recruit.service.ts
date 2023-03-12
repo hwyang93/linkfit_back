@@ -11,6 +11,7 @@ import { RecruitApply } from '../../entites/RecruitApply';
 import { UpdateRecruitApplyDto } from './dto/update-recruit-apply.dto';
 import { Member } from '../../entites/Member';
 import { RecruitFavorite } from '../../entites/RecruitFavorite';
+import { CancelRecruitApplyDto } from './dto/cancel-recruit-apply.dto';
 const _ = require('lodash');
 
 @Injectable()
@@ -237,13 +238,36 @@ export class RecruitService {
     );
   }
 
+  async cancelRecruitApply(cancelRecruitApplyDto: CancelRecruitApplyDto, member: Member) {
+    const queryRunner = this.datasource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      for (const seq of cancelRecruitApplyDto.seqs) {
+        await this.getRecruitApply(seq, member);
+
+        await queryRunner.manager.getRepository(RecruitApply).update({ seq }, { status: 'CANCEL' });
+      }
+      await queryRunner.commitTransaction();
+    } catch (e) {
+      console.log(e);
+      await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException('서버에서 에러가 발생했습니다.');
+    } finally {
+      await queryRunner.release();
+    }
+    return cancelRecruitApplyDto;
+  }
+
   async getRecruitApply(seq: number, member: Member) {
     const recruitApply = await this.recruitApplyRepository
       .createQueryBuilder('recruitApply')
       .where({ seq })
-      .innerJoinAndSelect('recruitApply.resume', 'resume')
-      .innerJoinAndSelect('recruitApply.recruit', 'recruit')
-      .innerJoinAndSelect('recruitApply.recruitDate', 'recruitDate')
+      .leftJoinAndSelect('recruitApply.resume', 'resume')
+      .leftJoinAndSelect('recruitApply.recruit', 'recruit')
+      .leftJoinAndSelect('recruitApply.recruitDate', 'recruitDate')
+      // .leftJoinAndSelect('')
       .getOne();
     const recruit = await this.recruitRepository.createQueryBuilder('recruit').where({ seq: recruitApply.recruitSeq }).getOne();
 
