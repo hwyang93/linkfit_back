@@ -115,10 +115,11 @@ export class RecruitController {
     return this.recruitService.deleteRecruitBookmark(seq, member);
   }
 
+  @ApiBearerAuth()
   @ApiOperation({ summary: '구인 공고 상세 조회' })
   @Get(':seq')
-  async getRecruit(@Param('seq', ParseIntPipe) seq: number) {
-    return this.recruitService.getRecruit(seq);
+  async getRecruit(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
+    return this.recruitService.getRecruit(seq, member);
   }
 
   @ApiBearerAuth()

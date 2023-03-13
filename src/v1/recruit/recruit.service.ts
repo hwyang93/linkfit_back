@@ -176,8 +176,31 @@ export class RecruitService {
     return result;
   }
 
-  async getRecruit(seq: number) {
-    return await this.recruitRepository.createQueryBuilder('recruit').where('recruit.seq = :seq', { seq: seq }).leftJoinAndSelect('recruit.dates', 'dates').getOne();
+  async getRecruit(seq: number, member: Member) {
+    const recruitInfo = await this.recruitRepository
+      .createQueryBuilder('recruit')
+      .where('recruit.seq = :seq', { seq: seq })
+      .leftJoinAndSelect('recruit.dates', 'dates')
+      .leftJoinAndSelect('recruit.writer', 'writer')
+      .leftJoinAndSelect('writer.company', 'company')
+      .getOne();
+    let applyInfo;
+    if (member) {
+      applyInfo = await this.recruitApplyRepository
+        .createQueryBuilder('recruitApply')
+        .where('recruitApply.memberSeq = :memberSeq', { memberSeq: member.seq })
+        .andWhere('recruitApply.recruitSeq = :recruitSeq', { recruitSeq: recruitInfo.seq })
+        .orderBy('recruitApply.updatedAt', 'DESC')
+        .getMany();
+
+      recruitInfo.dates.forEach(item => {
+        const isApply = applyInfo.find(apply => {
+          return apply.recruitDateSeq === item.seq;
+        });
+        isApply ? (item['isApplied'] = true) : (item['isApplied'] = false);
+      });
+    }
+    return { ...recruitInfo, applyInfo };
   }
 
   update(id: number, updateRecruitDto: UpdateRecruitDto, member: Member) {
@@ -185,7 +208,7 @@ export class RecruitService {
   }
 
   async deleteRecruit(seq: number, member: Member) {
-    const recruit = await this.getRecruit(seq);
+    const recruit = await this.getRecruit(seq, member);
 
     if (!recruit) {
       throw new NotFoundException('게시글이 존재하지 않습니다.');
@@ -338,7 +361,7 @@ export class RecruitService {
     if (!member) {
       throw new UnauthorizedException('로그인 후 이용해주세요.');
     }
-    const recruit = await this.getRecruit(recruitSeq);
+    const recruit = await this.getRecruit(recruitSeq, member);
     if (recruit.writerSeq !== member.seq) {
       throw new UnauthorizedException('허용되지 않은 접근입니다.');
     }
