@@ -2,6 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColum
 import { BaseEntity } from './BaseEntity';
 import { CommunityComment } from './CommunityComment';
 import { Member } from './Member';
+import { CommunityFavorite } from './CommunityFavorite';
 
 @Entity('COMMUNITY')
 export class Community extends BaseEntity {
@@ -29,4 +30,7 @@ export class Community extends BaseEntity {
   @ManyToOne(() => Member)
   @JoinColumn([{ name: 'WRITER_SEQ' }])
   writer: Member;
+
+  @OneToMany(() => CommunityFavorite, CommunityFavorite => CommunityFavorite.community)
+  bookmarks: CommunityFavorite[];
 }

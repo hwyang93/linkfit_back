@@ -27,7 +27,15 @@ export class CommunityService {
   }
 
   getCommunityList(searchParam: SearchCommunityDto, member: Member) {
-    const communityList = this.communityRepository.createQueryBuilder('community').innerJoinAndSelect('community.writer', 'writer').where('1=1');
+    const communityList = this.communityRepository
+      .createQueryBuilder('community')
+      .innerJoinAndSelect('community.writer', 'writer')
+      .leftJoinAndSelect('writer.company', 'company')
+      .leftJoinAndSelect('community.comments', 'comments')
+      .leftJoinAndSelect('comments.writer', 'commentWriter')
+      .leftJoinAndSelect('commentWriter.company', 'commentCompany')
+      .leftJoinAndSelect('community.bookmarks', 'bookmarks')
+      .where('1=1');
     if (searchParam.category) {
       communityList.andWhere('community.category IN (:...categorys)', { categorys: searchParam.category });
     }
@@ -42,8 +50,13 @@ export class CommunityService {
     const community = await this.communityRepository
       .createQueryBuilder('community')
       .innerJoinAndSelect('community.writer', 'writer')
+      .leftJoinAndSelect('writer.company', 'company')
+      .leftJoinAndSelect('writer.profileImage', 'profileImage')
       .leftJoinAndSelect('community.comments', 'comments')
       .leftJoinAndSelect('comments.writer', 'commentWriter')
+      .leftJoinAndSelect('commentWriter.company', 'commentCompany')
+      .leftJoinAndSelect('commentWriter.profileImage', 'commentProfileImage')
+      .leftJoinAndSelect('community.bookmarks', 'bookmarks')
       .where({ seq })
       .getOne();
 
