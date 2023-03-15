@@ -145,6 +145,8 @@ export class CommunityService {
       .leftJoinAndSelect('communityFavorite.community', 'community')
       .leftJoinAndSelect('community.writer', 'writer')
       .leftJoinAndSelect('writer.company', 'company')
+      .leftJoinAndSelect('community.bookmarks', 'bookmarks')
+      .leftJoinAndSelect('community.comments', 'comments')
       .where('communityFavorite.memberSeq = :memberSeq', { memberSeq: member.seq })
       .getMany();
   }

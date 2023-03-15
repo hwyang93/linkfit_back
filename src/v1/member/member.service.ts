@@ -90,7 +90,16 @@ export class MemberService {
       .where('member.seq = :seq', { seq: member.seq })
       .addSelect('IFNULL(follower.followerCount, 0)', 'followerCount')
       .getRawAndEntities();
-    return { ...result.entities[0], followerCount: result.raw[0]?.followerCount };
+
+    const masterResume = await this.resumeRepository
+      .createQueryBuilder('resume')
+      .leftJoinAndSelect('resume.careers', 'careers')
+      .where('resume.writerSeq = :writerSeq', { writerSeq: member.seq })
+      .andWhere('resume.isMaster="Y"')
+      .getOne();
+    const career = calcCareer(masterResume?.careers);
+
+    return { ...result.entities[0], followerCount: result.raw[0]?.followerCount, career: career };
   }
 
   async getMemberMyCompany(member: Member) {
