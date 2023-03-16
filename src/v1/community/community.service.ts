@@ -9,6 +9,7 @@ import { SearchCommunityDto } from './dto/search-community.dto';
 import { CreateCommunityCommentDto } from './dto/create-community-comment.dto';
 import { CommunityComment } from '../../entites/CommunityComment';
 import { CommunityFavorite } from '../../entites/CommunityFavorite';
+import { sortBy } from 'lodash';
 
 @Injectable()
 export class CommunityService {
@@ -44,6 +45,26 @@ export class CommunityService {
     }
     communityList.orderBy('community.updatedAt', 'DESC');
     return communityList.getMany();
+  }
+
+  async getCommunityListMy(member: Member) {
+    let result = [];
+    const communityList = await this.communityRepository
+      .createQueryBuilder('community')
+      .innerJoinAndSelect('community.writer', 'writer')
+      .leftJoinAndSelect('writer.company', 'company')
+      .leftJoinAndSelect('community.comments', 'comments')
+      .leftJoinAndSelect('comments.writer', 'commentWriter')
+      .leftJoinAndSelect('commentWriter.company', 'commentCompany')
+      .leftJoinAndSelect('community.bookmarks', 'bookmarks')
+      .where('community.writerSeq = :writerSeq', { writerSeq: member.seq })
+      .getMany();
+
+    const communityCommentList = await this.communityCommentRepository.createQueryBuilder('communityComment').where('communityComment.writerSeq = :writerSeq', { writerSeq: member.seq }).getMany();
+
+    result = [...communityList, ...communityCommentList];
+
+    return sortBy(result, 'updatedAt').reverse();
   }
 
   async getCommunity(seq: number) {

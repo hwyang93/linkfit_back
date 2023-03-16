@@ -21,10 +21,15 @@ export class CommunityController {
     return this.communityService.createCommunity(createCommunityDto, member);
   }
 
+  @ApiBearerAuth()
   @ApiOperation({ summary: '커뮤니티 게시글 목록 조회' })
   @Get()
   getCommunityList(@Query() searchParam: SearchCommunityDto, @MemberDecorator() member: Member) {
-    return this.communityService.getCommunityList(searchParam, member);
+    if (searchParam.isWriter === 'Y') {
+      return this.communityService.getCommunityListMy(member);
+    } else {
+      return this.communityService.getCommunityList(searchParam, member);
+    }
   }
 
   @ApiBearerAuth()

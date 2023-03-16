@@ -2,6 +2,7 @@ import { BaseEntity } from './BaseEntity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Member } from './Member';
 import { RecruitDate } from './RecruitDate';
+import { RecruitFavorite } from './RecruitFavorite';
 
 @Entity('RECRUIT')
 export class Recruit extends BaseEntity {
@@ -68,4 +69,7 @@ export class Recruit extends BaseEntity {
 
   @OneToMany(() => RecruitDate, RecruitDate => RecruitDate.recruit)
   dates: RecruitDate[];
+
+  @OneToMany(() => RecruitFavorite, RecruitFavorite => RecruitFavorite.recruit)
+  bookmarks: RecruitFavorite[];
 }
