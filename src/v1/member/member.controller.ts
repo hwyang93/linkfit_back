@@ -162,6 +162,13 @@ export class MemberController {
     return this.memberService.deleteMemberReputation(seq, member);
   }
 
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '팔로잉 목록 조회' })
+  @Get('following/:type')
+  getMemberFollowings(@Param('type') type: string, @MemberDecorator() member: Member) {
+    return this.memberService.getMemberFollowings(type, member);
+  }
+
   @ApiOperation({ summary: '회원정보 조회' })
   @Get(':seq')
   findOne(@Param('seq', ParseIntPipe) seq: number) {

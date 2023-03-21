@@ -1,4 +1,4 @@
-import { BadRequestException, Body, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,7 +10,6 @@ import { MemberLicence } from '../../entites/MemberLicence';
 import { CreateRegionAuthDto } from './dto/create-region-auth.dto';
 import { RegionAuth } from '../../entites/RegionAuth';
 import { UpdateMemberProfileDto } from './dto/update-member-profile.dto';
-import { MemberLink } from '../../entites/MemberLink';
 import { RecruitApply } from '../../entites/RecruitApply';
 import { PositionSuggest } from '../../entites/PositionSuggest';
 import { Resume } from '../../entites/Resume';
@@ -37,6 +36,7 @@ export class MemberService {
     @InjectRepository(PositionSuggest) private positionSuggestRepository: Repository<PositionSuggest>,
     @InjectRepository(Recruit) private recruitRepository: Repository<Recruit>,
     @InjectRepository(MemberReputation) private memberReputationRepository: Repository<MemberReputation>,
+    @InjectRepository(MemberFavorite) private memberFavoriteRepository: Repository<MemberFavorite>,
     @InjectRepository(CommonFile) private commonFileRepository: Repository<CommonFile>,
     private datasource: DataSource
   ) {}
@@ -469,6 +469,26 @@ export class MemberService {
     await this.memberReputationRepository.createQueryBuilder('memberReputation').softDelete().where({ seq }).execute();
 
     return { seq };
+  }
+
+  async getMemberFollowings(type: string, member: Member) {
+    const followings = await this.memberFavoriteRepository
+      .createQueryBuilder('memberFavorite')
+      .leftJoinAndSelect('memberFavorite.followingMember', 'followingMember')
+      .leftJoinAndSelect('followingMember.company', 'company')
+      .leftJoinAndSelect('followingMember.profileImage', 'profileImage')
+      .where('memberFavorite.memberSeq = :memberSeq', { memberSeq: member.seq })
+      .andWhere('followingMember.type = :type', { type })
+      .getMany();
+    const masterResume = await this.resumeRepository
+      .createQueryBuilder('resume')
+      .leftJoinAndSelect('resume.careers', 'careers')
+      .where('resume.writerSeq = :writerSeq', { writerSeq: member.seq })
+      .andWhere('resume.isMaster="Y"')
+      .getOne();
+    const career = calcCareer(masterResume?.careers);
+
+    return { ...followings, ...masterResume, career: career };
   }
 
   findOne(id: number) {

@@ -1,5 +1,5 @@
 import { BaseEntity } from './BaseEntity';
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Member } from './Member';
 
 @Entity('MEMBER_FAVORITE')
@@ -13,7 +13,7 @@ export class MemberFavorite extends BaseEntity {
   @Column({ type: 'int', name: 'FAVORITE_SEQ' })
   favoriteSeq: number;
 
-  // @OneToOne(() => Member)
-  // @JoinColumn([{ name: 'FAVORITE_SEQ' }])
-  // member: Member;
+  @ManyToOne(() => Member, Member => Member.follower)
+  @JoinColumn([{ name: 'FAVORITE_SEQ' }])
+  followingMember: Member;
 }

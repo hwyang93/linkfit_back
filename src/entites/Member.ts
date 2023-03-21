@@ -7,6 +7,7 @@ import { RegionAuth } from './RegionAuth';
 import { Resume } from './Resume';
 import { Recruit } from './Recruit';
 import { MemberLicence } from './MemberLicence';
+import { MemberFavorite } from './MemberFavorite';
 
 @Entity({ name: 'MEMBER' })
 export class Member extends BaseEntity {
@@ -113,4 +114,7 @@ export class Member extends BaseEntity {
 
   @OneToMany(() => MemberLicence, MemberLicence => MemberLicence.member)
   licences: MemberLicence[];
+
+  @OneToMany(() => MemberFavorite, MemberFavorite => MemberFavorite.followingMember)
+  follower: MemberFavorite[];
 }
