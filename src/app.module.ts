@@ -68,7 +68,7 @@ import { CompanyModule } from './company/company.module';
       ],
       charset: 'utf8mb4',
       autoLoadEntities: true,
-      synchronize: true,
+      synchronize: false,
       logging: true,
       keepConnectionAlive: true
     }),

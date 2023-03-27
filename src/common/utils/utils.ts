@@ -9,7 +9,6 @@ export function calcCareer(careers: any) {
     const diffDay = endDate.diff(startDate, 'month', true);
     totalDay += diffDay;
   });
-
   if (totalDay === 0) {
     career = '경력 없음';
   } else {

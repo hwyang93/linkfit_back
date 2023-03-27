@@ -472,23 +472,42 @@ export class MemberService {
   }
 
   async getMemberFollowings(type: string, member: Member) {
-    const followings = await this.memberFavoriteRepository
-      .createQueryBuilder('memberFavorite')
-      .leftJoinAndSelect('memberFavorite.followingMember', 'followingMember')
-      .leftJoinAndSelect('followingMember.company', 'company')
-      .leftJoinAndSelect('followingMember.profileImage', 'profileImage')
-      .where('memberFavorite.memberSeq = :memberSeq', { memberSeq: member.seq })
-      .andWhere('followingMember.type = :type', { type })
-      .getMany();
-    const masterResume = await this.resumeRepository
-      .createQueryBuilder('resume')
-      .leftJoinAndSelect('resume.careers', 'careers')
-      .where('resume.writerSeq = :writerSeq', { writerSeq: member.seq })
-      .andWhere('resume.isMaster="Y"')
-      .getOne();
-    const career = calcCareer(masterResume?.careers);
+    let followings = [];
 
-    return { ...followings, ...masterResume, career: career };
+    if (type === 'INSTRUCTOR') {
+      followings = await this.memberFavoriteRepository
+        .createQueryBuilder('memberFavorite')
+        .leftJoinAndSelect('memberFavorite.followingMember', 'followingMember')
+        .leftJoinAndSelect('followingMember.company', 'company')
+        .leftJoinAndSelect('followingMember.profileImage', 'profileImage')
+        .leftJoinAndSelect('followingMember.resumes', 'resumes')
+        .leftJoinAndSelect('resumes.careers', 'careers')
+        .where('memberFavorite.memberSeq = :memberSeq', { memberSeq: member.seq })
+        .andWhere('followingMember.type = :type', { type })
+        .andWhere('resumes.isMaster = :isMaster', { isMaster: 'Y' })
+        .getMany();
+    } else if (type === 'COMPANY') {
+      followings = await this.memberFavoriteRepository
+        .createQueryBuilder('memberFavorite')
+        .leftJoinAndSelect('memberFavorite.followingMember', 'followingMember')
+        .leftJoinAndSelect('followingMember.company', 'company')
+        .leftJoinAndSelect('followingMember.profileImage', 'profileImage')
+        .where('memberFavorite.memberSeq = :memberSeq', { memberSeq: member.seq })
+        .andWhere('followingMember.type = :type', { type })
+        .getMany();
+
+      return followings;
+    }
+
+    const result = [];
+    followings.forEach(item => {
+      const career = calcCareer(item.followingMember.resumes[0].careers);
+      result.push({
+        ...item,
+        career: career
+      });
+    });
+    return result;
   }
 
   findOne(id: number) {
