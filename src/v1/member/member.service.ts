@@ -471,43 +471,54 @@ export class MemberService {
     return { seq };
   }
 
-  async getMemberFollowings(type: string, member: Member) {
-    let followings = [];
-
-    if (type === 'INSTRUCTOR') {
-      followings = await this.memberFavoriteRepository
-        .createQueryBuilder('memberFavorite')
-        .leftJoinAndSelect('memberFavorite.followingMember', 'followingMember')
-        .leftJoinAndSelect('followingMember.company', 'company')
-        .leftJoinAndSelect('followingMember.profileImage', 'profileImage')
-        .leftJoinAndSelect('followingMember.resumes', 'resumes')
-        .leftJoinAndSelect('resumes.careers', 'careers')
-        .where('memberFavorite.memberSeq = :memberSeq', { memberSeq: member.seq })
-        .andWhere('followingMember.type = :type', { type })
-        .andWhere('resumes.isMaster = :isMaster', { isMaster: 'Y' })
-        .getMany();
-    } else if (type === 'COMPANY') {
-      followings = await this.memberFavoriteRepository
-        .createQueryBuilder('memberFavorite')
-        .leftJoinAndSelect('memberFavorite.followingMember', 'followingMember')
-        .leftJoinAndSelect('followingMember.company', 'company')
-        .leftJoinAndSelect('followingMember.profileImage', 'profileImage')
-        .where('memberFavorite.memberSeq = :memberSeq', { memberSeq: member.seq })
-        .andWhere('followingMember.type = :type', { type })
-        .getMany();
-
-      return followings;
-    }
+  async getMemberFollowingsInstructor(type: string, member: Member) {
+    const followings = await this.memberFavoriteRepository
+      .createQueryBuilder('memberFavorite')
+      .leftJoinAndSelect('memberFavorite.followingMember', 'followingMember')
+      .leftJoinAndSelect('followingMember.company', 'company')
+      .leftJoinAndSelect('followingMember.profileImage', 'profileImage')
+      .leftJoinAndSelect('followingMember.resumes', 'resumes')
+      .leftJoinAndSelect('resumes.careers', 'careers')
+      .leftJoinAndSelect(
+        sq => {
+          return sq
+            .select('memberFavorite.favoriteSeq', 'favoriteSeq')
+            .addSelect('COUNT(memberFavorite.favoriteSeq)', 'followerCount')
+            .from(MemberFavorite, 'memberFavorite')
+            .groupBy('memberFavorite.favoriteSeq');
+        },
+        'follower',
+        'followingMember.seq = follower.favoriteSeq'
+      )
+      .where('memberFavorite.memberSeq = :memberSeq', { memberSeq: member.seq })
+      .andWhere('followingMember.type = :type', { type })
+      .andWhere('resumes.isMaster = :isMaster', { isMaster: 'Y' })
+      .select()
+      .getRawAndEntities();
 
     const result = [];
-    followings.forEach(item => {
+    followings.entities.forEach(item => {
       const career = calcCareer(item.followingMember.resumes[0].careers);
+      item.followingMember['followerCount'] = followings.raw.find(raw => {
+        return raw.favoriteSeq === item.favoriteSeq;
+      })?.followerCount;
       result.push({
         ...item,
         career: career
       });
     });
     return result;
+  }
+
+  async getMemberFollowingsCompany(type: string, member: Member) {
+    return await this.memberFavoriteRepository
+      .createQueryBuilder('memberFavorite')
+      .leftJoinAndSelect('memberFavorite.followingMember', 'followingMember')
+      .leftJoinAndSelect('followingMember.company', 'company')
+      .leftJoinAndSelect('followingMember.profileImage', 'profileImage')
+      .where('memberFavorite.memberSeq = :memberSeq', { memberSeq: member.seq })
+      .andWhere('followingMember.type = :type', { type })
+      .getMany();
   }
 
   findOne(id: number) {

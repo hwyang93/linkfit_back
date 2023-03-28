@@ -166,7 +166,11 @@ export class MemberController {
   @ApiOperation({ summary: '팔로잉 목록 조회' })
   @Get('following/:type')
   getMemberFollowings(@Param('type') type: string, @MemberDecorator() member: Member) {
-    return this.memberService.getMemberFollowings(type, member);
+    if (type === 'INSTRUCTOR') {
+      return this.memberService.getMemberFollowingsInstructor(type, member);
+    } else if (type === 'COMPANY') {
+      return this.memberService.getMemberFollowingsCompany(type, member);
+    }
   }
 
   @ApiOperation({ summary: '회원정보 조회' })
