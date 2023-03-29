@@ -521,6 +521,10 @@ export class MemberService {
       .getMany();
   }
 
+  getRecruitByMember(seq: number) {
+    return this.recruitRepository.createQueryBuilder('recruit').leftJoinAndSelect('recruit.dates', 'dates').where('recruit.writerSeq = :writerSeq', { writerSeq: seq }).getMany();
+  }
+
   findOne(id: number) {
     return `This action returns a #${id} member`;
   }

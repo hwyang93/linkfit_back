@@ -173,6 +173,12 @@ export class MemberController {
     }
   }
 
+  @ApiOperation({ summary: '회원이 작성한 공고 조회' })
+  @Get(':seq/recruit')
+  getRecruitByMember(@Param('seq', ParseIntPipe) seq: number) {
+    return this.memberService.getRecruitByMember(seq);
+  }
+
   @ApiOperation({ summary: '회원정보 조회' })
   @Get(':seq')
   findOne(@Param('seq', ParseIntPipe) seq: number) {
