@@ -32,7 +32,12 @@ export class CompanyService {
       .where('company.memberSeq = :seq', { seq })
       .getOne();
 
-    let recruits = await this.recruitRepository.createQueryBuilder('recruit').leftJoinAndSelect('recruit.dates', 'dates').where('recruit.writerSeq = :writerSeq', { writerSeq: seq }).getMany();
+    let recruits = await this.recruitRepository
+      .createQueryBuilder('recruit')
+      .leftJoinAndSelect('recruit.dates', 'dates')
+      .where('recruit.writerSeq = :writerSeq', { writerSeq: seq })
+      .andWhere('recruit.status = "ING"')
+      .getMany();
 
     const reputations = await this.memberReputationRepository
       .createQueryBuilder('memberReputation')
@@ -40,7 +45,6 @@ export class CompanyService {
       .where('memberReputation.targetMemberSeq = :memberSeq', { memberSeq: seq })
       .orderBy('memberReputation.updatedAt', 'DESC')
       .getMany();
-
     if (member) {
       const bookmarks = await this.recruitFavoriteRepository.createQueryBuilder('recruitFavorite').innerJoinAndSelect('recruitFavorite.recruit', 'recruit').where({ memberSeq: member.seq }).getMany();
       const follows = await this.memberFavoriteRepository.createQueryBuilder('memberFavorite').where('memberFavorite.memberSeq', { memberSeq: member.seq }).getMany();
@@ -48,7 +52,7 @@ export class CompanyService {
       result.companyInfo = {
         ...companyInfo,
         isFollow: follows.find(follow => {
-          return follow.favoriteSeq === result.companyInfo['memberSeq'];
+          return follow.favoriteSeq === companyInfo.memberSeq;
         })
           ? 'Y'
           : 'N'

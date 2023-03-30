@@ -3,6 +3,9 @@ import { CreateRecruitDateDto } from './create-recruit-date.dto';
 import { Recruit } from '../../../entites/Recruit';
 
 export class CreateRecruitDto {
+  @ApiProperty({ description: '타이틀' })
+  title: string;
+
   @ApiProperty({ description: '업체명' })
   companyName: string;
 
@@ -53,6 +56,7 @@ export class CreateRecruitDto {
 
   toEntity() {
     const entity = new Recruit();
+    entity.title = this.title;
     entity.companyName = this?.companyName;
     entity.position = this.position;
     entity.address = this?.address;

@@ -522,7 +522,12 @@ export class MemberService {
   }
 
   getRecruitByMember(seq: number) {
-    return this.recruitRepository.createQueryBuilder('recruit').leftJoinAndSelect('recruit.dates', 'dates').where('recruit.writerSeq = :writerSeq', { writerSeq: seq }).getMany();
+    return this.recruitRepository
+      .createQueryBuilder('recruit')
+      .leftJoinAndSelect('recruit.dates', 'dates')
+      .where('recruit.writerSeq = :writerSeq', { writerSeq: seq })
+      .andWhere('recruit.status = "ING"')
+      .getMany();
   }
 
   findOne(id: number) {
