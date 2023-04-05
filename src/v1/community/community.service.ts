@@ -38,7 +38,7 @@ export class CommunityService {
       .leftJoinAndSelect('community.bookmarks', 'bookmarks')
       .where('1=1');
     if (searchParam.category) {
-      communityList.andWhere('community.category IN (:...categorys)', { categorys: searchParam.category });
+      communityList.andWhere('community.category IN (:categorys)', { categorys: searchParam.category });
     }
     if (searchParam.isWriter === 'Y') {
       communityList.andWhere('community.writerSeq = :writerSeq', { writerSeq: member.seq });

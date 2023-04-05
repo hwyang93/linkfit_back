@@ -21,6 +21,7 @@ import { UpdateMemberReputationDto } from './dto/update-member-reputation.dto';
 import { MemberFavorite } from '../../entites/MemberFavorite';
 import { calcCareer } from '../../common/utils/utils';
 import { CommonFile } from '../../entites/CommonFile';
+import { SearchSuggestDto } from './dto/search-suggest.dto';
 
 const bcrypt = require('bcrypt');
 
@@ -189,22 +190,33 @@ export class MemberService {
     return { duplication: false };
   }
 
-  async getSuggestToList(member: Member) {
-    return await this.positionSuggestRepository
+  async getSuggestToList(searchParams: SearchSuggestDto, member: Member) {
+    const positionSuggest = await this.positionSuggestRepository
       .createQueryBuilder('positionSuggest')
       .innerJoinAndSelect('positionSuggest.writer', 'writer')
       .leftJoinAndSelect('writer.company', 'company')
-      .where('positionSuggest.targetMemberSeq = :memberSeq', { memberSeq: member.seq })
-      .getMany();
+      .where('positionSuggest.targetMemberSeq = :memberSeq', { memberSeq: member.seq });
+
+    if (searchParams.period) {
+    }
+    if (searchParams.status) {
+      positionSuggest.andWhere('recruitApply.status = :status', { status: searchParams.status });
+    }
+    return positionSuggest.getMany();
   }
 
-  async getSuggestFromList(member: Member) {
-    return await this.positionSuggestRepository
+  async getSuggestFromList(searchParams: SearchSuggestDto, member: Member) {
+    const positionSuggest = await this.positionSuggestRepository
       .createQueryBuilder('positionSuggest')
       .innerJoinAndSelect('positionSuggest.writer', 'writer')
       .leftJoinAndSelect('writer.company', 'company')
-      .where('positionSuggest.suggestMemberSeq = :memberSeq', { memberSeq: member.seq })
-      .getMany();
+      .where('positionSuggest.suggestMemberSeq = :memberSeq', { memberSeq: member.seq });
+    if (searchParams.period) {
+    }
+    if (searchParams.status) {
+      positionSuggest.andWhere('recruitApply.status = :status', { status: searchParams.status });
+    }
+    return positionSuggest.getMany();
   }
 
   async updatePositionSuggestStatus(seq: number, updatePositionSuggestDto: UpdatePositionSuggestDto, member: Member) {

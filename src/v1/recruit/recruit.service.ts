@@ -12,6 +12,7 @@ import { UpdateRecruitApplyDto } from './dto/update-recruit-apply.dto';
 import { Member } from '../../entites/Member';
 import { RecruitFavorite } from '../../entites/RecruitFavorite';
 import { CancelRecruitApplyDto } from './dto/cancel-recruit-apply.dto';
+import { SearchRecruitApplyDto } from './dto/search-recruit-apply.dto';
 const _ = require('lodash');
 
 @Injectable()
@@ -85,23 +86,25 @@ export class RecruitService {
     const qb = this.recruitRepository
       .createQueryBuilder('recruit')
       .leftJoinAndSelect('recruit.writer', 'writer')
+      .leftJoinAndSelect('recruit.dates', 'dates')
       .leftJoinAndSelect('writer.profileImage', 'profileImage')
       .leftJoinAndSelect('writer.company', 'company')
       .where('recruit.status = "ING"')
       .select(['recruit', 'writer.name', 'company.companyName', 'profileImage']);
 
     if (searchParam.area) {
-      qb.andWhere('recruit.field IN (:...fields)', { address: `%${searchParam.area}%` });
+      qb.andWhere('recruit.address IN (:address)', { address: `%${searchParam.area}%` });
     }
     if (searchParam.fields) {
-      qb.andWhere('recruit.field IN (:...fields)', { fields: searchParam.fields });
+      qb.andWhere('recruit.position IN (:fields)', { fields: searchParam.fields });
     }
     if (searchParam.recruitTypes) {
-      qb.andWhere('recruit.recruitType IN (:...recruitTypes)', { recruitTypes: searchParam.recruitTypes });
+      qb.andWhere('recruit.recruitType IN (:recruitTypes)', { recruitTypes: searchParam.recruitTypes });
     }
     if (searchParam.times) {
-      qb.andWhere('recruit.time IN (:...times)', { times: searchParam.times });
+      qb.andWhere('dates.time IN (:times)', { times: searchParam.times });
     }
+
     if (searchParam.isWriter === 'Y') {
       qb.andWhere('recruit.writerSeq = :writerSeq', { writerSeq: member.seq });
       return qb.withDeleted().orderBy('recruit.updatedAt', 'DESC').getMany();
@@ -250,15 +253,17 @@ export class RecruitService {
     }
   }
 
-  getRecruitApplyListByMember(member: Member) {
-    return (
-      this.recruitApplyRepository
-        .createQueryBuilder('recruitApply')
-        .where('recruitApply.memberSeq = :memberSeq', { memberSeq: member.seq })
-        .leftJoinAndSelect('recruitApply.recruit', 'recruit')
-        // .innerJoinAndSelect('recruitApply.recruitDate', 'recruitDate')
-        .getMany()
-    );
+  getRecruitApplyListByMember(searchParams: SearchRecruitApplyDto, member: Member) {
+    const recruitApply = this.recruitApplyRepository
+      .createQueryBuilder('recruitApply')
+      .where('recruitApply.memberSeq = :memberSeq', { memberSeq: member.seq })
+      .leftJoinAndSelect('recruitApply.recruit', 'recruit');
+    if (searchParams.period) {
+    }
+    if (searchParams.status) {
+      recruitApply.andWhere('recruitApply.status = :status', { status: searchParams.status });
+    }
+    return recruitApply.getMany();
   }
 
   async cancelRecruitApply(cancelRecruitApplyDto: CancelRecruitApplyDto, member: Member) {

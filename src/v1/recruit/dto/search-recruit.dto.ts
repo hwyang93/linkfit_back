@@ -18,8 +18,11 @@ export class SearchRecruitDto extends PaginationDto {
   area: string;
 
   @ApiProperty({ description: '본인이 작성한 게시글 여부', default: 'N', required: false })
-  isWriter = 'N';
+  isWriter: string;
 
   @ApiProperty({ description: '진행 여부', required: false })
   status: string;
+
+  @ApiProperty({ description: '기간', required: false })
+  period: string;
 }

@@ -7,6 +7,7 @@ import { PositionSuggest } from '../../entites/PositionSuggest';
 import { MemberFavorite } from '../../entites/MemberFavorite';
 import { MemberReputation } from '../../entites/MemberReputation';
 import { calcCareer } from '../../common/utils/utils';
+import { SearchInstructorDto } from './dto/search-instructor.dto';
 
 @Injectable()
 export class InstructorService {
@@ -17,36 +18,65 @@ export class InstructorService {
     @InjectRepository(MemberReputation) private memberReputationRepository: Repository<MemberReputation>
   ) {}
 
-  async getInstructorList(member: Member) {
+  async getInstructorList(searchParam: SearchInstructorDto, member: Member) {
     const { regionAuth } = await this.memberRepository.createQueryBuilder('member').where('member.seq = :seq', { seq: member.seq }).leftJoinAndSelect('member.regionAuth', 'regionAuth').getOne();
     if (!regionAuth) {
       throw new UnauthorizedException('지역 인증이 필요합니다.');
     }
+    let instructors;
 
-    const instructors = await this.memberRepository
-      .createQueryBuilder('member')
-      .where('member.type = :type', { type: 'INSTRUCTOR' })
-      .andWhere('member.isOpenProfile = :isOpenProfile', { isOpenProfile: 'Y' })
-      .andWhere('regionAuth.region2depth = :region2depth', { region2depth: regionAuth.region2depth })
-      .andWhere('resumes.isMaster = :isMaster', { isMaster: 'Y' })
-      .leftJoinAndSelect('member.regionAuth', 'regionAuth')
-      .leftJoinAndSelect('member.resumes', 'resumes')
-      .leftJoinAndSelect('resumes.careers', 'careers')
-      .leftJoinAndSelect(
-        sq => {
-          return sq
-            .select('memberFavorite.favoriteSeq', 'favoriteSeq')
-            .addSelect('COUNT(memberFavorite.favoriteSeq)', 'followerCount')
-            .from(MemberFavorite, 'memberFavorite')
-            .groupBy('memberFavorite.favoriteSeq');
-        },
-        'follower',
-        'member.seq = follower.favoriteSeq'
-      )
-      .select(['member.seq', 'member.name', 'member.nickname', 'member.field', 'regionAuth.region1depth', 'regionAuth.region2depth', 'regionAuth.region3depth', 'resumes', 'careers'])
-      .addSelect('IFNULL(follower.followerCount, 0)', 'followerCount')
-      .orderBy('member.updatedAt', 'DESC')
-      .getRawAndEntities();
+    if (searchParam.fields) {
+      instructors = await this.memberRepository
+        .createQueryBuilder('member')
+        .where('member.type = :type', { type: 'INSTRUCTOR' })
+        .andWhere('member.isOpenProfile = :isOpenProfile', { isOpenProfile: 'Y' })
+        .andWhere('regionAuth.region2depth = :region2depth', { region2depth: regionAuth.region2depth })
+        .andWhere('resumes.isMaster = :isMaster', { isMaster: 'Y' })
+        .andWhere('member.field IN (:fields)', { fields: searchParam.fields })
+        .leftJoinAndSelect('member.regionAuth', 'regionAuth')
+        .leftJoinAndSelect('member.resumes', 'resumes')
+        .leftJoinAndSelect('resumes.careers', 'careers')
+        .leftJoinAndSelect(
+          sq => {
+            return sq
+              .select('memberFavorite.favoriteSeq', 'favoriteSeq')
+              .addSelect('COUNT(memberFavorite.favoriteSeq)', 'followerCount')
+              .from(MemberFavorite, 'memberFavorite')
+              .groupBy('memberFavorite.favoriteSeq');
+          },
+          'follower',
+          'member.seq = follower.favoriteSeq'
+        )
+        .select(['member.seq', 'member.name', 'member.nickname', 'member.field', 'regionAuth.region1depth', 'regionAuth.region2depth', 'regionAuth.region3depth', 'resumes', 'careers'])
+        .addSelect('IFNULL(follower.followerCount, 0)', 'followerCount')
+        .orderBy('member.updatedAt', 'DESC')
+        .getRawAndEntities();
+    } else {
+      instructors = await this.memberRepository
+        .createQueryBuilder('member')
+        .where('member.type = :type', { type: 'INSTRUCTOR' })
+        .andWhere('member.isOpenProfile = :isOpenProfile', { isOpenProfile: 'Y' })
+        .andWhere('regionAuth.region2depth = :region2depth', { region2depth: regionAuth.region2depth })
+        .andWhere('resumes.isMaster = :isMaster', { isMaster: 'Y' })
+        .leftJoinAndSelect('member.regionAuth', 'regionAuth')
+        .leftJoinAndSelect('member.resumes', 'resumes')
+        .leftJoinAndSelect('resumes.careers', 'careers')
+        .leftJoinAndSelect(
+          sq => {
+            return sq
+              .select('memberFavorite.favoriteSeq', 'favoriteSeq')
+              .addSelect('COUNT(memberFavorite.favoriteSeq)', 'followerCount')
+              .from(MemberFavorite, 'memberFavorite')
+              .groupBy('memberFavorite.favoriteSeq');
+          },
+          'follower',
+          'member.seq = follower.favoriteSeq'
+        )
+        .select(['member.seq', 'member.name', 'member.nickname', 'member.field', 'regionAuth.region1depth', 'regionAuth.region2depth', 'regionAuth.region3depth', 'resumes', 'careers'])
+        .addSelect('IFNULL(follower.followerCount, 0)', 'followerCount')
+        .orderBy('member.updatedAt', 'DESC')
+        .getRawAndEntities();
+    }
 
     const follower = await this.memberFavoriteRepository.createQueryBuilder('memberFavorite').where('memberFavorite.memberSeq = :memberSeq', { memberSeq: member.seq }).getMany();
 

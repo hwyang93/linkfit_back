@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, Query } from '@nestjs/common';
 import { InstructorService } from './instructor.service';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { MemberDecorator } from '../../common/decorators/member.decorator';
 import { Member } from '../../entites/Member';
 import { CreateInstructorSuggestDto } from './dto/create-instructor-suggest.dto';
+import { SearchInstructorDto } from './dto/search-instructor.dto';
 
 @ApiTags('instructor')
 @Controller('instructor')
@@ -13,8 +14,8 @@ export class InstructorController {
   @ApiBearerAuth()
   @ApiOperation({ summary: '강사 목록 조회' })
   @Get()
-  getInstructorList(@MemberDecorator() member: Member) {
-    return this.instructorService.getInstructorList(member);
+  getInstructorList(@Query() searchParam: SearchInstructorDto, @MemberDecorator() member: Member) {
+    return this.instructorService.getInstructorList(searchParam, member);
   }
 
   @ApiBearerAuth()

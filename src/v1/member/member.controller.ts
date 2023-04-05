@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseInterceptors, UploadedFile, Query } from '@nestjs/common';
 import { MemberService } from './member.service';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
@@ -12,6 +12,7 @@ import { UpdatePositionSuggestDto } from './dto/update-position-suggest.dto';
 import { CreateMemberReputationDto } from './dto/create-member-reputation.dto';
 import { UpdateMemberReputationDto } from './dto/update-member-reputation.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { SearchSuggestDto } from './dto/search-suggest.dto';
 
 @ApiTags('member')
 @Controller('member')
@@ -88,15 +89,15 @@ export class MemberController {
   @ApiBearerAuth()
   @ApiOperation({ summary: '제안 받은 포지션 목록 조회' })
   @Get('suggest/to')
-  getSuggestToList(@MemberDecorator() member: Member) {
-    return this.memberService.getSuggestToList(member);
+  getSuggestToList(@Query() searchParams: SearchSuggestDto, @MemberDecorator() member: Member) {
+    return this.memberService.getSuggestToList(searchParams, member);
   }
 
   @ApiBearerAuth()
   @ApiOperation({ summary: '제안한 포지션 목록 조회' })
   @Get('suggest/from')
-  getSuggestFromList(@MemberDecorator() member: Member) {
-    return this.memberService.getSuggestFromList(member);
+  getSuggestFromList(@Query() searchParams: SearchSuggestDto, @MemberDecorator() member: Member) {
+    return this.memberService.getSuggestFromList(searchParams, member);
   }
 
   @ApiBearerAuth()
