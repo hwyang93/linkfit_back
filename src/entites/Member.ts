@@ -58,7 +58,7 @@ export class Member extends BaseEntity {
   })
   addressDetail: string;
 
-  @Column({ type: 'datetime', nullable: true })
+  @Column({ type: 'datetime', name: 'LAST_LOGIN', nullable: true })
   lastLogin: Date;
 
   @Column({
