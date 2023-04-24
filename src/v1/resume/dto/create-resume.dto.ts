@@ -46,6 +46,9 @@ export class CreateResumeDto {
   @ApiProperty({ description: '학력', type: () => Array(CreateEducationDto) })
   educations: CreateEducationDto[];
 
+  @ApiProperty({ description: '자격증 고유번호', default: 0 })
+  licenceSeq: number;
+
   toEntity() {
     const entity = new Resume();
     entity.title = this.title;
@@ -60,6 +63,7 @@ export class CreateResumeDto {
     entity.hopeWorkType = this.hopeWorkType;
     entity.isMaster = this.isMaster;
     entity.isOpen = this.isOpen;
+    entity.licenceSeq = this.licenceSeq;
 
     return entity;
   }

@@ -21,6 +21,7 @@ export class RecruitController {
   @ApiOperation({ summary: '구인 공고 등록' })
   @Post()
   async createRecruit(@Body() createRecruitDto: CreateRecruitDto, @MemberDecorator() member: Member) {
+    console.log(createRecruitDto);
     return await this.recruitService.createRecruit(createRecruitDto, member);
   }
 

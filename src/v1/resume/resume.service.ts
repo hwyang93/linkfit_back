@@ -87,6 +87,7 @@ export class ResumeService {
       .leftJoinAndSelect('resume.careers', 'careers')
       .leftJoinAndSelect('resume.educations', 'educations')
       .leftJoinAndSelect('resume.writer', 'writer')
+      .leftJoinAndSelect('resume.licence', 'licence')
       .where('resume.seq=:seq', { seq: seq })
       .getOne();
   }

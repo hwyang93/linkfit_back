@@ -58,7 +58,7 @@ export class Resume extends BaseEntity {
   @OneToMany(() => Education, Education => Education.resume)
   educations: Education[];
 
-  @ManyToMany(() => MemberLicence)
+  @ManyToOne(() => MemberLicence, {})
   @JoinColumn([{ name: 'LICENCE_SEQ' }])
   licence: MemberLicence;
 
