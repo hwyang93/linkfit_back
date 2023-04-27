@@ -223,7 +223,7 @@ export class RecruitService {
     return this.recruitRepository.delete(seq);
   }
 
-  async createRecruitApply(createRecruitApplyDto: CreateRecruitApplyDto, member: Member) {
+  async createRecruitApply(seq: number, createRecruitApplyDto: CreateRecruitApplyDto, member: Member) {
     if (!member) {
       throw new UnauthorizedException('로그인 후 이용해주세요.');
     }
@@ -236,7 +236,7 @@ export class RecruitService {
         const apply = new RecruitApply();
         apply.memberSeq = member.seq;
         apply.resumeSeq = createRecruitApplyDto.resumeSeq;
-        apply.recruitSeq = createRecruitApplyDto.recruitSeq;
+        apply.recruitSeq = seq;
         apply.recruitDateSeq = recruitDateSeq;
         apply.status = 'APPLY';
 

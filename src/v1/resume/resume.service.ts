@@ -78,7 +78,7 @@ export class ResumeService {
   }
 
   async getResumeList(member: Member) {
-    return await this.resumeRepository.find({ where: { writerSeq: member.seq } });
+    return await this.resumeRepository.createQueryBuilder('resume').where('resume.writerSeq = :memberSeq', { memberSeq: member.seq }).orderBy('FIELD(resume.isMaster, "Y", "N")').getMany();
   }
 
   getResume(seq: number) {

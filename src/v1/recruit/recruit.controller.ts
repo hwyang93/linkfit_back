@@ -58,9 +58,9 @@ export class RecruitController {
   @ApiBearerAuth()
   // @UseGuards(LoggedInGuard)
   @ApiOperation({ summary: '구인 공고 지원' })
-  @Post('apply')
-  createRecruitApply(@Body() createRecruitApplyDto: CreateRecruitApplyDto, @MemberDecorator() member: Member) {
-    return this.recruitService.createRecruitApply(createRecruitApplyDto, member);
+  @Post(':seq/apply')
+  createRecruitApply(@Param('seq', ParseIntPipe) seq: number, @Body() createRecruitApplyDto: CreateRecruitApplyDto, @MemberDecorator() member: Member) {
+    return this.recruitService.createRecruitApply(seq, createRecruitApplyDto, member);
   }
 
   @ApiBearerAuth()
