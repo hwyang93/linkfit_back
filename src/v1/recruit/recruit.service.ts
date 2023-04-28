@@ -193,6 +193,7 @@ export class RecruitService {
         .createQueryBuilder('recruitApply')
         .where('recruitApply.memberSeq = :memberSeq', { memberSeq: member.seq })
         .andWhere('recruitApply.recruitSeq = :recruitSeq', { recruitSeq: recruitInfo.seq })
+        .andWhere('recruitApply.status != "CANCEL"')
         .orderBy('recruitApply.updatedAt', 'DESC')
         .getMany();
 
@@ -272,10 +273,10 @@ export class RecruitService {
     await queryRunner.startTransaction();
 
     try {
-      for (const seq of cancelRecruitApplyDto.seqs) {
-        await this.getRecruitApply(seq, member);
+      for (const recruitDateSeqs of cancelRecruitApplyDto.recruitDateSeqs) {
+        console.log(recruitDateSeqs);
 
-        await queryRunner.manager.getRepository(RecruitApply).update({ seq }, { status: 'CANCEL' });
+        await queryRunner.manager.getRepository(RecruitApply).update({ seq: recruitDateSeqs }, { status: 'CANCEL' });
       }
       await queryRunner.commitTransaction();
     } catch (e) {

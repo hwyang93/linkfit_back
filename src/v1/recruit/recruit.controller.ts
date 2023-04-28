@@ -11,6 +11,7 @@ import { Member } from '../../entites/Member';
 import { LoggedInGuard } from '../../common/guards/logged-in.guard';
 import { CancelRecruitApplyDto } from './dto/cancel-recruit-apply.dto';
 import { SearchRecruitApplyDto } from './dto/search-recruit-apply.dto';
+import { DeleteRecruitApplyDto } from './dto/delete-recruit-apply.dto';
 
 @ApiTags('recruit')
 @Controller('recruit')
@@ -60,8 +61,17 @@ export class RecruitController {
   @ApiOperation({ summary: '구인 공고 지원' })
   @Post(':seq/apply')
   createRecruitApply(@Param('seq', ParseIntPipe) seq: number, @Body() createRecruitApplyDto: CreateRecruitApplyDto, @MemberDecorator() member: Member) {
+    console.log('createRecruitApplyDto:::::::::::::::::::');
+    console.log(createRecruitApplyDto);
     return this.recruitService.createRecruitApply(seq, createRecruitApplyDto, member);
   }
+
+  // @ApiBearerAuth()
+  // @ApiOperation({ summary: '구인 공고 지원 취소' })
+  // @Delete(':seq/apply')
+  // deleteRecruitApply(@Param('seq', ParseIntPipe) seq: number, @Body() deleteRecruitApplyDto: DeleteRecruitApplyDto, @MemberDecorator() member: Member) {
+  //   return this.recruitService.deleteRecruitApply(seq, deleteRecruitApplyDto, member);
+  // }
 
   @ApiBearerAuth()
   @ApiOperation({ summary: '내 구인 공고 지원목록 조회' })
@@ -71,7 +81,7 @@ export class RecruitController {
   }
 
   @ApiBearerAuth()
-  @ApiOperation({ summary: '지원한 구인공고 취소' })
+  @ApiOperation({ summary: '구인 공고 지원 취소' })
   @Patch('apply')
   cancelRecruitApply(@Body() cancelRecruitApplyDto: CancelRecruitApplyDto, @MemberDecorator() member: Member) {
     return this.recruitService.cancelRecruitApply(cancelRecruitApplyDto, member);
@@ -84,12 +94,12 @@ export class RecruitController {
     return this.recruitService.getRecruitApply(seq, member);
   }
 
-  @ApiBearerAuth()
-  @ApiOperation({ summary: '구인 공고 지원 취소' })
-  @Delete('apply/:seq')
-  deleteRecruitApply(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
-    return this.recruitService.deleteRecruitApply(seq, member);
-  }
+  // @ApiBearerAuth()
+  // @ApiOperation({ summary: '구인 공고 지원 취소' })
+  // @Delete('apply/:seq')
+  // deleteRecruitApply(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
+  //   return this.recruitService.deleteRecruitApply(seq, member);
+  // }
 
   @ApiBearerAuth()
   // @UseGuards(LoggedInGuard)
