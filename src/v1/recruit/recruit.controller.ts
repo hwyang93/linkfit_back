@@ -11,7 +11,6 @@ import { Member } from '../../entites/Member';
 import { LoggedInGuard } from '../../common/guards/logged-in.guard';
 import { CancelRecruitApplyDto } from './dto/cancel-recruit-apply.dto';
 import { SearchRecruitApplyDto } from './dto/search-recruit-apply.dto';
-import { DeleteRecruitApplyDto } from './dto/delete-recruit-apply.dto';
 
 @ApiTags('recruit')
 @Controller('recruit')

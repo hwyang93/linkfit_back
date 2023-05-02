@@ -5,7 +5,6 @@ import { UpdateCommunityDto } from './dto/update-community.dto';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { MemberDecorator } from '../../common/decorators/member.decorator';
 import { Member } from '../../entites/Member';
-import { SearchRecruitDto } from '../recruit/dto/search-recruit.dto';
 import { SearchCommunityDto } from './dto/search-community.dto';
 import { CreateCommunityCommentDto } from './dto/create-community-comment.dto';
 

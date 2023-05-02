@@ -27,24 +27,71 @@ export class CommunityService {
     return { seq: savedCommunity.seq };
   }
 
-  getCommunityList(searchParam: SearchCommunityDto, member: Member) {
-    const communityList = this.communityRepository
+  async getCommunityList(searchParam: SearchCommunityDto, member: Member) {
+    let communityList: any = this.communityRepository
       .createQueryBuilder('community')
       .innerJoinAndSelect('community.writer', 'writer')
       .leftJoinAndSelect('writer.company', 'company')
       .leftJoinAndSelect('community.comments', 'comments')
       .leftJoinAndSelect('comments.writer', 'commentWriter')
       .leftJoinAndSelect('commentWriter.company', 'commentCompany')
-      .leftJoinAndSelect('community.bookmarks', 'bookmarks')
+      // .leftJoinAndSelect('community.bookmarks', 'bookmarks')
+      .addSelect(sq => {
+        return sq.select('COUNT(*)', 'bookmarkCount').from(CommunityFavorite, 'bookmarks').where('bookmarks.favoriteSeq = community.seq');
+      }, 'bookmarkCount')
+      .addSelect(sq => {
+        return sq
+          .select('bookmarks.seq', 'isBookmark')
+          .from(CommunityFavorite, 'bookmarks')
+          .where('bookmarks.favoriteSeq = community.seq')
+          .andWhere('bookmarks.memberSeq = :memberSeq', { memberSeq: member.seq });
+      }, 'isBookmark')
       .where('1=1');
     if (searchParam.category) {
       communityList.andWhere('community.category IN (:categorys)', { categorys: searchParam.category });
     }
-    if (searchParam.isWriter === 'Y') {
-      communityList.andWhere('community.writerSeq = :writerSeq', { writerSeq: member.seq });
-    }
     communityList.orderBy('community.updatedAt', 'DESC');
-    return communityList.getMany();
+    communityList = await communityList.getRawAndEntities();
+    // const sample = await this.communityRepository
+    //   .createQueryBuilder('community')
+    //   .innerJoinAndSelect('community.writer', 'writer')
+    //   .leftJoinAndSelect('writer.company', 'company')
+    //   .leftJoinAndSelect('community.comments', 'comments')
+    //   .leftJoinAndSelect('comments.writer', 'commentWriter')
+    //   .leftJoinAndSelect('commentWriter.company', 'commentCompany')
+    //     .leftJoinAndSelect('community.bookmarks', 'bookmarks')
+    //   .addSelect(sq => {
+    //     return sq
+    //       .select('bookmarks.seq', 'isBookmark')
+    //       .from(CommunityFavorite, 'bookmarks')
+    //       .where('bookmarks.favoriteSeq = community.seq')
+    //       .andWhere('bookmarks.memberSeq = :memberSeq', { memberSeq: member.seq });
+    //   }, 'isBookmark')
+    //   .where('1=1')
+    //   .getRawAndEntities();
+
+    // console.log('sample::::::::::');
+    // console.log(await sample.getRawAndEntities());
+    // const result = {
+    //   ...sample.entities
+    // };
+    const result = [];
+    communityList.entities.forEach(item => {
+      result.push({
+        ...item,
+        bookmarkCount: parseInt(
+          communityList.raw.find(raw => {
+            return raw.community_SEQ === item.seq;
+          }).bookmarkCount
+        ),
+        isBookmark: communityList.raw.find(raw => {
+          return raw.community_SEQ === item.seq;
+        }).isBookmark
+          ? 'Y'
+          : 'N'
+      });
+    });
+    return result;
   }
 
   async getCommunityListMy(member: Member) {
@@ -84,7 +131,7 @@ export class CommunityService {
     await this.communityRepository
       .createQueryBuilder('community')
       .update()
-      .set({ viewCount: community.viewCount + 1 })
+      .set({ updatedAt: community.updatedAt, viewCount: community.viewCount + 1 })
       .where({ seq: community.seq })
       .execute();
     return community;
@@ -143,11 +190,16 @@ export class CommunityService {
   }
 
   async deleteCommunityBookmark(seq: number, member: Member) {
-    const recruitBookmark = await this.communityFavoriteRepository.createQueryBuilder('communityFavorite').where({ seq }).getOne();
+    const recruitBookmark = await this.communityFavoriteRepository.createQueryBuilder('communityFavorite').where('communityFavorite.favoriteSeq = :seq', { seq }).getOne();
     if (recruitBookmark.memberSeq !== member.seq) {
       throw new UnauthorizedException('허용되지 않은 접근입니다.');
     }
-    await this.communityFavoriteRepository.createQueryBuilder('communityFavorite').softDelete().where({ seq }).execute();
+    await this.communityFavoriteRepository
+      .createQueryBuilder('communityFavorite')
+      .softDelete()
+      .where('communityFavorite.favoriteSeq = :seq', { seq })
+      .andWhere('communityFavorite.memberSeq = :memberSeq', { memberSeq: member.seq })
+      .execute();
     return { seq };
   }
 
