@@ -255,7 +255,7 @@ export class CommunityService {
 
     favoriteList.forEach(item => {
       item.community['isBookmark'] = 'Y';
-      result.push({ item });
+      result.push({ ...item });
     });
 
     return result;
