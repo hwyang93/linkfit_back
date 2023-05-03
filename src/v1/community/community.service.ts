@@ -114,7 +114,7 @@ export class CommunityService {
     return sortBy(result, 'updatedAt').reverse();
   }
 
-  async getCommunity(seq: number) {
+  async getCommunity(seq: number, member: Member) {
     const community = await this.communityRepository
       .createQueryBuilder('community')
       .innerJoinAndSelect('community.writer', 'writer')
@@ -124,17 +124,45 @@ export class CommunityService {
       .leftJoinAndSelect('comments.writer', 'commentWriter')
       .leftJoinAndSelect('commentWriter.company', 'commentCompany')
       .leftJoinAndSelect('commentWriter.profileImage', 'commentProfileImage')
-      .leftJoinAndSelect('community.bookmarks', 'bookmarks')
+      // .leftJoinAndSelect('community.bookmarks', 'bookmarks')
+      .addSelect(sq => {
+        return sq.select('COUNT(*)', 'bookmarkCount').from(CommunityFavorite, 'bookmarks').where('bookmarks.favoriteSeq = community.seq');
+      }, 'bookmarkCount')
+      .addSelect(sq => {
+        return sq
+          .select('bookmarks.seq', 'isBookmark')
+          .from(CommunityFavorite, 'bookmarks')
+          .where('bookmarks.favoriteSeq = community.seq')
+          .andWhere('bookmarks.memberSeq = :memberSeq', { memberSeq: member.seq });
+      }, 'isBookmark')
       .where({ seq })
-      .getOne();
+      .getRawAndEntities();
 
     await this.communityRepository
       .createQueryBuilder('community')
       .update()
-      .set({ updatedAt: community.updatedAt, viewCount: community.viewCount + 1 })
-      .where({ seq: community.seq })
+      .set({ updatedAt: community.entities[0].updatedAt, viewCount: community.entities[0].viewCount + 1 })
+      .where({ seq })
       .execute();
-    return community;
+
+    let result = {};
+    community.entities.forEach(item => {
+      result = {
+        ...item,
+        bookmarkCount: parseInt(
+          community.raw.find(raw => {
+            return raw.community_SEQ === item.seq;
+          }).bookmarkCount
+        ),
+        isBookmark: community.raw.find(raw => {
+          return raw.community_SEQ === item.seq;
+        }).isBookmark
+          ? 'Y'
+          : 'N'
+      };
+    });
+    return result;
+    // return community;
   }
 
   async createCommunityComment(seq: number, createCommunityCommentDto: CreateCommunityCommentDto, member: Member) {
@@ -197,8 +225,8 @@ export class CommunityService {
     await this.communityFavoriteRepository
       .createQueryBuilder('communityFavorite')
       .softDelete()
-      .where('communityFavorite.favoriteSeq = :seq', { seq })
-      .andWhere('communityFavorite.memberSeq = :memberSeq', { memberSeq: member.seq })
+      .where('favoriteSeq = :seq', { seq })
+      .andWhere('memberSeq = :memberSeq', { memberSeq: member.seq })
       .execute();
     return { seq };
   }
@@ -213,7 +241,7 @@ export class CommunityService {
   }
 
   async getCommunityBookmarks(member: Member) {
-    return this.communityFavoriteRepository
+    const favoriteList = await this.communityFavoriteRepository
       .createQueryBuilder('communityFavorite')
       .leftJoinAndSelect('communityFavorite.community', 'community')
       .leftJoinAndSelect('community.writer', 'writer')
@@ -222,5 +250,14 @@ export class CommunityService {
       .leftJoinAndSelect('community.comments', 'comments')
       .where('communityFavorite.memberSeq = :memberSeq', { memberSeq: member.seq })
       .getMany();
+
+    const result = [];
+
+    favoriteList.forEach(item => {
+      item.community['isBookmark'] = 'Y';
+      result.push({ item });
+    });
+
+    return result;
   }
 }

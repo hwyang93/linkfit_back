@@ -90,7 +90,14 @@ export class RecruitService {
       .leftJoinAndSelect('writer.profileImage', 'profileImage')
       .leftJoinAndSelect('writer.company', 'company')
       .where('recruit.status = "ING"')
-      .select(['recruit', 'writer.name', 'company.companyName', 'profileImage']);
+      .select(['recruit', 'writer.name', 'company.companyName', 'profileImage'])
+      .addSelect(sq => {
+        return sq
+          .select('bookmarks.seq', 'isBookmark')
+          .from(RecruitFavorite, 'bookmarks')
+          .where('bookmarks.favoriteSeq = recruit.seq')
+          .andWhere('bookmarks.memberSeq = :memberSeq', { memberSeq: member.seq });
+      }, 'isBookmark');
 
     if (searchParam.area) {
       qb.andWhere('recruit.address IN (:address)', { address: `%${searchParam.area}%` });
@@ -105,11 +112,24 @@ export class RecruitService {
       qb.andWhere('dates.time IN (:times)', { times: searchParam.times });
     }
 
-    if (searchParam.isWriter === 'Y') {
-      qb.andWhere('recruit.writerSeq = :writerSeq', { writerSeq: member.seq });
-      return qb.withDeleted().orderBy('recruit.updatedAt', 'DESC').getMany();
-    }
-    return qb.orderBy('recruit.updatedAt', 'DESC').getMany();
+    const recruitList = await qb.orderBy('recruit.updatedAt', 'DESC').getRawAndEntities();
+
+    // recruitList = await recruitList.orderBy('recruit.updatedAt', 'DESC').getRawAndEntities();
+
+    const result = [];
+    recruitList.entities.forEach(item => {
+      result.push({
+        ...item,
+        isBookmark: recruitList.raw.find(raw => {
+          return raw.recruit_SEQ === item.seq;
+        }).isBookmark
+          ? 'Y'
+          : 'N'
+      });
+    });
+    return result;
+
+    // return recruitList.orderBy('recruit.updatedAt', 'DESC').getMany();
   }
 
   async getRecruitMarkerList(searchParam: SearchRecruitDto, member: Member) {
@@ -307,8 +327,21 @@ export class RecruitService {
     return recruitApply;
   }
 
-  getRecruitBookmarkList(member: Member) {
-    return this.recruitFavoriteRepository.createQueryBuilder('recruitFavorite').where({ memberSeq: member.seq }).innerJoinAndSelect('recruitFavorite.recruit', 'recruit').getMany();
+  async getRecruitBookmarkList(member: Member) {
+    const favoriteList = await this.recruitFavoriteRepository
+      .createQueryBuilder('recruitFavorite')
+      .where({ memberSeq: member.seq })
+      .innerJoinAndSelect('recruitFavorite.recruit', 'recruit')
+      .leftJoinAndSelect('recruit.writer', 'writer')
+      .leftJoinAndSelect('writer.profileImage', 'profileImage')
+      .getMany();
+
+    const result = [];
+    favoriteList.forEach(item => {
+      item.recruit['isBookmark'] = 'Y';
+      result.push({ ...item });
+    });
+    return result;
   }
 
   async deleteRecruitApply(seq: number, member: Member) {
@@ -354,11 +387,16 @@ export class RecruitService {
   }
 
   async deleteRecruitBookmark(seq: number, member: Member) {
-    const recruitBookmark = await this.recruitFavoriteRepository.createQueryBuilder('recruitFavorite').where({ seq }).getOne();
+    const recruitBookmark = await this.recruitFavoriteRepository.createQueryBuilder('recruitFavorite').where('recruitFavorite.favoriteSeq = :seq', { seq }).getOne();
     if (recruitBookmark.memberSeq !== member.seq) {
       throw new UnauthorizedException('허용되지 않은 접근입니다.');
     }
-    await this.recruitFavoriteRepository.createQueryBuilder('recruitFavorite').softDelete().where({ seq }).execute();
+    await this.recruitFavoriteRepository
+      .createQueryBuilder('recruitFavorite')
+      .softDelete()
+      .where('favoriteSeq = :seq', { seq })
+      .andWhere('memberSeq = :memberSeq', { memberSeq: member.seq })
+      .execute();
     return { seq };
   }
 

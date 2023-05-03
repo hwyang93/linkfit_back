@@ -35,7 +35,6 @@ export class RecruitController {
     if (searchParam.type === 'list') {
       return this.recruitService.getRecruitList(searchParam, member);
     }
-
     if (searchParam.type === 'marker') {
       return this.recruitService.getRecruitMarkerList(searchParam, member);
     }
@@ -111,7 +110,7 @@ export class RecruitController {
   @ApiBearerAuth()
   // @UseGuards(LoggedInGuard)
   @ApiOperation({ summary: '구인 공고 북마크 등록' })
-  @Post('bookmark/:seq')
+  @Post(':seq/bookmark')
   createRecruitBookmark(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
     return this.recruitService.createRecruitBookmark(seq, member);
   }
@@ -119,7 +118,7 @@ export class RecruitController {
   @ApiBearerAuth()
   // @UseGuards(LoggedInGuard)
   @ApiOperation({ summary: '구인 공고 북마크 삭제' })
-  @Delete('bookmark/:seq')
+  @Delete(':seq/bookmark')
   deleteRecruitBookmark(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
     return this.recruitService.deleteRecruitBookmark(seq, member);
   }
