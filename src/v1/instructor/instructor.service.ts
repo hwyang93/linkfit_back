@@ -8,6 +8,7 @@ import { MemberFavorite } from '../../entites/MemberFavorite';
 import { MemberReputation } from '../../entites/MemberReputation';
 import { calcCareer } from '../../common/utils/utils';
 import { SearchInstructorDto } from './dto/search-instructor.dto';
+import { RecruitFavorite } from '../../entites/RecruitFavorite';
 
 @Injectable()
 export class InstructorService {
@@ -102,6 +103,75 @@ export class InstructorService {
           : 'N'
       });
     });
+    return result;
+  }
+
+  async getRecruitRecommendedList(member: Member) {
+    const { regionAuth } = await this.memberRepository.createQueryBuilder('member').where('member.seq = :seq', { seq: member.seq }).leftJoinAndSelect('member.regionAuth', 'regionAuth').getOne();
+    if (!regionAuth) {
+      throw new UnauthorizedException('지역 인증이 필요합니다.');
+    }
+    const instructors = await this.memberRepository
+      .createQueryBuilder('member')
+      .leftJoinAndSelect('member.regionAuth', 'regionAuth')
+      .leftJoinAndSelect('member.resumes', 'resumes')
+      .leftJoinAndSelect('resumes.careers', 'careers')
+      .leftJoinAndSelect(
+        sq => {
+          return sq
+            .select('memberFavorite.favoriteSeq', 'favoriteSeq')
+            .addSelect('COUNT(memberFavorite.favoriteSeq)', 'followerCount')
+            .from(MemberFavorite, 'memberFavorite')
+            .groupBy('memberFavorite.favoriteSeq');
+        },
+        'follower',
+        'member.seq = follower.favoriteSeq'
+      )
+      .leftJoin(
+        sq => {
+          return sq.addSelect('memberFavorite.favoriteSeq', 'favoriteSeq').from(MemberFavorite, 'memberFavorite').where('memberFavorite.memberSeq = :memberSeq', { memberSeq: member.seq });
+        },
+        'follow',
+        'member.seq = follow.favoriteSeq'
+      )
+      .select(['member.seq', 'member.name', 'member.nickname', 'member.field', 'regionAuth.region1depth', 'regionAuth.region2depth', 'regionAuth.region3depth', 'resumes', 'careers'])
+      .addSelect('IFNULL(follower.followerCount, 0)', 'followerCount')
+      // .addSelect(sq => {
+      //   return sq.select('bookmarks.seq', 'isFollow').from(MemberFavorite, 'bookmarks').where('bookmarks.favoriteSeq = member.seq');
+      //   // .andWhere('bookmarks.memberSeq = :memberSeq', { memberSeq: member.seq });
+      // }, 'isFollow')
+      .addSelect("IF(ISNULL(follow.favoriteSeq), 'N', 'Y')", 'isFollow')
+      .where('member.type = :type', { type: 'INSTRUCTOR' })
+      .andWhere('member.isOpenProfile = :isOpenProfile', { isOpenProfile: 'Y' })
+      .andWhere('regionAuth.region2depth = :region2depth', { region2depth: regionAuth.region2depth })
+      .andWhere('resumes.isMaster = :isMaster', { isMaster: 'Y' })
+      .orderBy({ 'follower.followerCount': 'DESC', 'member.updatedAt': 'DESC' })
+      .getRawAndEntities();
+
+    const result = [];
+
+    instructors.entities.forEach(item => {
+      const career = calcCareer(item.resumes[0].careers);
+      result.push({
+        seq: item.seq,
+        name: item.name,
+        nickname: item.nickname,
+        field: item.field,
+        address: `${item.regionAuth.region1depth} ${item.regionAuth.region2depth} ${item.regionAuth.region3depth}`,
+        career: career,
+        followerCount: parseInt(
+          instructors.raw.find(raw => {
+            return raw.member_SEQ === item.seq;
+          })?.followerCount
+        ),
+        isFollow: instructors.raw.find(raw => {
+          return raw.member_SEQ === item.seq;
+        }).isFollow
+          ? 'Y'
+          : 'N'
+      });
+    });
+    console.log(instructors.raw);
     return result;
   }
 

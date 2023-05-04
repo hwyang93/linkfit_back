@@ -19,6 +19,13 @@ export class InstructorController {
   }
 
   @ApiBearerAuth()
+  @ApiOperation({ summary: '추천 강사 목록 조회' })
+  @Get('recommended')
+  getRecruitRecommendedList(@MemberDecorator() member: Member) {
+    return this.instructorService.getRecruitRecommendedList(member);
+  }
+
+  @ApiBearerAuth()
   @ApiOperation({ summary: '강사 제안 등록' })
   @Post('suggest')
   createInstructorSuggest(@Body() createInstructorSuggestDto: CreateInstructorSuggestDto, @MemberDecorator() member: Member) {

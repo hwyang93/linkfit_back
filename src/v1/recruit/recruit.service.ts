@@ -156,6 +156,44 @@ export class RecruitService {
     return pinData.getRawMany();
   }
 
+  async getRecruitRecommendedList(member: Member) {
+    const qb = this.recruitRepository
+      .createQueryBuilder('recruit')
+      .leftJoinAndSelect('recruit.writer', 'writer')
+      .leftJoinAndSelect('recruit.dates', 'dates')
+      .leftJoinAndSelect('writer.profileImage', 'profileImage')
+      .leftJoinAndSelect('writer.company', 'company')
+      .leftJoin(
+        sq => {
+          return sq.select('recruitFavorite.favoriteSeq', 'favoriteSeq').addSelect('COUNT(*)', 'bookmarkCount').from(RecruitFavorite, 'recruitFavorite').groupBy('recruitFavorite.favoriteSeq');
+        },
+        'bookmark',
+        'recruit.seq = bookmark.favoriteSeq'
+      )
+      .select(['recruit', 'writer.name', 'company.companyName', 'profileImage'])
+      .addSelect(sq => {
+        return sq
+          .select('bookmarks.seq', 'isBookmark')
+          .from(RecruitFavorite, 'bookmarks')
+          .where('bookmarks.favoriteSeq = recruit.seq')
+          .andWhere('bookmarks.memberSeq = :memberSeq', { memberSeq: member.seq });
+      }, 'isBookmark')
+      .where('recruit.status = "ING"');
+    const recruitList = await qb.orderBy({ 'bookmark.bookmarkCount': 'DESC', 'recruit.updatedAt': 'DESC' }).getRawAndEntities();
+    const result = [];
+    recruitList.entities.forEach(item => {
+      result.push({
+        ...item,
+        isBookmark: recruitList.raw.find(raw => {
+          return raw.recruit_SEQ === item.seq;
+        }).isBookmark
+          ? 'Y'
+          : 'N'
+      });
+    });
+    return result;
+  }
+
   async getRecruitMarker(searchParam: SearchRecruitDto, lon: number, lat: number, member: Member) {
     const result = {
       company: [],

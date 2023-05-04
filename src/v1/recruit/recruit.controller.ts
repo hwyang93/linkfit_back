@@ -21,7 +21,6 @@ export class RecruitController {
   @ApiOperation({ summary: '구인 공고 등록' })
   @Post()
   async createRecruit(@Body() createRecruitDto: CreateRecruitDto, @MemberDecorator() member: Member) {
-    console.log(createRecruitDto);
     return await this.recruitService.createRecruit(createRecruitDto, member);
   }
 
@@ -40,6 +39,12 @@ export class RecruitController {
     }
   }
 
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '추천 구인 공고 목록 조회' })
+  @Get('recommended')
+  getRecruitRecommendedList(@MemberDecorator() member: Member) {
+    return this.recruitService.getRecruitRecommendedList(member);
+  }
   // @ApiBearerAuth()
   // @ApiOperation({ summary: '구인 공고 마커 목록 조회' })
   // @Get('markers')
@@ -59,8 +64,6 @@ export class RecruitController {
   @ApiOperation({ summary: '구인 공고 지원' })
   @Post(':seq/apply')
   createRecruitApply(@Param('seq', ParseIntPipe) seq: number, @Body() createRecruitApplyDto: CreateRecruitApplyDto, @MemberDecorator() member: Member) {
-    console.log('createRecruitApplyDto:::::::::::::::::::');
-    console.log(createRecruitApplyDto);
     return this.recruitService.createRecruitApply(seq, createRecruitApplyDto, member);
   }
 

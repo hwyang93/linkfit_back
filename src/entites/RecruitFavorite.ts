@@ -13,7 +13,7 @@ export class RecruitFavorite extends BaseEntity {
   @Column({ type: 'int', name: 'FAVORITE_SEQ' })
   favoriteSeq: number;
 
-  @ManyToOne(() => Recruit, Recruit => Recruit.bookmarks)
+  @ManyToOne(() => Recruit, Recruit => Recruit.bookmarks, { createForeignKeyConstraints: false })
   @JoinColumn([{ name: 'FAVORITE_SEQ' }])
   recruit: Recruit;
 }
