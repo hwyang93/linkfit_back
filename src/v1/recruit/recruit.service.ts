@@ -159,25 +159,32 @@ export class RecruitService {
   async getRecruitRecommendedList(member: Member) {
     const qb = this.recruitRepository
       .createQueryBuilder('recruit')
+      .limit(8)
       .leftJoinAndSelect('recruit.writer', 'writer')
       .leftJoinAndSelect('recruit.dates', 'dates')
       .leftJoinAndSelect('writer.profileImage', 'profileImage')
       .leftJoinAndSelect('writer.company', 'company')
       .leftJoin(
         sq => {
-          return sq.select('recruitFavorite.favoriteSeq', 'favoriteSeq').addSelect('COUNT(*)', 'bookmarkCount').from(RecruitFavorite, 'recruitFavorite').groupBy('recruitFavorite.favoriteSeq');
+          return sq
+            .select('recruitFavorite.favoriteSeq', 'favoriteSeq')
+            .addSelect('COUNT(*)', 'bookmarkCount')
+            .from(RecruitFavorite, 'recruitFavorite')
+            .where('recruitFavorite.deletedAt IS NULL')
+            .groupBy('recruitFavorite.favoriteSeq');
         },
         'bookmark',
         'recruit.seq = bookmark.favoriteSeq'
       )
       .select(['recruit', 'writer.name', 'company.companyName', 'profileImage'])
-      .addSelect(sq => {
-        return sq
-          .select('bookmarks.seq', 'isBookmark')
-          .from(RecruitFavorite, 'bookmarks')
-          .where('bookmarks.favoriteSeq = recruit.seq')
-          .andWhere('bookmarks.memberSeq = :memberSeq', { memberSeq: member.seq });
-      }, 'isBookmark')
+      // .addSelect(sq => {
+      //   return sq
+      //     .select('bookmarks.seq', 'isBookmark')
+      //     .from(RecruitFavorite, 'bookmarks')
+      //     .where('bookmarks.favoriteSeq = recruit.seq')
+      //     .andWhere('bookmarks.memberSeq = :memberSeq', { memberSeq: member.seq });
+      // }, 'isBookmark')
+      .addSelect("IF(ISNULL(bookmark.favoriteSeq), 'N', 'Y')", 'isBookmark')
       .where('recruit.status = "ING"');
     const recruitList = await qb.orderBy({ 'bookmark.bookmarkCount': 'DESC', 'recruit.updatedAt': 'DESC' }).getRawAndEntities();
     const result = [];
@@ -187,8 +194,6 @@ export class RecruitService {
         isBookmark: recruitList.raw.find(raw => {
           return raw.recruit_SEQ === item.seq;
         }).isBookmark
-          ? 'Y'
-          : 'N'
       });
     });
     return result;

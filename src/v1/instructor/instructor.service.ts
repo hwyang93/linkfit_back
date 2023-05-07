@@ -113,6 +113,7 @@ export class InstructorService {
     }
     const instructors = await this.memberRepository
       .createQueryBuilder('member')
+      .limit(8)
       .leftJoinAndSelect('member.regionAuth', 'regionAuth')
       .leftJoinAndSelect('member.resumes', 'resumes')
       .leftJoinAndSelect('resumes.careers', 'careers')
@@ -167,11 +168,9 @@ export class InstructorService {
         isFollow: instructors.raw.find(raw => {
           return raw.member_SEQ === item.seq;
         }).isFollow
-          ? 'Y'
-          : 'N'
       });
     });
-    console.log(instructors.raw);
+    // console.log(instructors.raw);
     return result;
   }
 
