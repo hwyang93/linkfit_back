@@ -1,5 +1,5 @@
 import { BaseEntity } from './BaseEntity';
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Recruit } from './Recruit';
 
 @Entity('RECRUIT_FAVORITE')
@@ -13,7 +13,7 @@ export class RecruitFavorite extends BaseEntity {
   @Column({ type: 'int', name: 'FAVORITE_SEQ' })
   favoriteSeq: number;
 
-  @ManyToOne(() => Recruit, Recruit => Recruit.bookmarks, { createForeignKeyConstraints: false })
+  @ManyToOne(() => Recruit, Recruit => Recruit.bookmarks)
   @JoinColumn([{ name: 'FAVORITE_SEQ' }])
   recruit: Recruit;
 }

@@ -13,6 +13,7 @@ import { Member } from '../../entites/Member';
 import { RecruitFavorite } from '../../entites/RecruitFavorite';
 import { CancelRecruitApplyDto } from './dto/cancel-recruit-apply.dto';
 import { SearchRecruitApplyDto } from './dto/search-recruit-apply.dto';
+import { MemberFavorite } from '../../entites/MemberFavorite';
 const _ = require('lodash');
 
 @Injectable()
@@ -22,6 +23,7 @@ export class RecruitService {
     @InjectRepository(RecruitDate) private recruitDateRepository: Repository<RecruitDate>,
     @InjectRepository(RecruitApply) private recruitApplyRepository: Repository<RecruitApply>,
     @InjectRepository(RecruitFavorite) private recruitFavoriteRepository: Repository<RecruitFavorite>,
+    @InjectRepository(MemberFavorite) private memberFavoriteRepository: Repository<MemberFavorite>,
     @InjectRepository(Member) private memberRepository: Repository<Member>,
     private datasource: DataSource
   ) {}
@@ -248,6 +250,7 @@ export class RecruitService {
       .where('recruit.seq = :seq', { seq: seq })
       .leftJoinAndSelect('recruit.dates', 'dates')
       .leftJoinAndSelect('recruit.writer', 'writer')
+      .leftJoinAndSelect('writer.profileImage', 'profileImage')
       .leftJoinAndSelect('writer.company', 'company')
       .getOne();
     let applyInfo;
@@ -260,12 +263,19 @@ export class RecruitService {
         .orderBy('recruitApply.updatedAt', 'DESC')
         .getMany();
 
+      const followInfo = await this.memberFavoriteRepository
+        .createQueryBuilder('memberFavorite')
+        .where('memberFavorite.memberSeq = :memberSeq', { memberSeq: member.seq })
+        .andWhere('memberFavorite.favoriteSeq = :favoriteSeq', { favoriteSeq: recruitInfo.writerSeq })
+        .getOne();
+
       recruitInfo.dates.forEach(item => {
         const isApply = applyInfo.find(apply => {
           return apply.recruitDateSeq === item.seq;
         });
         isApply ? (item['isApplied'] = true) : (item['isApplied'] = false);
       });
+      followInfo ? (recruitInfo.writer['isFollow'] = 'Y') : (recruitInfo.writer['isFollow'] = 'N');
     }
     return { ...recruitInfo, applyInfo };
   }

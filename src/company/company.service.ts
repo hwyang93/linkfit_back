@@ -28,6 +28,7 @@ export class CompanyService {
     const companyInfo = await this.companyRepository
       .createQueryBuilder('company')
       .leftJoinAndSelect('company.member', 'member')
+      .leftJoinAndSelect('member.profileImage', 'profileImage')
       .leftJoinAndSelect('member.links', 'links')
       .where('company.memberSeq = :seq', { seq })
       .getOne();
@@ -47,8 +48,7 @@ export class CompanyService {
       .getMany();
     if (member) {
       const bookmarks = await this.recruitFavoriteRepository.createQueryBuilder('recruitFavorite').innerJoinAndSelect('recruitFavorite.recruit', 'recruit').where({ memberSeq: member.seq }).getMany();
-      const follows = await this.memberFavoriteRepository.createQueryBuilder('memberFavorite').where('memberFavorite.memberSeq', { memberSeq: member.seq }).getMany();
-
+      const follows = await this.memberFavoriteRepository.createQueryBuilder('memberFavorite').where('memberFavorite.memberSeq = :memberSeq', { memberSeq: member.seq }).getMany();
       result.companyInfo = {
         ...companyInfo,
         isFollow: follows.find(follow => {
