@@ -25,13 +25,34 @@ export class CompanyService {
       recruits: {},
       reputations: {}
     };
-    const companyInfo = await this.companyRepository
+    const companyInfoRawAndEntities = await this.companyRepository
       .createQueryBuilder('company')
       .leftJoinAndSelect('company.member', 'member')
       .leftJoinAndSelect('member.profileImage', 'profileImage')
       .leftJoinAndSelect('member.links', 'links')
+      .leftJoinAndSelect(
+        sq => {
+          return sq
+            .select('memberFavorite.favoriteSeq', 'favoriteSeq')
+            .addSelect('COUNT(memberFavorite.favoriteSeq)', 'followerCount')
+            .from(MemberFavorite, 'memberFavorite')
+            .groupBy('memberFavorite.favoriteSeq');
+        },
+        'follower',
+        'follower.favoriteSeq = member.seq'
+      )
+      .addSelect('IFNULL(follower.followerCount, 0)', 'followerCount')
       .where('company.memberSeq = :seq', { seq })
-      .getOne();
+      .getRawAndEntities();
+
+    const companyInfo = {
+      ...companyInfoRawAndEntities.entities[0],
+      followerCount: parseInt(
+        companyInfoRawAndEntities.raw.find(raw => {
+          return raw.member_SEQ === seq;
+        })?.followerCount
+      )
+    };
 
     let recruits = await this.recruitRepository
       .createQueryBuilder('recruit')

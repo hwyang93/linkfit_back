@@ -115,6 +115,7 @@ export class InstructorService {
       .createQueryBuilder('member')
       .limit(8)
       .leftJoinAndSelect('member.regionAuth', 'regionAuth')
+      .leftJoinAndSelect('member.profileImage', 'profileImage')
       .leftJoinAndSelect('member.resumes', 'resumes')
       .leftJoinAndSelect('resumes.careers', 'careers')
       .leftJoinAndSelect(
@@ -135,7 +136,7 @@ export class InstructorService {
         'follow',
         'member.seq = follow.favoriteSeq'
       )
-      .select(['member.seq', 'member.name', 'member.nickname', 'member.field', 'regionAuth.region1depth', 'regionAuth.region2depth', 'regionAuth.region3depth', 'resumes', 'careers'])
+      .select(['member.seq', 'member.name', 'member.nickname', 'member.field', 'regionAuth.region1depth', 'regionAuth.region2depth', 'regionAuth.region3depth', 'resumes', 'careers', 'profileImage'])
       .addSelect('IFNULL(follower.followerCount, 0)', 'followerCount')
       // .addSelect(sq => {
       //   return sq.select('bookmarks.seq', 'isFollow').from(MemberFavorite, 'bookmarks').where('bookmarks.favoriteSeq = member.seq');
@@ -160,6 +161,7 @@ export class InstructorService {
         field: item.field,
         address: `${item.regionAuth.region1depth} ${item.regionAuth.region2depth} ${item.regionAuth.region3depth}`,
         career: career,
+        profileImage: item.profileImage,
         followerCount: parseInt(
           instructors.raw.find(raw => {
             return raw.member_SEQ === item.seq;
@@ -170,7 +172,6 @@ export class InstructorService {
         }).isFollow
       });
     });
-    // console.log(instructors.raw);
     return result;
   }
 
