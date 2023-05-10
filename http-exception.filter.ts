@@ -7,8 +7,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const status = exception.getStatus();
     const err = exception.getResponse() as { message: any; statusCode: number } | { error: string; statusCode: 400; message: string[] }; // class-validator 타이핑
-    console.log('fail response::::::::::', err.statusCode);
     if (typeof err !== 'string' && err.statusCode === 400) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       return response.status(status).json({
         success: false,
@@ -17,6 +17,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       });
     }
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     return response.status(status).json({
       success: false,

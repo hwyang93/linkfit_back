@@ -4,7 +4,6 @@ import { map, Observable } from 'rxjs';
 @Injectable()
 export class StandardResponseInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    console.log('success response::::::::::', context.switchToHttp().getResponse().statusCode);
     return next.handle().pipe(
       map(data => {
         if (context.switchToHttp().getRequest().query.curPage && context.switchToHttp().getRequest().query.perPage) {

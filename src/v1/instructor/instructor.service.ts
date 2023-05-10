@@ -35,6 +35,7 @@ export class InstructorService {
         .andWhere('resumes.isMaster = :isMaster', { isMaster: 'Y' })
         .andWhere('member.field IN (:fields)', { fields: searchParam.fields })
         .leftJoinAndSelect('member.regionAuth', 'regionAuth')
+        .leftJoinAndSelect('member.profileImage', 'profileImage')
         .leftJoinAndSelect('member.resumes', 'resumes')
         .leftJoinAndSelect('resumes.careers', 'careers')
         .leftJoinAndSelect(
@@ -48,7 +49,7 @@ export class InstructorService {
           'follower',
           'member.seq = follower.favoriteSeq'
         )
-        .select(['member.seq', 'member.name', 'member.nickname', 'member.field', 'regionAuth.region1depth', 'regionAuth.region2depth', 'regionAuth.region3depth', 'resumes', 'careers'])
+        .select(['member.seq', 'member.name', 'member.nickname', 'member.field', 'regionAuth.region1depth', 'regionAuth.region2depth', 'regionAuth.region3depth', 'resumes', 'careers', 'profileImage'])
         .addSelect('IFNULL(follower.followerCount, 0)', 'followerCount')
         .orderBy('member.updatedAt', 'DESC')
         .getRawAndEntities();
@@ -60,6 +61,7 @@ export class InstructorService {
         .andWhere('regionAuth.region2depth = :region2depth', { region2depth: regionAuth.region2depth })
         .andWhere('resumes.isMaster = :isMaster', { isMaster: 'Y' })
         .leftJoinAndSelect('member.regionAuth', 'regionAuth')
+        .leftJoinAndSelect('member.profileImage', 'profileImage')
         .leftJoinAndSelect('member.resumes', 'resumes')
         .leftJoinAndSelect('resumes.careers', 'careers')
         .leftJoinAndSelect(
@@ -73,7 +75,7 @@ export class InstructorService {
           'follower',
           'member.seq = follower.favoriteSeq'
         )
-        .select(['member.seq', 'member.name', 'member.nickname', 'member.field', 'regionAuth.region1depth', 'regionAuth.region2depth', 'regionAuth.region3depth', 'resumes', 'careers'])
+        .select(['member.seq', 'member.name', 'member.nickname', 'member.field', 'regionAuth.region1depth', 'regionAuth.region2depth', 'regionAuth.region3depth', 'resumes', 'careers', 'profileImage'])
         .addSelect('IFNULL(follower.followerCount, 0)', 'followerCount')
         .orderBy('member.updatedAt', 'DESC')
         .getRawAndEntities();
@@ -91,6 +93,7 @@ export class InstructorService {
         field: item.field,
         address: `${item.regionAuth.region1depth} ${item.regionAuth.region2depth} ${item.regionAuth.region3depth}`,
         career: career,
+        profileImage: item.profileImage,
         followerCount: parseInt(
           instructors.raw.find(raw => {
             return raw.member_SEQ === item.seq;
@@ -118,7 +121,7 @@ export class InstructorService {
       .leftJoinAndSelect('member.profileImage', 'profileImage')
       .leftJoinAndSelect('member.resumes', 'resumes')
       .leftJoinAndSelect('resumes.careers', 'careers')
-      .leftJoinAndSelect(
+      .leftJoin(
         sq => {
           return sq
             .select('memberFavorite.favoriteSeq', 'favoriteSeq')
@@ -138,10 +141,6 @@ export class InstructorService {
       )
       .select(['member.seq', 'member.name', 'member.nickname', 'member.field', 'regionAuth.region1depth', 'regionAuth.region2depth', 'regionAuth.region3depth', 'resumes', 'careers', 'profileImage'])
       .addSelect('IFNULL(follower.followerCount, 0)', 'followerCount')
-      // .addSelect(sq => {
-      //   return sq.select('bookmarks.seq', 'isFollow').from(MemberFavorite, 'bookmarks').where('bookmarks.favoriteSeq = member.seq');
-      //   // .andWhere('bookmarks.memberSeq = :memberSeq', { memberSeq: member.seq });
-      // }, 'isFollow')
       .addSelect("IF(ISNULL(follow.favoriteSeq), 'N', 'Y')", 'isFollow')
       .where('member.type = :type', { type: 'INSTRUCTOR' })
       .andWhere('member.isOpenProfile = :isOpenProfile', { isOpenProfile: 'Y' })
@@ -155,13 +154,9 @@ export class InstructorService {
     instructors.entities.forEach(item => {
       const career = calcCareer(item.resumes[0].careers);
       result.push({
-        seq: item.seq,
-        name: item.name,
-        nickname: item.nickname,
-        field: item.field,
+        ...item,
         address: `${item.regionAuth.region1depth} ${item.regionAuth.region2depth} ${item.regionAuth.region3depth}`,
         career: career,
-        profileImage: item.profileImage,
         followerCount: parseInt(
           instructors.raw.find(raw => {
             return raw.member_SEQ === item.seq;
