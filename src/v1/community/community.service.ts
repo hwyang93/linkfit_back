@@ -10,6 +10,7 @@ import { CreateCommunityCommentDto } from './dto/create-community-comment.dto';
 import { CommunityComment } from '../../entites/CommunityComment';
 import { CommunityFavorite } from '../../entites/CommunityFavorite';
 import { sortBy } from 'lodash';
+import { MemberFavorite } from '../../entites/MemberFavorite';
 
 @Injectable()
 export class CommunityService {
@@ -248,14 +249,32 @@ export class CommunityService {
       .leftJoinAndSelect('writer.company', 'company')
       .leftJoinAndSelect('community.bookmarks', 'bookmarks')
       .leftJoinAndSelect('community.comments', 'comments')
+      .leftJoinAndSelect(
+        sq => {
+          return sq
+            .select('communityFavorite.favoriteSeq', 'favoriteSeq')
+            .addSelect('COUNT(communityFavorite.favoriteSeq)', 'bookmarkCount')
+            .from(CommunityFavorite, 'communityFavorite')
+            .groupBy('communityFavorite.favoriteSeq');
+        },
+        'bookmark',
+        'community.seq = bookmark.favoriteSeq'
+      )
+      .addSelect('IFNULL(bookmark.bookmarkCount, 0)', 'bookmarkCount')
       .where('communityFavorite.memberSeq = :memberSeq', { memberSeq: member.seq })
-      .getMany();
+      .getRawAndEntities();
 
     const result = [];
-
-    favoriteList.forEach(item => {
+    favoriteList.entities.forEach(item => {
       item.community['isBookmark'] = 'Y';
-      result.push({ ...item });
+      item.community['bookmarkCount'] = parseInt(
+        favoriteList.raw.find(raw => {
+          return raw.communityFavorite_SEQ === item.seq;
+        })?.bookmarkCount
+      );
+      result.push({
+        ...item
+      });
     });
 
     return result;
