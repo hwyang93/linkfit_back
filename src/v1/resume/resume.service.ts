@@ -3,12 +3,12 @@ import { CreateResumeDto } from './dto/create-resume.dto';
 import { UpdateResumeDto } from './dto/update-resume.dto';
 import { Member } from '../../entites/Member';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Recruit } from '../../entites/Recruit';
 import { DataSource, Repository } from 'typeorm';
 import { Resume } from '../../entites/Resume';
 import { Career } from '../../entites/Career';
 import { Education } from '../../entites/Education';
 import { UpdateResumeMasterDto } from './dto/update-resume-master.dto';
+import { calcCareer } from '../../common/utils/utils';
 
 @Injectable()
 export class ResumeService {
@@ -81,15 +81,19 @@ export class ResumeService {
     return await this.resumeRepository.createQueryBuilder('resume').where('resume.writerSeq = :memberSeq', { memberSeq: member.seq }).orderBy('FIELD(resume.isMaster, "Y", "N")').getMany();
   }
 
-  getResume(seq: number) {
-    return this.resumeRepository
+  async getResume(seq: number) {
+    const resume = await this.resumeRepository
       .createQueryBuilder('resume')
       .leftJoinAndSelect('resume.careers', 'careers')
       .leftJoinAndSelect('resume.educations', 'educations')
       .leftJoinAndSelect('resume.writer', 'writer')
       .leftJoinAndSelect('resume.licence', 'licence')
+      .leftJoinAndSelect('writer.regionAuth', 'regionAuth')
       .where('resume.seq=:seq', { seq: seq })
       .getOne();
+    resume.writer['career'] = calcCareer(resume?.careers);
+
+    return resume;
   }
 
   async setMasterResume(seq: number, member: Member) {
