@@ -22,6 +22,7 @@ import { MemberFavorite } from '../../entites/MemberFavorite';
 import { calcCareer } from '../../common/utils/utils';
 import { CommonFile } from '../../entites/CommonFile';
 import { SearchSuggestDto } from './dto/search-suggest.dto';
+import { SearchLicenceDto } from './dto/search-licence.dto';
 
 const bcrypt = require('bcrypt');
 
@@ -324,12 +325,12 @@ export class MemberService {
     return { seq: savedMemberLicence.seq };
   }
 
-  getMemberLicenceList(member: Member) {
-    return this.memberLicenceRepository
-      .createQueryBuilder('memberLicence')
-      .where('memberLicence.memberSeq = :memberSeq', { memberSeq: member.seq })
-      .orderBy('memberLicence.createdAt', 'DESC')
-      .getMany();
+  getMemberLicenceList(searchParams: SearchLicenceDto, member: Member) {
+    const memberLicences = this.memberLicenceRepository.createQueryBuilder('memberLicence').where('memberLicence.memberSeq = :memberSeq', { memberSeq: member.seq });
+    if (searchParams.status) {
+      memberLicences.andWhere('memberLicence.status = :status', { status: searchParams.status });
+    }
+    return memberLicences.orderBy('memberLicence.createdAt', 'DESC').getMany();
   }
 
   async updateMemberLicence(seq: number, member: Member) {

@@ -13,6 +13,7 @@ import { CreateMemberReputationDto } from './dto/create-member-reputation.dto';
 import { UpdateMemberReputationDto } from './dto/update-member-reputation.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { SearchSuggestDto } from './dto/search-suggest.dto';
+import { SearchLicenceDto } from './dto/search-licence.dto';
 
 @ApiTags('member')
 @Controller('member')
@@ -63,8 +64,8 @@ export class MemberController {
   @ApiBearerAuth()
   @ApiOperation({ summary: '내 자격증 목록 조회' })
   @Get('licence')
-  getMemberLicenceList(@MemberDecorator() member: Member) {
-    return this.memberService.getMemberLicenceList(member);
+  getMemberLicenceList(@Query() searchParams: SearchLicenceDto, @MemberDecorator() member: Member) {
+    return this.memberService.getMemberLicenceList(searchParams, member);
   }
 
   @ApiBearerAuth()
