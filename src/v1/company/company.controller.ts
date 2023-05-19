@@ -1,8 +1,8 @@
 import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
 import { CompanyService } from './company.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { MemberDecorator } from '../common/decorators/member.decorator';
-import { Member } from '../entites/Member';
+import { MemberDecorator } from '../../common/decorators/member.decorator';
+import { Member } from '../../entites/Member';
 
 @ApiTags('company')
 @Controller('company')

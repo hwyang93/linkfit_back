@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Member } from '../entites/Member';
+import { Member } from '../../entites/Member';
 import { Repository } from 'typeorm';
-import { MemberReputation } from '../entites/MemberReputation';
-import { Company } from '../entites/Company';
-import { RecruitFavorite } from '../entites/RecruitFavorite';
-import { MemberFavorite } from '../entites/MemberFavorite';
-import { Recruit } from '../entites/Recruit';
+import { MemberReputation } from '../../entites/MemberReputation';
+import { Company } from '../../entites/Company';
+import { RecruitFavorite } from '../../entites/RecruitFavorite';
+import { MemberFavorite } from '../../entites/MemberFavorite';
+import { Recruit } from '../../entites/Recruit';
 
 @Injectable()
 export class CompanyService {
