@@ -33,6 +33,16 @@ export class RecruitService {
       throw new UnauthorizedException('로그인 후 이용해주세요.');
     }
 
+    const memberInfo = await this.memberRepository.createQueryBuilder('member').leftJoinAndSelect('member.company', 'company').where('member.seq = :memberSeq', { memberSeq: member.seq }).getOne();
+
+    if (memberInfo.type === 'COMPANY') {
+      createRecruitDto.companyName = memberInfo.company.companyName;
+      createRecruitDto.address = memberInfo.company.address;
+      createRecruitDto.addressDetail = memberInfo.company.addressDetail;
+      createRecruitDto.lat = memberInfo.company.lat;
+      createRecruitDto.lon = memberInfo.company.lon;
+    }
+
     const recruit = createRecruitDto.toEntity();
 
     recruit.writerSeq = member.seq;
@@ -387,6 +397,7 @@ export class RecruitService {
       .innerJoinAndSelect('recruitFavorite.recruit', 'recruit')
       .leftJoinAndSelect('recruit.writer', 'writer')
       .leftJoinAndSelect('writer.profileImage', 'profileImage')
+      .orderBy('recruitFavorite.updatedAt', 'DESC')
       .getMany();
 
     const result = [];

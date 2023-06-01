@@ -262,6 +262,8 @@ export class CommunityService {
       )
       .addSelect('IFNULL(bookmark.bookmarkCount, 0)', 'bookmarkCount')
       .where('communityFavorite.memberSeq = :memberSeq', { memberSeq: member.seq })
+      .orderBy('communityFavorite.updatedAt', 'DESC')
+
       .getRawAndEntities();
 
     const result = [];
