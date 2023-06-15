@@ -7,6 +7,10 @@ import { AuthService } from './auth.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Member } from '../../entites/Member';
 import { AuthController } from './auth.controller';
+// import { KakaoStrategy } from './kakao.strategy';
+import { EmailAuth } from '../../entites/EmailAuth';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 
 @Module({
   imports: [
@@ -16,7 +20,7 @@ import { AuthController } from './auth.controller';
       secretOrPrivateKey: process.env.JWT_PRIVATE_KEY
       // signOptions: { expiresIn: '10m' }
     }),
-    TypeOrmModule.forFeature([Member])
+    TypeOrmModule.forFeature([Member, EmailAuth])
   ],
   providers: [AuthService, LocalStrategy, JwtStrategy],
   exports: [AuthService],

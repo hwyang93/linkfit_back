@@ -33,10 +33,34 @@ import { InstructorModule } from './v1/instructor/instructor.module';
 import { CommunityModule } from './v1/community/community.module';
 import { CsModule } from './v1/cs/cs.module';
 import { CompanyModule } from './v1/company/company.module';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true }),
+    MailerModule.forRootAsync({
+      useFactory: () => ({
+        transport: {
+          host: process.env.EMAIL_HOST,
+          auth: {
+            user: process.env.EMAIL_AUTH_EMAIL,
+            pass: process.env.EMAIL_AUTH_PASSWORD
+          }
+        },
+        defaults: {
+          from: '"링크핏" <no-reply@linkfit.com>'
+        },
+        template: {
+          dir: __dirname + '/templates',
+          adapter: new EjsAdapter(),
+          options: {
+            strict: true
+          }
+        }
+      })
+    }),
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: process.env.DB_HOST,
