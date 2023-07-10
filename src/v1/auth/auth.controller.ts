@@ -8,6 +8,7 @@ import { MemberDecorator } from '../../common/decorators/member.decorator';
 import { Member } from '../../entites/Member';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateSendEmailDto } from './dto/create-send-email.dto';
+import { CheckAuthNumberDto } from './dto/check-auth-number.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -75,5 +76,11 @@ export class AuthController {
   @Post('email')
   async createSendEmailAuth(@Body() createSendEmailDto: CreateSendEmailDto) {
     return this.authService.createSendEmailAuth(createSendEmailDto);
+  }
+
+  @ApiOperation({ summary: '이메일 인증번호 확인' })
+  @Post('check/email')
+  async checkAuthNumberByEmail(@Body() checkAuthNumberDto: CheckAuthNumberDto) {
+    return this.authService.checkAuthNumberByEmail(checkAuthNumberDto);
   }
 }

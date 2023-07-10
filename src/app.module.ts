@@ -36,10 +36,11 @@ import { CompanyModule } from './v1/company/company.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
+import { EmailAuth } from './entites/EmailAuth';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true }),
+    ConfigModule.forRoot({ envFilePath: '.env_temp', isGlobal: true }),
     MailerModule.forRootAsync({
       useFactory: () => ({
         transport: {
@@ -88,7 +89,8 @@ import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
         RecruitDate,
         Resume,
         Seek,
-        SeekDate
+        SeekDate,
+        EmailAuth
       ],
       charset: 'utf8mb4',
       autoLoadEntities: true,

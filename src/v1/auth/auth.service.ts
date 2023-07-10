@@ -7,6 +7,9 @@ import { JwtService } from '@nestjs/jwt';
 import { Cache } from 'cache-manager';
 import { CreateSendEmailDto } from './dto/create-send-email.dto';
 import { MailerService } from '@nestjs-modules/mailer';
+import dayjs from 'dayjs';
+import { EmailAuth } from '../../entites/EmailAuth';
+import { CheckAuthNumberDto } from './dto/check-auth-number.dto';
 
 const bcrypt = require('bcrypt');
 
@@ -15,6 +18,7 @@ export class AuthService {
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     @InjectRepository(Member) private memberRepository: Repository<Member>,
+    @InjectRepository(EmailAuth) private emailAuthRepository: Repository<EmailAuth>,
     private jwtService: JwtService,
     private readonly mailerService: MailerService
   ) {}
@@ -76,17 +80,42 @@ export class AuthService {
     await this.sendMail(createSendEmailDto.email);
   }
 
+  async checkAuthNumberByEmail(checkAuthNumberDto: CheckAuthNumberDto) {
+    const authInfo = await this.emailAuthRepository
+      .createQueryBuilder('emailAuth')
+      .where('emailAuth.sendToEmail = :email', { email: checkAuthNumberDto.email })
+      .orderBy('emailAuth.issueDate', 'DESC')
+      .limit(1)
+      .getOne();
+
+    const diffDate = dayjs(new Date()).diff(authInfo.issueDate, 'minute', true);
+
+    if (diffDate > 10) {
+      throw new UnauthorizedException('유효시간이 만료된 인증번호 입니다.');
+    }
+
+    if (checkAuthNumberDto.authNumber !== authInfo.authNumber) {
+      throw new UnauthorizedException('일치하지 않은 인증번호 입니다.');
+    }
+  }
+
   async sendMail(email: string) {
     const authNumber = this.makeAuthNumber();
+    const issueDate = dayjs(new Date()).format('YYYY.MM.DD HH:mm:ss');
     await this.mailerService
       .sendMail({
         to: email,
         subject: '[링크핏] 비밀번호 찾기 인증번호',
         template: './sendEmailAuth.ejs',
-        context: { authNumber: authNumber }
+        context: { authNumber: authNumber, issueDate: issueDate }
       })
       .then(result => {
         console.log(result);
+        const emailAuth = new EmailAuth();
+        emailAuth.authNumber = authNumber;
+        emailAuth.sendToEmail = email;
+        emailAuth.issueDate = issueDate;
+        this.emailAuthRepository.save(emailAuth);
       })
       .catch(error => {
         console.log(error);

@@ -19,6 +19,7 @@ import { RecruitDate } from './src/entites/RecruitDate';
 import { Resume } from './src/entites/Resume';
 import { Seek } from './src/entites/Seek';
 import { SeekDate } from './src/entites/SeekDate';
+import { EmailAuth } from './src/entites/EmailAuth';
 
 const dataSource = new DataSource({
   type: 'mysql',
@@ -47,7 +48,8 @@ const dataSource = new DataSource({
     RecruitDate,
     Resume,
     Seek,
-    SeekDate
+    SeekDate,
+    EmailAuth
   ],
   migrations: [__dirname + '/src/migrations/*.ts'],
   charset: 'utf8mb4',

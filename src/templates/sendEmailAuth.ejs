@@ -1,3 +1,26 @@
-<div>
-  <h1>비밀번호 찾기 인증번호는 <%= locals.authNumber %></h1>
+<div class="mail_wrap">
+	<div class="title">Linkfit logo</div>
+	<div class="cont">
+		<h1>Linkfit 이메일 인증코드</h1>
+		<span class="desc">안녕하세요. Linkfit 입니다.<br/>비밀번호 재설정을 위한 이메일 인증을 진행합니다. 아래 발급된 이메일 인증번호를 입력해서 인증을 완료해 주세요. 개인정보 보호를 위해서 인증번호는 발급 후 10분 간 유효합니다.</span>
+	</div>
+	<div class="cont">
+		<span class="desc">인증번호</span>
+		<span class="verifynum"><%= locals.authNumber %></span>
+		<span class="desc">발급시간 : <b><%= locals.issueDate %></b></span>
+	</div>
+	<div class="cont">
+		<span class="desc">이메일 인증을 요청한 적이 없거나, 이 이메일로 Linkfit에 가입한 적이 없을 경우, Linkfit 고객센터로 문의해 주세요.<br><br>Linkfit 고객센터: moverlab.tech@gmail.com</span>
+	</div>
 </div>
+
+<style>
+body {font-family:"noto sans"}
+.mail_wrap {max-width: 764px;padding: 32px 16px;display: block;align-content: center;margin: auto;}
+.mail_wrap .title {width: 100%;border-bottom: 1px solid #dcdcdc;padding-bottom: 8px;}
+.mail_wrap .cont {width: 100%;padding: 32px 0;border-bottom: 1px solid #dcdcdc;}
+h1 {font-size: 32px;font-weight: 700;margin-bottom: 16px;}
+.mail_wrap .desc {font-size: 16px;font-weight: 400;line-height: 150%;}
+.mail_wrap .desc b {color: #3962F3;font-weight: 400;}
+.mail_wrap .verifynum {font-size: 32px;font-weight: 700;margin-top: 8px;padding-bottom: 24px;display: block;}
+</style>

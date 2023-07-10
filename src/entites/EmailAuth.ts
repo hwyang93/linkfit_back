@@ -12,6 +12,9 @@ export class EmailAuth extends BaseEntity {
   @Column({ type: 'char', length: 6, name: 'AUTH_NUMBER' })
   authNumber: string;
 
-  @Column({ type: 'char', length: 1, name: 'IS_EXPIRE' })
+  @Column({ type: 'varchar', length: 20, name: 'ISSUE_DATE' })
+  issueDate: string;
+
+  @Column({ type: 'char', length: 1, name: 'IS_EXPIRE', default: 'N' })
   isExpire: string;
 }
