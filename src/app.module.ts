@@ -40,7 +40,7 @@ import { EmailAuth } from './entites/EmailAuth';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ envFilePath: '.env_temp', isGlobal: true }),
+    ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true }),
     MailerModule.forRootAsync({
       useFactory: () => ({
         transport: {
