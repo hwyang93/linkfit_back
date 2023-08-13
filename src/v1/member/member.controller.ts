@@ -14,6 +14,7 @@ import { UpdateMemberReputationDto } from './dto/update-member-reputation.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { SearchSuggestDto } from './dto/search-suggest.dto';
 import { SearchLicenceDto } from './dto/search-licence.dto';
+import { UpdateMemberPasswordDto } from './dto/update-member-password.dto';
 
 @ApiTags('member')
 @Controller('member')
@@ -185,6 +186,13 @@ export class MemberController {
   @Get(':seq')
   findOne(@Param('seq', ParseIntPipe) seq: number) {
     return this.memberService.getMemberInfoBySeq(seq);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '회원 비밀변호 변경' })
+  @Patch('password')
+  updateUserPassword(@Body() updateMemberPasswordDto: UpdateMemberPasswordDto, @MemberDecorator() member: Member) {
+    return this.memberService.updateMemberPassword(updateMemberPasswordDto, member);
   }
 
   @Patch(':id')

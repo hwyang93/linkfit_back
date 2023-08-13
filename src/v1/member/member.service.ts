@@ -23,6 +23,7 @@ import { calcCareer } from '../../common/utils/utils';
 import { CommonFile } from '../../entites/CommonFile';
 import { SearchSuggestDto } from './dto/search-suggest.dto';
 import { SearchLicenceDto } from './dto/search-licence.dto';
+import { UpdateMemberPasswordDto } from './dto/update-member-password.dto';
 
 const bcrypt = require('bcrypt');
 
@@ -370,6 +371,21 @@ export class MemberService {
     //   where: { seq: seq }
     // });
     return result;
+  }
+
+  async updateMemberPassword(updateMemberPasswordDto: UpdateMemberPasswordDto, member: Member) {
+    const memberInfo = await this.memberRepository.createQueryBuilder('member').where('member.seq = :seq', { seq: member.seq }).addSelect('member.password').getOne();
+    const passwordCompareResult = await bcrypt.compare(updateMemberPasswordDto.password, memberInfo.password);
+
+    if (!passwordCompareResult) {
+      throw new UnauthorizedException('일치하지 않은 비밀번호 입니다.');
+    }
+
+    const encryptedNewPassword = await bcrypt.hash(updateMemberPasswordDto.newPassword, 12);
+
+    await this.memberRepository.createQueryBuilder('member').update().set({ password: encryptedNewPassword }).where({ seq: member.seq }).execute();
+
+    return { seq: member.seq };
   }
 
   async getMemberInfoByEmail(email: string) {
