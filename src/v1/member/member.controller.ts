@@ -195,6 +195,14 @@ export class MemberController {
     return this.memberService.updateMemberPassword(updateMemberPasswordDto, member);
   }
 
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '포트폴리오 등록' })
+  @UseInterceptors(FileInterceptor('file'))
+  @Post('portfolio')
+  createMemberPortfolio(@UploadedFile() file: Express.MulterS3.File, @Body() createMemberLicenceDto: CreateMemberLicenceDto, @MemberDecorator() member: Member) {
+    return this.memberService.createMemberPortfolio(file, member);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateMemberDto: UpdateMemberDto) {
     return this.memberService.update(+id, updateMemberDto);

@@ -24,6 +24,7 @@ import { CommonFile } from '../../entites/CommonFile';
 import { SearchSuggestDto } from './dto/search-suggest.dto';
 import { SearchLicenceDto } from './dto/search-licence.dto';
 import { UpdateMemberPasswordDto } from './dto/update-member-password.dto';
+import { MemberAlbum } from '../../entites/MemberAlbum';
 
 const bcrypt = require('bcrypt');
 
@@ -386,6 +387,38 @@ export class MemberService {
     await this.memberRepository.createQueryBuilder('member').update().set({ password: encryptedNewPassword }).where({ seq: member.seq }).execute();
 
     return { seq: member.seq };
+  }
+
+  async createMemberPortfolio(file: Express.MulterS3.File, member: Member) {
+    const queryRunner = this.datasource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let savedMemberAlbum;
+    let savedCommonFile;
+
+    try {
+      if (file) {
+        const location = file.location;
+        const commonFile = new CommonFile();
+        commonFile.memberSeq = member.seq;
+        commonFile.originFileName = file.originalname;
+        commonFile.originFileUrl = location;
+        savedCommonFile = await queryRunner.manager.getRepository(CommonFile).save(commonFile);
+
+        const memberAlbum = new MemberAlbum();
+        memberAlbum.memberSeq = member.seq;
+        memberAlbum.albumFileSeq = savedCommonFile.seq;
+        savedMemberAlbum = await queryRunner.manager.getRepository(MemberAlbum).save(memberAlbum);
+      }
+      await queryRunner.commitTransaction();
+    } catch (e) {
+      console.log(e);
+      await queryRunner.rollbackTransaction();
+    } finally {
+      await queryRunner.release();
+    }
+    return { seq: savedMemberAlbum.seq };
   }
 
   async getMemberInfoByEmail(email: string) {

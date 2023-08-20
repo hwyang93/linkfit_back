@@ -16,6 +16,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { multerOptionsFactory } from '../../common/utils/multer.option';
 import { CommonFile } from '../../entites/CommonFile';
 import { MemberFavorite } from '../../entites/MemberFavorite';
+import { MemberAlbum } from '../../entites/MemberAlbum';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { MemberFavorite } from '../../entites/MemberFavorite';
       useFactory: multerOptionsFactory,
       inject: [ConfigService]
     }),
-    TypeOrmModule.forFeature([Member, Company, MemberLicence, RegionAuth, Resume, RecruitApply, PositionSuggest, Recruit, MemberReputation, MemberFavorite, CommonFile])
+    TypeOrmModule.forFeature([Member, Company, MemberLicence, RegionAuth, Resume, RecruitApply, PositionSuggest, Recruit, MemberReputation, MemberFavorite, CommonFile, MemberAlbum])
   ],
   controllers: [MemberController],
   providers: [MemberService]

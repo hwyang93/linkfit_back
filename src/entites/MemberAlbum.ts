@@ -9,7 +9,10 @@ export class MemberAlbum {
   @Column({ type: 'int', name: 'MEMBER_SEQ' })
   memberSeq: number;
 
+  @Column({ type: 'int', name: 'ALBUM_FILE_SEQ' })
+  albumFileSeq: number;
+
   @OneToOne(() => CommonFile)
-  @JoinColumn([{ name: 'COMMON_FILE_SEQ' }])
+  @JoinColumn([{ name: 'ALBUM_FILE_SEQ' }])
   image: CommonFile;
 }
