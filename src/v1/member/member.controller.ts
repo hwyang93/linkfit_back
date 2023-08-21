@@ -176,18 +176,6 @@ export class MemberController {
     }
   }
 
-  @ApiOperation({ summary: '회원이 작성한 공고 조회' })
-  @Get(':seq/recruit')
-  getRecruitByMember(@Param('seq', ParseIntPipe) seq: number) {
-    return this.memberService.getRecruitByMember(seq);
-  }
-
-  @ApiOperation({ summary: '회원정보 조회' })
-  @Get(':seq')
-  findOne(@Param('seq', ParseIntPipe) seq: number) {
-    return this.memberService.getMemberInfoBySeq(seq);
-  }
-
   @ApiBearerAuth()
   @ApiOperation({ summary: '회원 비밀변호 변경' })
   @Patch('password')
@@ -201,6 +189,32 @@ export class MemberController {
   @Post('portfolio')
   createMemberPortfolio(@UploadedFile() file: Express.MulterS3.File, @Body() createMemberLicenceDto: CreateMemberLicenceDto, @MemberDecorator() member: Member) {
     return this.memberService.createMemberPortfolio(file, member);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '포트폴리오 목록 조회' })
+  @Get('portfolio')
+  getMemberPortfolio(@MemberDecorator() member: Member) {
+    return this.memberService.getMemberPortfolio(member);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '포트폴리오 목록 조회' })
+  @Get('portfolio')
+  deleteMemberPortfolio(@MemberDecorator() member: Member) {
+    return this.memberService.getMemberPortfolio(member);
+  }
+
+  @ApiOperation({ summary: '회원이 작성한 공고 조회' })
+  @Get(':seq/recruit')
+  getRecruitByMember(@Param('seq', ParseIntPipe) seq: number) {
+    return this.memberService.getRecruitByMember(seq);
+  }
+
+  @ApiOperation({ summary: '회원정보 조회' })
+  @Get(':seq')
+  findOne(@Param('seq', ParseIntPipe) seq: number) {
+    return this.memberService.getMemberInfoBySeq(seq);
   }
 
   @Patch(':id')

@@ -42,6 +42,7 @@ export class MemberService {
     @InjectRepository(MemberReputation) private memberReputationRepository: Repository<MemberReputation>,
     @InjectRepository(MemberFavorite) private memberFavoriteRepository: Repository<MemberFavorite>,
     @InjectRepository(CommonFile) private commonFileRepository: Repository<CommonFile>,
+    @InjectRepository(MemberAlbum) private memberAlbumRepository: Repository<MemberAlbum>,
     private datasource: DataSource
   ) {}
   async join(createMemberDto: CreateMemberDto) {
@@ -419,6 +420,17 @@ export class MemberService {
       await queryRunner.release();
     }
     return { seq: savedMemberAlbum.seq };
+  }
+
+  async getMemberPortfolio(member: Member) {
+    const result = await this.commonFileRepository
+      .createQueryBuilder('commonFile')
+      .where(qb => {
+        const sq = qb.subQuery().select('memberAlbum.albumFileSeq', 'albumFileSeq').from(MemberAlbum, 'memberAlbum').where('memberAlbum.memberSeq = :memberSeq', { memberSeq: member.seq }).getQuery();
+        return 'commonFile.seq IN ' + sq;
+      })
+      .getMany();
+    return result;
   }
 
   async getMemberInfoByEmail(email: string) {
