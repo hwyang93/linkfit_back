@@ -14,8 +14,11 @@ export class Inquiry extends BaseEntity {
   @Column({ type: 'varchar', length: 100, name: 'TITLE' })
   title: string;
 
-  @Column({ type: 'varchar', length: 2000, name: 'CONTENT' })
-  content: string;
+  @Column({ type: 'varchar', length: 2000, name: 'CONTENTS' })
+  contents: string;
+
+  @Column({ type: 'varchar', length: 10, name: 'STATUS' })
+  status: string;
 
   @OneToMany(() => InquiryAnswer, InquiryAnswer => InquiryAnswer.inquiry)
   answers: InquiryAnswer[];
