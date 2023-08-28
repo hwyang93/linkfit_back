@@ -1,17 +1,18 @@
-import { Body, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Cs } from '../../entites/Cs';
 import { SearchCsDto } from './dto/search-cs.dto';
 import { Inquiry } from '../../entites/Inquiry';
 import { CreateInquiryDto } from './dto/create-inquiry.dto';
-import { MemberDecorator } from '../../common/decorators/member.decorator';
 import { Member } from '../../entites/Member';
 import { UpdateInquiryDto } from './dto/update-inquiry.dto';
 
 @Injectable()
 export class CsService {
   constructor(@InjectRepository(Cs) private csRepository: Repository<Cs>, @InjectRepository(Inquiry) private inquiryRepository: Repository<Inquiry>) {}
+
+  async getInquiryItems() {}
 
   async createInquiry(createInquiryDto: CreateInquiryDto, member: Member) {
     const inquiry = createInquiryDto.toEntity();
@@ -24,7 +25,7 @@ export class CsService {
   }
 
   async getInquiryList(member: Member) {
-    return await this.inquiryRepository.createQueryBuilder('inquiry').where('inquiry.writerSeq = :memberSeq', { memberSeq: member.seq }).getMany();
+    return await this.inquiryRepository.createQueryBuilder('inquiry').where('inquiry.writerSeq = :memberSeq', { memberSeq: member.seq }).orderBy('inquiry.updatedAt', 'DESC').getMany();
   }
 
   async getInquiry(seq: number, member: Member) {

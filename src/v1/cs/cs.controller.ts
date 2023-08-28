@@ -5,13 +5,18 @@ import { SearchCsDto } from './dto/search-cs.dto';
 import { CreateInquiryDto } from './dto/create-inquiry.dto';
 import { MemberDecorator } from '../../common/decorators/member.decorator';
 import { Member } from '../../entites/Member';
-import { UpdateMemberPasswordDto } from '../member/dto/update-member-password.dto';
 import { UpdateInquiryDto } from './dto/update-inquiry.dto';
 
 @ApiTags('cs')
 @Controller('cs')
 export class CsController {
   constructor(private readonly csService: CsService) {}
+
+  @ApiOperation({ summary: '1:1문의 문의항목 조회' })
+  @Post('inquiry/items')
+  getInquiryItems() {
+    return this.csService.getInquiryItems();
+  }
 
   @ApiBearerAuth()
   @ApiOperation({ summary: '1:1문의 등록' })
