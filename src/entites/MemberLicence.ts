@@ -21,6 +21,9 @@ export class MemberLicence extends BaseEntity {
   @Column({ type: 'varchar', length: 30, name: 'ISSUER' })
   issuer: string;
 
+  @Column({ type: 'varchar', length: 10, name: 'ISSUE_DATE' })
+  issueDate: string;
+
   @Column({ type: 'varchar', length: 10, name: 'STATUS' })
   status: string;
 

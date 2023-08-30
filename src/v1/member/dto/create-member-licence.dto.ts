@@ -11,6 +11,9 @@ export class CreateMemberLicenceDto {
   @ApiProperty({ description: '발급기관' })
   issuer: string;
 
+  @ApiProperty({ description: '발급일자' })
+  issueDate: string;
+
   @ApiProperty({ description: '자격증 사본' })
   file: Express.MulterS3.File;
 
@@ -19,6 +22,7 @@ export class CreateMemberLicenceDto {
     entity.field = this.field;
     entity.licenceNumber = this.licenceNumber;
     entity.issuer = this.issuer;
+    entity.issueDate = this.issueDate;
 
     return entity;
   }
