@@ -317,7 +317,7 @@ export class RecruitService {
       .createQueryBuilder('recruit')
       .update()
       .set({ viewCount: recruitInfo.viewCount + 1 })
-      .where('recruit.seq', { seq })
+      .where({ seq })
       .execute();
 
     return { ...recruitInfo, applyInfo };
