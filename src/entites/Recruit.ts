@@ -63,6 +63,9 @@ export class Recruit extends BaseEntity {
   @Column({ type: 'int', name: 'WRITER_SEQ' })
   writerSeq: number;
 
+  @Column({ type: 'int', name: 'VIEW_COUNT', default: () => 0 })
+  viewCount: number;
+
   @ManyToOne(() => Member)
   @JoinColumn([{ name: 'WRITER_SEQ' }])
   writer: Member;

@@ -25,6 +25,8 @@ import { SearchSuggestDto } from './dto/search-suggest.dto';
 import { SearchLicenceDto } from './dto/search-licence.dto';
 import { UpdateMemberPasswordDto } from './dto/update-member-password.dto';
 import { MemberAlbum } from '../../entites/MemberAlbum';
+import { EmailAuth } from '../../entites/EmailAuth';
+import dayjs from 'dayjs';
 
 const bcrypt = require('bcrypt');
 
@@ -43,6 +45,7 @@ export class MemberService {
     @InjectRepository(MemberFavorite) private memberFavoriteRepository: Repository<MemberFavorite>,
     @InjectRepository(CommonFile) private commonFileRepository: Repository<CommonFile>,
     @InjectRepository(MemberAlbum) private memberAlbumRepository: Repository<MemberAlbum>,
+    @InjectRepository(EmailAuth) private emailAuthRepository: Repository<EmailAuth>,
     private datasource: DataSource
   ) {}
   async join(createMemberDto: CreateMemberDto) {
@@ -376,18 +379,38 @@ export class MemberService {
   }
 
   async updateMemberPassword(updateMemberPasswordDto: UpdateMemberPasswordDto, member: Member) {
-    const memberInfo = await this.memberRepository.createQueryBuilder('member').where('member.seq = :seq', { seq: member.seq }).addSelect('member.password').getOne();
-    const passwordCompareResult = await bcrypt.compare(updateMemberPasswordDto.password, memberInfo.password);
+    const encryptedNewPassword = await bcrypt.hash(updateMemberPasswordDto.newPassword, 12);
+    let updateMemberInfo;
+    if (updateMemberPasswordDto.isCheckAuthCode === 'N') {
+      const memberInfo = await this.memberRepository.createQueryBuilder('member').where('member.seq = :seq', { seq: member.seq }).addSelect('member.password').getOne();
 
-    if (!passwordCompareResult) {
-      throw new UnauthorizedException('일치하지 않은 비밀번호 입니다.');
+      const passwordCompareResult = await bcrypt.compare(updateMemberPasswordDto.password, memberInfo.password);
+      if (!passwordCompareResult) {
+        throw new UnauthorizedException('일치하지 않은 비밀번호 입니다.');
+      }
+
+      updateMemberInfo = await this.memberRepository.createQueryBuilder('member').update().set({ password: encryptedNewPassword }).where({ seq: member.seq }).execute();
     }
 
-    const encryptedNewPassword = await bcrypt.hash(updateMemberPasswordDto.newPassword, 12);
+    if (updateMemberPasswordDto.isCheckAuthCode === 'Y') {
+      const authInfo = await this.emailAuthRepository
+        .createQueryBuilder('emailAuth')
+        .where('emailAuth.sendToEmail = :email', { email: updateMemberPasswordDto.email })
+        .orderBy('emailAuth.issueDate', 'DESC')
+        .limit(1)
+        .getOne();
 
-    await this.memberRepository.createQueryBuilder('member').update().set({ password: encryptedNewPassword }).where({ seq: member.seq }).execute();
+      const today = new Date();
+      const compareDate = dayjs(authInfo.issueDate).diff(today, 'd');
 
-    return { seq: member.seq };
+      if (compareDate > 0) {
+        throw new UnauthorizedException('허용되지 않은 접근입니다.');
+      }
+
+      updateMemberInfo = await this.memberRepository.createQueryBuilder('member').update().set({ password: encryptedNewPassword }).where({ email: updateMemberPasswordDto.email }).execute();
+    }
+
+    return { seq: updateMemberInfo.seq };
   }
 
   async createMemberPortfolio(file: Express.MulterS3.File, member: Member) {

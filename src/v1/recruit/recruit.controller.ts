@@ -91,7 +91,7 @@ export class RecruitController {
   @ApiBearerAuth()
   @ApiOperation({ summary: '구인 공고 지원 상세 조회' })
   @Get('apply/:seq')
-  getRecruitApply(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
+  getRecruitApply(@Param('seq', ParseIntPipe) seq: number, @Query() searchParams: SearchRecruitApplyDto, @MemberDecorator() member: Member) {
     return this.recruitService.getRecruitApply(seq, member);
   }
 

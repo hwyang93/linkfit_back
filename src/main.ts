@@ -12,6 +12,7 @@ async function bootstrap() {
   app.enableCors({
     origin: true
   });
+
   app.setGlobalPrefix('api/v1');
   const port = process.env.PORT || 3000;
   app.useGlobalPipes(
@@ -36,6 +37,7 @@ async function bootstrap() {
     .addTag('community', '커뮤니티 관련')
     .addTag('cs', '고객센터 관련')
     .addTag('company', '업체 관련')
+    .addTag('system', '시스템 관련')
     .build();
   const document = SwaggerModule.createDocument(app, config, { ignoreGlobalPrefix: true });
   SwaggerModule.setup('docs', app, document);

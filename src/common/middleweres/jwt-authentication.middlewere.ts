@@ -14,7 +14,7 @@ export class JwtAuthenticationMiddleware implements NestMiddleware {
         } else {
           verifyInfo = jwt.verify(token, process.env.JWT_PRIVATE_KEY);
         }
-        req.member = pick(verifyInfo, ['seq', 'email']);
+        req.member = pick(verifyInfo, ['seq', 'email', 'address', 'addressDetail']);
       } catch (e) {
         throw new UnauthorizedException('expired');
       }

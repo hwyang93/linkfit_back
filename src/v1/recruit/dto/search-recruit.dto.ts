@@ -25,4 +25,7 @@ export class SearchRecruitDto extends PaginationDto {
 
   @ApiProperty({ description: '기간', required: false })
   period: string;
+
+  @ApiProperty({ description: '정렬', enum: ['RECENT, VIEW'], default: 'RECENT', required: false })
+  sort: string;
 }

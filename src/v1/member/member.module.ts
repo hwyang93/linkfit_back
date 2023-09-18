@@ -17,6 +17,7 @@ import { multerOptionsFactory } from '../../common/utils/multer.option';
 import { CommonFile } from '../../entites/CommonFile';
 import { MemberFavorite } from '../../entites/MemberFavorite';
 import { MemberAlbum } from '../../entites/MemberAlbum';
+import { EmailAuth } from '../../entites/EmailAuth';
 
 @Module({
   imports: [
@@ -25,7 +26,7 @@ import { MemberAlbum } from '../../entites/MemberAlbum';
       useFactory: multerOptionsFactory,
       inject: [ConfigService]
     }),
-    TypeOrmModule.forFeature([Member, Company, MemberLicence, RegionAuth, Resume, RecruitApply, PositionSuggest, Recruit, MemberReputation, MemberFavorite, CommonFile, MemberAlbum])
+    TypeOrmModule.forFeature([Member, Company, MemberLicence, RegionAuth, Resume, RecruitApply, PositionSuggest, Recruit, MemberReputation, MemberFavorite, CommonFile, MemberAlbum, EmailAuth])
   ],
   controllers: [MemberController],
   providers: [MemberService]

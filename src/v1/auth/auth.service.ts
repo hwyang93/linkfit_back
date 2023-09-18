@@ -1,4 +1,4 @@
-import { CACHE_MANAGER, ConflictException, HttpException, Inject, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { CACHE_MANAGER, Inject, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Repository } from 'typeorm';
@@ -10,6 +10,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import dayjs from 'dayjs';
 import { EmailAuth } from '../../entites/EmailAuth';
 import { CheckAuthNumberDto } from './dto/check-auth-number.dto';
+import { FindEmailDto } from './dto/find-email.dto';
 
 const bcrypt = require('bcrypt');
 
@@ -41,7 +42,7 @@ export class AuthService {
   }
 
   async login(member: any) {
-    const payload = { email: member.email, seq: member.seq };
+    const payload = { email: member.email, seq: member.seq, address: member.address, addressDetail: member.addressDetail };
     const accessToken = this.jwtService.sign(payload, { secret: process.env.JWT_PRIVATE_KEY });
 
     const refreshToken = this.jwtService.sign(payload, { expiresIn: '30d', secret: process.env.JWT_PUBLIC_KEY });
@@ -76,6 +77,17 @@ export class AuthService {
     console.log(res);
   }
 
+  async getFindEmail(findEmailDto: FindEmailDto) {
+    return await this.memberRepository
+      .createQueryBuilder('member')
+      .select('member.email')
+      .addSelect('member.createdAt')
+      .addSelect("DATE_FORMAT(member.createdAt, '%Y.%m.%d') ", 'member_CREATED_AT')
+      .where('member.name = :name', { name: findEmailDto.name })
+      .andWhere('member.phone = :phone', { phone: findEmailDto.phone })
+      .getMany();
+  }
+
   async createSendEmailAuth(createSendEmailDto: CreateSendEmailDto) {
     await this.sendMail(createSendEmailDto.email);
   }
@@ -107,10 +119,12 @@ export class AuthService {
         to: email,
         subject: '[링크핏] 비밀번호 찾기 인증번호',
         template: './sendEmailAuth.ejs',
-        context: { authNumber: authNumber, issueDate: issueDate }
+        context: {
+          authNumber: authNumber,
+          issueDate: issueDate
+        }
       })
       .then(result => {
-        console.log(result);
         const emailAuth = new EmailAuth();
         emailAuth.authNumber = authNumber;
         emailAuth.sendToEmail = email;

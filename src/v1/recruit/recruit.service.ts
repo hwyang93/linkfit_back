@@ -14,6 +14,7 @@ import { RecruitFavorite } from '../../entites/RecruitFavorite';
 import { CancelRecruitApplyDto } from './dto/cancel-recruit-apply.dto';
 import { SearchRecruitApplyDto } from './dto/search-recruit-apply.dto';
 import { MemberFavorite } from '../../entites/MemberFavorite';
+import dayjs from 'dayjs';
 const _ = require('lodash');
 
 @Injectable()
@@ -79,7 +80,7 @@ export class RecruitService {
     return { seq: savedRecruit.seq };
   }
 
-  async getRecruitListByMy(searchParam: SearchRecruitDto, member: Member) {
+  async getRecruitListByMy(searchParams: SearchRecruitDto, member: Member) {
     const qb = this.recruitRepository
       .createQueryBuilder('recruit')
       .leftJoinAndSelect('recruit.writer', 'writer')
@@ -87,8 +88,25 @@ export class RecruitService {
       .select(['recruit', 'writer.name', 'company.companyName'])
       .where('recruit.writerSeq = :writerSeq', { writerSeq: member.seq });
 
-    if (searchParam.status) {
-      qb.andWhere('recruit.status = :status', { status: searchParam.status });
+    if (searchParams.period) {
+      let startDate = dayjs(new Date()).format('YYYY-MM-DD');
+      if (searchParams.period === 'ONE_WEEK') {
+        startDate = dayjs(new Date()).add(-7, 'day').format('YYYY-MM-DD');
+      }
+      if (searchParams.period === 'ONE_MONTH') {
+        startDate = dayjs(new Date()).add(-1, 'month').format('YYYY-MM-DD');
+      }
+      if (searchParams.period === 'TWO_MONTH') {
+        startDate = dayjs(new Date()).add(-2, 'month').format('YYYY-MM-DD');
+      }
+      if (searchParams.period === 'THREE_MONTH') {
+        startDate = dayjs(new Date()).add(-3, 'month').format('YYYY-MM-DD');
+      }
+      qb.andWhere('recruit.updatedAt >= :startDate', { startDate });
+    }
+
+    if (searchParams.status) {
+      qb.andWhere('recruit.status = :status', { status: searchParams.status });
     }
 
     return qb.withDeleted().orderBy('recruit.updatedAt', 'DESC').getMany();
@@ -102,6 +120,7 @@ export class RecruitService {
       .leftJoinAndSelect('writer.profileImage', 'profileImage')
       .leftJoinAndSelect('writer.company', 'company')
       .where('recruit.status = "ING"')
+      .andWhere('recruit.address like :address', { address: `${member.address} ${member.addressDetail}%` })
       .select(['recruit', 'writer.name', 'company.companyName', 'profileImage'])
       .addSelect(sq => {
         return sq
@@ -111,9 +130,9 @@ export class RecruitService {
           .andWhere('bookmarks.memberSeq = :memberSeq', { memberSeq: member.seq });
       }, 'isBookmark');
 
-    if (searchParam.area) {
-      qb.andWhere('recruit.address IN (:address)', { address: `%${searchParam.area}%` });
-    }
+    // if (searchParam.area) {
+    //   qb.andWhere('recruit.address IN (:address)', { address: `%${searchParam.area}%` });
+    // }
     if (searchParam.fields) {
       qb.andWhere('recruit.position IN (:fields)', { fields: searchParam.fields });
     }
@@ -124,7 +143,12 @@ export class RecruitService {
       qb.andWhere('dates.time IN (:times)', { times: searchParam.times });
     }
 
-    const recruitList = await qb.orderBy('recruit.updatedAt', 'DESC').getRawAndEntities();
+    if (searchParam.sort === 'VIEW') {
+      qb.orderBy('recruit.updatedAt', 'DESC');
+    } else {
+      qb.orderBy('recruit.viewCount', 'DESC');
+    }
+    const recruitList = await qb.getRawAndEntities();
 
     // recruitList = await recruitList.orderBy('recruit.updatedAt', 'DESC').getRawAndEntities();
 
@@ -197,7 +221,8 @@ export class RecruitService {
       //     .andWhere('bookmarks.memberSeq = :memberSeq', { memberSeq: member.seq });
       // }, 'isBookmark')
       .addSelect("IF(ISNULL(bookmark.favoriteSeq), 'N', 'Y')", 'isBookmark')
-      .where('recruit.status = "ING"');
+      .where('recruit.status = "ING"')
+      .andWhere('recruit.address like :address', { address: `${member.address} ${member.addressDetail}%` });
     const recruitList = await qb.orderBy({ 'bookmark.bookmarkCount': 'DESC', 'recruit.updatedAt': 'DESC' }).getRawAndEntities();
     const result = [];
     recruitList.entities.forEach(item => {
@@ -287,6 +312,14 @@ export class RecruitService {
       });
       followInfo ? (recruitInfo.writer['isFollow'] = 'Y') : (recruitInfo.writer['isFollow'] = 'N');
     }
+
+    await this.recruitRepository
+      .createQueryBuilder('recruit')
+      .update()
+      .set({ viewCount: recruitInfo.viewCount + 1 })
+      .where('recruit.seq', { seq })
+      .execute();
+
     return { ...recruitInfo, applyInfo };
   }
 
@@ -343,6 +376,20 @@ export class RecruitService {
       .where('recruitApply.memberSeq = :memberSeq', { memberSeq: member.seq })
       .leftJoinAndSelect('recruitApply.recruit', 'recruit');
     if (searchParams.period) {
+      let startDate = dayjs(new Date()).format('YYYY-MM-DD');
+      if (searchParams.period === 'ONE_WEEK') {
+        startDate = dayjs(new Date()).add(-7, 'day').format('YYYY-MM-DD');
+      }
+      if (searchParams.period === 'ONE_MONTH') {
+        startDate = dayjs(new Date()).add(-1, 'month').format('YYYY-MM-DD');
+      }
+      if (searchParams.period === 'TWO_MONTH') {
+        startDate = dayjs(new Date()).add(-2, 'month').format('YYYY-MM-DD');
+      }
+      if (searchParams.period === 'THREE_MONTH') {
+        startDate = dayjs(new Date()).add(-3, 'month').format('YYYY-MM-DD');
+      }
+      recruitApply.andWhere('recruitApply.updatedAt >= :startDate', { startDate });
     }
     if (searchParams.status) {
       recruitApply.andWhere('recruitApply.status = :status', { status: searchParams.status });
@@ -385,6 +432,10 @@ export class RecruitService {
 
     if (recruit.writerSeq !== member.seq && recruitApply.memberSeq !== member.seq) {
       throw new UnauthorizedException('허용되지 않은 접근입니다.');
+    }
+
+    if (recruit.writerSeq === member.seq) {
+      await this.recruitApplyRepository.createQueryBuilder('recruitApply').update().set({ status: 'VIEWED' }).where({ seq }).execute();
     }
 
     return recruitApply;
@@ -452,7 +503,8 @@ export class RecruitService {
 
   async deleteRecruitBookmark(seq: number, member: Member) {
     const recruitBookmark = await this.recruitFavoriteRepository.createQueryBuilder('recruitFavorite').where('recruitFavorite.favoriteSeq = :seq', { seq }).getOne();
-    if (recruitBookmark.memberSeq !== member.seq) {
+    console.log(recruitBookmark);
+    if (recruitBookmark?.memberSeq !== member.seq) {
       throw new UnauthorizedException('허용되지 않은 접근입니다.');
     }
     await this.recruitFavoriteRepository

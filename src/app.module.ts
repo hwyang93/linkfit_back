@@ -37,6 +37,9 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
 import { EmailAuth } from './entites/EmailAuth';
+import { CommonCode } from './entites/CommonCode';
+import { SystemModule } from './v1/system/system.module';
+import { RecruitFavorite } from './entites/RecruitFavorite';
 
 @Module({
   imports: [
@@ -86,15 +89,18 @@ import { EmailAuth } from './entites/EmailAuth';
         Inquiry,
         InquiryAnswer,
         Recruit,
+        RecruitFavorite,
         RecruitDate,
         Resume,
         Seek,
         SeekDate,
-        EmailAuth
+        EmailAuth,
+        CommonCode
       ],
       charset: 'utf8mb4',
       autoLoadEntities: true,
       synchronize: false,
+      // synchronize: true,
       logging: true,
       keepConnectionAlive: true
     }),
@@ -105,7 +111,8 @@ import { EmailAuth } from './entites/EmailAuth';
     InstructorModule,
     CommunityModule,
     CsModule,
-    CompanyModule
+    CompanyModule,
+    SystemModule
   ],
   controllers: [AppController],
   providers: [AppService]

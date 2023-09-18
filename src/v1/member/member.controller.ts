@@ -177,7 +177,7 @@ export class MemberController {
   }
 
   @ApiBearerAuth()
-  @ApiOperation({ summary: '회원 비밀변호 변경' })
+  @ApiOperation({ summary: '회원 비밀번호 변경' })
   @Patch('password')
   updateUserPassword(@Body() updateMemberPasswordDto: UpdateMemberPasswordDto, @MemberDecorator() member: Member) {
     return this.memberService.updateMemberPassword(updateMemberPasswordDto, member);

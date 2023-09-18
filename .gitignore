@@ -50,5 +50,6 @@ Thumbs.db
 *.wmv
 
 .env
+.env_temp
 
 

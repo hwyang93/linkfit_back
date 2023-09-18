@@ -20,10 +20,11 @@ export class InstructorService {
   ) {}
 
   async getInstructorList(searchParam: SearchInstructorDto, member: Member) {
-    const { regionAuth } = await this.memberRepository.createQueryBuilder('member').where('member.seq = :seq', { seq: member.seq }).leftJoinAndSelect('member.regionAuth', 'regionAuth').getOne();
-    if (!regionAuth) {
-      throw new UnauthorizedException('지역 인증이 필요합니다.');
-    }
+    // const { regionAuth } = await this.memberRepository.createQueryBuilder('member').where('member.seq = :seq', { seq: member.seq }).leftJoinAndSelect('member.regionAuth', 'regionAuth').getOne();
+    // if (!regionAuth) {
+    //   throw new UnauthorizedException('지역 인증이 필요합니다.');
+    // }
+
     let instructors;
 
     if (searchParam.fields) {
@@ -31,10 +32,12 @@ export class InstructorService {
         .createQueryBuilder('member')
         .where('member.type = :type', { type: 'INSTRUCTOR' })
         .andWhere('member.isOpenProfile = :isOpenProfile', { isOpenProfile: 'Y' })
-        .andWhere('regionAuth.region2depth = :region2depth', { region2depth: regionAuth.region2depth })
+        // .andWhere('regionAuth.region2depth = :region2depth', { region2depth: regionAuth.region2depth })
+        .andWhere('member.address = :address', { address: member.address })
+        .andWhere('member.addressDetail = :addressDetail', { addressDetail: member.addressDetail })
         .andWhere('resumes.isMaster = :isMaster', { isMaster: 'Y' })
         .andWhere('member.field IN (:fields)', { fields: searchParam.fields })
-        .leftJoinAndSelect('member.regionAuth', 'regionAuth')
+        // .leftJoinAndSelect('member.regionAuth', 'regionAuth')
         .leftJoinAndSelect('member.profileImage', 'profileImage')
         .leftJoinAndSelect('member.resumes', 'resumes')
         .leftJoinAndSelect('resumes.careers', 'careers')
@@ -49,7 +52,8 @@ export class InstructorService {
           'follower',
           'member.seq = follower.favoriteSeq'
         )
-        .select(['member.seq', 'member.name', 'member.nickname', 'member.field', 'regionAuth.region1depth', 'regionAuth.region2depth', 'regionAuth.region3depth', 'resumes', 'careers', 'profileImage'])
+        // .select(['member.seq', 'member.name', 'member.nickname', 'member.field', 'regionAuth.region1depth', 'regionAuth.region2depth', 'regionAuth.region3depth', 'resumes', 'careers', 'profileImage'])
+        .select(['member.seq', 'member.name', 'member.nickname', 'member.field', 'resumes', 'careers', 'profileImage'])
         .addSelect('IFNULL(follower.followerCount, 0)', 'followerCount')
         .orderBy('member.updatedAt', 'DESC')
         .getRawAndEntities();
@@ -58,9 +62,11 @@ export class InstructorService {
         .createQueryBuilder('member')
         .where('member.type = :type', { type: 'INSTRUCTOR' })
         .andWhere('member.isOpenProfile = :isOpenProfile', { isOpenProfile: 'Y' })
-        .andWhere('regionAuth.region2depth = :region2depth', { region2depth: regionAuth.region2depth })
+        // .andWhere('regionAuth.region2depth = :region2depth', { region2depth: regionAuth.region2depth })
+        .andWhere('member.address = :address', { address: member.address })
+        .andWhere('member.addressDetail = :addressDetail', { addressDetail: member.addressDetail })
         .andWhere('resumes.isMaster = :isMaster', { isMaster: 'Y' })
-        .leftJoinAndSelect('member.regionAuth', 'regionAuth')
+        // .leftJoinAndSelect('member.regionAuth', 'regionAuth')
         .leftJoinAndSelect('member.profileImage', 'profileImage')
         .leftJoinAndSelect('member.resumes', 'resumes')
         .leftJoinAndSelect('resumes.careers', 'careers')
@@ -75,7 +81,8 @@ export class InstructorService {
           'follower',
           'member.seq = follower.favoriteSeq'
         )
-        .select(['member.seq', 'member.name', 'member.nickname', 'member.field', 'regionAuth.region1depth', 'regionAuth.region2depth', 'regionAuth.region3depth', 'resumes', 'careers', 'profileImage'])
+        // .select(['member.seq', 'member.name', 'member.nickname', 'member.field', 'regionAuth.region1depth', 'regionAuth.region2depth', 'regionAuth.region3depth', 'resumes', 'careers', 'profileImage'])
+        .select(['member.seq', 'member.name', 'member.nickname', 'member.field', 'member.address', 'member.addressDetail', 'resumes', 'careers', 'profileImage'])
         .addSelect('IFNULL(follower.followerCount, 0)', 'followerCount')
         .orderBy('member.updatedAt', 'DESC')
         .getRawAndEntities();
@@ -91,7 +98,8 @@ export class InstructorService {
         name: item.name,
         nickname: item.nickname,
         field: item.field,
-        address: `${item.regionAuth.region1depth} ${item.regionAuth.region2depth} ${item.regionAuth.region3depth}`,
+        // address: `${item.regionAuth.region1depth} ${item.regionAuth.region2depth} ${item.regionAuth.region3depth}`,
+        address: `${item.address} ${item.addressDetail}`,
         career: career,
         profileImage: item.profileImage,
         followerCount: parseInt(
@@ -110,14 +118,14 @@ export class InstructorService {
   }
 
   async getRecruitRecommendedList(member: Member) {
-    const { regionAuth } = await this.memberRepository.createQueryBuilder('member').where('member.seq = :seq', { seq: member.seq }).leftJoinAndSelect('member.regionAuth', 'regionAuth').getOne();
-    if (!regionAuth) {
-      throw new UnauthorizedException('지역 인증이 필요합니다.');
-    }
+    // const { regionAuth } = await this.memberRepository.createQueryBuilder('member').where('member.seq = :seq', { seq: member.seq }).leftJoinAndSelect('member.regionAuth', 'regionAuth').getOne();
+    // if (!regionAuth) {
+    //   throw new UnauthorizedException('지역 인증이 필요합니다.');
+    // }
     const instructors = await this.memberRepository
       .createQueryBuilder('member')
       .limit(8)
-      .leftJoinAndSelect('member.regionAuth', 'regionAuth')
+      // .leftJoinAndSelect('member.regionAuth', 'regionAuth')
       .leftJoinAndSelect('member.profileImage', 'profileImage')
       .leftJoinAndSelect('member.resumes', 'resumes')
       .leftJoinAndSelect('resumes.careers', 'careers')
@@ -139,12 +147,15 @@ export class InstructorService {
         'follow',
         'member.seq = follow.favoriteSeq'
       )
-      .select(['member.seq', 'member.name', 'member.nickname', 'member.field', 'regionAuth.region1depth', 'regionAuth.region2depth', 'regionAuth.region3depth', 'resumes', 'careers', 'profileImage'])
+      // .select(['member.seq', 'member.name', 'member.nickname', 'member.field', 'regionAuth.region1depth', 'regionAuth.region2depth', 'regionAuth.region3depth', 'resumes', 'careers', 'profileImage'])
+      .select(['member.seq', 'member.name', 'member.nickname', 'member.field', 'member.address', 'member.addressDetail', 'resumes', 'careers', 'profileImage'])
       .addSelect('IFNULL(follower.followerCount, 0)', 'followerCount')
       .addSelect("IF(ISNULL(follow.favoriteSeq), 'N', 'Y')", 'isFollow')
       .where('member.type = :type', { type: 'INSTRUCTOR' })
       .andWhere('member.isOpenProfile = :isOpenProfile', { isOpenProfile: 'Y' })
-      .andWhere('regionAuth.region2depth = :region2depth', { region2depth: regionAuth.region2depth })
+      // .andWhere('regionAuth.region2depth = :region2depth', { region2depth: regionAuth.region2depth })
+      .andWhere('member.address = :address', { address: member.address })
+      .andWhere('member.addressDetail = :addressDetail', { addressDetail: member.addressDetail })
       .andWhere('resumes.isMaster = :isMaster', { isMaster: 'Y' })
       .orderBy({ 'follower.followerCount': 'DESC', 'member.updatedAt': 'DESC' })
       .getRawAndEntities();
@@ -155,7 +166,8 @@ export class InstructorService {
       const career = calcCareer(item.resumes[0].careers);
       result.push({
         ...item,
-        address: `${item.regionAuth.region1depth} ${item.regionAuth.region2depth} ${item.regionAuth.region3depth}`,
+        // address: `${item.regionAuth.region1depth} ${item.regionAuth.region2depth} ${item.regionAuth.region3depth}`,
+        address: `${item.address} ${item.addressDetail}`,
         career: career,
         followerCount: parseInt(
           instructors.raw.find(raw => {
@@ -175,7 +187,7 @@ export class InstructorService {
       .createQueryBuilder('member')
       .where('member.seq = :seq', { seq: seq })
       .andWhere('resumes.isMaster = :isMaster', { isMaster: 'Y' })
-      .leftJoinAndSelect('member.regionAuth', 'regionAuth')
+      // .leftJoinAndSelect('member.regionAuth', 'regionAuth')
       .leftJoinAndSelect('member.resumes', 'resumes')
       .leftJoinAndSelect('member.links', 'links')
       .leftJoinAndSelect('resumes.careers', 'careers')
@@ -185,9 +197,11 @@ export class InstructorService {
         'member.nickname',
         'member.field',
         'member.intro',
-        'regionAuth.region1depth',
-        'regionAuth.region2depth',
-        'regionAuth.region3depth',
+        'member.address',
+        'member.addressDetail',
+        // 'regionAuth.region1depth',
+        // 'regionAuth.region2depth',
+        // 'regionAuth.region3depth',
         'resumes',
         'careers',
         'links'
@@ -212,7 +226,8 @@ export class InstructorService {
       seq: instructor.seq,
       name: instructor.name,
       nickname: instructor.nickname,
-      address: `${instructor.regionAuth.region1depth} ${instructor.regionAuth.region2depth} ${instructor.regionAuth.region3depth}`,
+      // address: `${instructor.regionAuth.region1depth} ${instructor.regionAuth.region2depth} ${instructor.regionAuth.region3depth}`,
+      address: `${instructor.address} ${instructor.addressDetail}`,
       intro: instructor.intro,
       career: career,
       links: instructor.links,
@@ -264,6 +279,7 @@ export class InstructorService {
 
   async deleteInstructorFollow(seq: number, member: Member) {
     const instructorFollow = await this.memberFavoriteRepository.createQueryBuilder('memberFavorite').where({ seq }).getOne();
+    console.log(instructorFollow);
     if (instructorFollow.memberSeq !== member.seq) {
       throw new UnauthorizedException('허용되지 않은 접근입니다.');
     }

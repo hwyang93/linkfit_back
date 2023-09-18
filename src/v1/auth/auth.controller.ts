@@ -1,4 +1,4 @@
-import { Body, CACHE_MANAGER, Controller, Get, Inject, Post, Req, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Body, CACHE_MANAGER, Controller, Get, Inject, Post, Query, Req, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { LocalAuthGuard } from './local-auth.guard';
@@ -9,6 +9,7 @@ import { Member } from '../../entites/Member';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateSendEmailDto } from './dto/create-send-email.dto';
 import { CheckAuthNumberDto } from './dto/check-auth-number.dto';
+import { FindEmailDto } from './dto/find-email.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -71,6 +72,12 @@ export class AuthController {
   //   // return member.email;
   //   return res.end();
   // }
+
+  @ApiOperation({ summary: '이메일 찾기' })
+  @Get('email')
+  async getFindEmail(@Query() findEmailDto: FindEmailDto) {
+    return this.authService.getFindEmail(findEmailDto);
+  }
 
   @ApiOperation({ summary: '이메일 인증번호 발송' })
   @Post('email')
