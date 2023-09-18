@@ -1,10 +1,11 @@
 import { Controller, Get, InternalServerErrorException, NotFoundException, Param, ParseIntPipe } from '@nestjs/common';
 import { SystemService } from './system.service';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import axios from 'axios';
 import { convertRegionMainCode, convertRegionMainName, convertRegionMiddleCode } from '../../common/utils/utils';
 import { orderBy } from 'lodash';
 
+@ApiTags('system')
 @Controller('system')
 export class SystemController {
   constructor(private readonly systemService: SystemService) {}
