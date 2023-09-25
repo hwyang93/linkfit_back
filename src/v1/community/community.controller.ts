@@ -66,6 +66,7 @@ export class CommunityController {
     return this.communityService.createCommunityComment(seq, createCommunityCommentDto, member);
   }
 
+  @ApiBearerAuth()
   @ApiOperation({ summary: '커뮤니티 게시글 상세 조회' })
   @Get(':seq')
   getCommunity(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
