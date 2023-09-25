@@ -177,6 +177,20 @@ export class MemberController {
   }
 
   @ApiBearerAuth()
+  @ApiOperation({ summary: '회원 팔로우 등록' })
+  @Post('follow/:seq')
+  createMemberFollow(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
+    return this.memberService.createMemberFollow(seq, member);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '회원 팔로우 삭제' })
+  @Delete('follow/:seq')
+  deleteMemberFollow(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
+    return this.memberService.deleteMemberFollow(seq, member);
+  }
+
+  @ApiBearerAuth()
   @ApiOperation({ summary: '회원 비밀번호 변경' })
   @Patch('password')
   updateUserPassword(@Body() updateMemberPasswordDto: UpdateMemberPasswordDto, @MemberDecorator() member: Member) {

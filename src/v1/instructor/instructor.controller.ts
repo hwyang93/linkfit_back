@@ -33,14 +33,14 @@ export class InstructorController {
   }
 
   @ApiBearerAuth()
-  @ApiOperation({ summary: '강사 팔로우 등록' })
+  @ApiOperation({ summary: '강사 팔로우 등록', deprecated: true })
   @Post('follow/:seq')
   createInstructorFollow(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
     return this.instructorService.createInstructorFollow(seq, member);
   }
 
   @ApiBearerAuth()
-  @ApiOperation({ summary: '강사 팔로우 삭제' })
+  @ApiOperation({ summary: '강사 팔로우 삭제', deprecated: true })
   @Delete('follow/:seq')
   deleteInstructorFollow(@Param('seq', ParseIntPipe) seq: number, @MemberDecorator() member: Member) {
     return this.instructorService.deleteInstructorFollow(seq, member);

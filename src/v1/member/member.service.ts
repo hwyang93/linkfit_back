@@ -618,6 +618,46 @@ export class MemberService {
       .getMany();
   }
 
+  async createMemberFollow(seq: number, member: Member) {
+    const memberFavorite = new MemberFavorite();
+    memberFavorite.memberSeq = member.seq;
+    memberFavorite.favoriteSeq = seq;
+
+    const checkInstructorFollow = await this.memberFavoriteRepository
+      .createQueryBuilder('memberFavorite')
+      .where('memberFavorite.memberSeq = :memberSeq', { memberSeq: member.seq })
+      .andWhere('memberFavorite.favoriteSeq = :favoriteSeq', { favoriteSeq: seq })
+      .withDeleted()
+      .getOne();
+
+    let savedSeq;
+
+    if (!checkInstructorFollow) {
+      const { seq } = await this.memberFavoriteRepository.save(memberFavorite);
+      savedSeq = seq;
+    } else {
+      await this.memberFavoriteRepository
+        .createQueryBuilder('memberFavorite')
+        .restore()
+        .where('memberSeq = :memberSeq', { memberSeq: member.seq })
+        .andWhere('favoriteSeq = :favoriteSeq', { favoriteSeq: seq })
+        .execute();
+
+      savedSeq = checkInstructorFollow.seq;
+    }
+    return { seq: savedSeq };
+  }
+
+  async deleteMemberFollow(seq: number, member: Member) {
+    const memberFollow = await this.memberFavoriteRepository.createQueryBuilder('memberFavorite').where({ seq }).getOne();
+    console.log(memberFollow);
+    if (memberFollow.memberSeq !== member.seq) {
+      throw new UnauthorizedException('허용되지 않은 접근입니다.');
+    }
+    await this.memberFavoriteRepository.createQueryBuilder('memberFavorite').softDelete().where({ seq }).execute();
+    return { seq };
+  }
+
   getRecruitByMember(seq: number) {
     return this.recruitRepository
       .createQueryBuilder('recruit')
