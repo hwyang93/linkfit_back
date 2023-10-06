@@ -323,8 +323,15 @@ export class RecruitService {
     return { ...recruitInfo, applyInfo };
   }
 
-  update(id: number, updateRecruitDto: UpdateRecruitDto, member: Member) {
-    return `This action updates a #${id} recruit`;
+  async updateRecruit(seq: number, updateRecruitDto: UpdateRecruitDto, member: Member) {
+    const recruit = await this.recruitRepository.createQueryBuilder('recruit').where({ seq }).getOne();
+    if (recruit.writerSeq !== member.seq) {
+      throw new UnauthorizedException('허용되지 않은 접근입니다.');
+    }
+    const updateRecruit = updateRecruitDto.toEntity();
+    updateRecruit.seq = seq;
+    await this.recruitRepository.save(updateRecruit);
+    return { seq };
   }
 
   async deleteRecruit(seq: number, member: Member) {

@@ -136,8 +136,8 @@ export class RecruitController {
   @ApiBearerAuth()
   @ApiOperation({ summary: '구인 공고 수정' })
   @Patch(':seq')
-  update(@Param('seq') id: string, @Body() updateRecruitDto: UpdateRecruitDto, @MemberDecorator() member: Member) {
-    return this.recruitService.update(+id, updateRecruitDto, member);
+  updateRecruit(@Param('seq') seq: string, @Body() updateRecruitDto: UpdateRecruitDto, @MemberDecorator() member: Member) {
+    return this.recruitService.updateRecruit(+seq, updateRecruitDto, member);
   }
 
   @ApiBearerAuth()

@@ -175,11 +175,18 @@ export class CommunityService {
     return { seq: savedCommunityComment.seq };
   }
 
-  update(id: number, updateCommunityDto: UpdateCommunityDto) {
-    return `This action updates a #${id} community`;
+  async update(seq: number, updateCommunityDto: UpdateCommunityDto, member: Member) {
+    const community = await this.communityRepository.createQueryBuilder('community').where({ seq }).getOne();
+    if (community.writerSeq !== member.seq) {
+      throw new UnauthorizedException('허용되지 않은 접근입니다.');
+    }
+    const updateCommunity = updateCommunityDto.toEntity();
+    updateCommunity.seq = seq;
+    await this.communityRepository.save(updateCommunity);
+    return { seq };
   }
 
-  async removeCommunity(seq: number, member: Member) {
+  async deleteCommunity(seq: number, member: Member) {
     const community = await this.communityRepository.createQueryBuilder('community').where({ seq }).getOne();
     if (community.writerSeq !== member.seq) {
       throw new UnauthorizedException('허용되지 않은 접근입니다.');

@@ -3,7 +3,7 @@ import { SystemService } from './system.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import axios from 'axios';
 import { convertRegionMainCode, convertRegionMainName, convertRegionMiddleCode } from '../../common/utils/utils';
-import { orderBy } from 'lodash';
+import { orderBy, uniqBy } from 'lodash';
 
 @ApiTags('system')
 @Controller('system')
@@ -57,16 +57,17 @@ export class SystemController {
         headers: { 'Content-Type': 'application/json' }
       })
       .then(({ data }: any) => {
+        console.log(data);
         regionCode = data.regcodes.map(region => {
           return { code: convertRegionMiddleCode(region.code), name: region.name.replace(data.regcodes[0].name, '').trim() };
         });
         regionCode.shift();
+        regionCode = uniqBy(regionCode, 'code');
         regionCode = orderBy(regionCode, 'name', 'asc');
       })
       .catch(() => {
         throw new InternalServerErrorException('서버에서 에러가 발생했습니다.');
       });
-
     return regionCode;
   }
 }
