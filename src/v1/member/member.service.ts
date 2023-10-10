@@ -205,6 +205,20 @@ export class MemberService {
       .where('positionSuggest.targetMemberSeq = :memberSeq', { memberSeq: member.seq });
 
     if (searchParams.period) {
+      let startDate = dayjs(new Date()).format('YYYY-MM-DD');
+      if (searchParams.period === 'ONE_WEEK') {
+        startDate = dayjs(new Date()).add(-7, 'day').format('YYYY-MM-DD');
+      }
+      if (searchParams.period === 'ONE_MONTH') {
+        startDate = dayjs(new Date()).add(-1, 'month').format('YYYY-MM-DD');
+      }
+      if (searchParams.period === 'TWO_MONTH') {
+        startDate = dayjs(new Date()).add(-2, 'month').format('YYYY-MM-DD');
+      }
+      if (searchParams.period === 'THREE_MONTH') {
+        startDate = dayjs(new Date()).add(-3, 'month').format('YYYY-MM-DD');
+      }
+      positionSuggest.andWhere('recruit.updatedAt >= :startDate', { startDate });
     }
     if (searchParams.status) {
       positionSuggest.andWhere('recruitApply.status = :status', { status: searchParams.status });
@@ -219,6 +233,20 @@ export class MemberService {
       .leftJoinAndSelect('writer.company', 'company')
       .where('positionSuggest.suggestMemberSeq = :memberSeq', { memberSeq: member.seq });
     if (searchParams.period) {
+      let startDate = dayjs(new Date()).format('YYYY-MM-DD');
+      if (searchParams.period === 'ONE_WEEK') {
+        startDate = dayjs(new Date()).add(-7, 'day').format('YYYY-MM-DD');
+      }
+      if (searchParams.period === 'ONE_MONTH') {
+        startDate = dayjs(new Date()).add(-1, 'month').format('YYYY-MM-DD');
+      }
+      if (searchParams.period === 'TWO_MONTH') {
+        startDate = dayjs(new Date()).add(-2, 'month').format('YYYY-MM-DD');
+      }
+      if (searchParams.period === 'THREE_MONTH') {
+        startDate = dayjs(new Date()).add(-3, 'month').format('YYYY-MM-DD');
+      }
+      positionSuggest.andWhere('recruit.updatedAt >= :startDate', { startDate });
     }
     if (searchParams.status) {
       positionSuggest.andWhere('recruitApply.status = :status', { status: searchParams.status });
